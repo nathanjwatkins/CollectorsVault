@@ -1,0 +1,8 @@
+data/users.csv
+data/collection.csv
+data/prices.csv
+data/images.csv
+uploads/*.jpg
+uploads/*.jpeg
+uploads/*.png
+.git/

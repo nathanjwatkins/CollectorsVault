@@ -1,0 +1,20 @@
+Options -Indexes
+DirectoryIndex index.php
+
+# Protect data directory (belt and braces)
+<FilesMatch "\.(csv|log|json)$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
+
+# Allow uploads directory
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^data/ - [F,L]
+</IfModule>
+
+# PHP session security
+<IfModule mod_php.c>
+  php_value session.cookie_httponly 1
+  php_value session.use_strict_mode 1
+</IfModule>
