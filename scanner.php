@@ -15,7 +15,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=1776894066">
+<link rel="stylesheet" href="shared.css?v=1776894396">
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
@@ -214,7 +214,7 @@ $username = htmlspecialchars($_SESSION['user']);
 .picker-carousel {
   display: flex;
   gap: 10px;
-  padding: 12px 0 20px 16px;
+  padding: 12px 0 20px 40px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
@@ -354,7 +354,7 @@ $username = htmlspecialchars($_SESSION['user']);
 }
 @media (min-width: 900px) {
   .picker-hero { padding: 32px 48px 20px; }
-  .picker-carousel { padding: 12px 0 28px 48px; gap: 14px; }
+  .picker-carousel { padding: 12px 0 28px 40px; gap: 14px; }
   /* Desktop: exactly 3 cards visible, 4th peeks ~15% off the right edge
      Formula: (100vw - left-padding - 2*gap) / 3.15  */
   .picker-card {
@@ -370,7 +370,7 @@ $username = htmlspecialchars($_SESSION['user']);
 }
 @media (min-width: 1400px) {
   .picker-hero { padding: 36px 64px 22px; }
-  .picker-carousel { padding: 12px 0 28px 64px; gap: 16px; }
+  .picker-carousel { padding: 12px 0 28px 40px; gap: 16px; }
   .picker-card {
     flex: 0 0 calc((100vw - 64px - 16px * 2) / 3.15);
     max-width: 480px;
