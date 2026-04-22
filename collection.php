@@ -15,7 +15,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=1776894066">
+<link rel="stylesheet" href="shared.css?v=1776894396">
 <style>
 /* ── HERO ──────────────────────────────────────────────────────────────────── */
 .hero {
@@ -756,7 +756,7 @@ body.cat-carousel-open .fab {
 }
 @media (min-width: 900px) {
   #catCarousel .picker-hero { padding: 32px 48px 20px; }
-  #catCarousel .picker-carousel { padding: 12px 0 28px 48px; gap: 14px; }
+  #catCarousel .picker-carousel { padding: 12px 0 28px 40px; gap: 14px; }
   /* Desktop: 3 cards + ~15% peek of 4th */
   #catCarousel .picker-card {
     flex: 0 0 calc((100vw - 48px - 14px * 2) / 3.15);
@@ -771,7 +771,7 @@ body.cat-carousel-open .fab {
 }
 @media (min-width: 1400px) {
   #catCarousel .picker-hero { padding: 36px 64px 22px; }
-  #catCarousel .picker-carousel { padding: 12px 0 28px 64px; gap: 16px; }
+  #catCarousel .picker-carousel { padding: 12px 0 28px 40px; gap: 16px; }
   #catCarousel .picker-card {
     flex: 0 0 calc((100vw - 64px - 16px * 2) / 3.15);
     max-width: 480px;
