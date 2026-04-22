@@ -15,7 +15,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=1776894657">
+<link rel="stylesheet" href="shared.css?v=1776894711">
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
@@ -206,10 +206,10 @@ $username = htmlspecialchars($_SESSION['user']);
   position: relative;
   z-index: 1;
   overflow: hidden;
-  padding-left: 40px;
-  /* Fade right edge — shows ~20% of next card */
-  -webkit-mask-image: linear-gradient(to right, black 82%, transparent 100%);
-  mask-image: linear-gradient(to right, black 82%, transparent 100%);
+  margin-left: 40px;
+  /* Fade right edge only — left is already inset by margin */
+  -webkit-mask-image: linear-gradient(to right, black 84%, transparent 100%);
+  mask-image: linear-gradient(to right, black 84%, transparent 100%);
 }
 
 .picker-carousel {
