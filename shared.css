@@ -537,7 +537,64 @@ body.cat-carousel-open .bottom-nav { display: none !important; }
 body.picker-open .fab,
 body.cat-carousel-open .fab { display: none !important; }
 
-/* ── Glass scene — cool dark background from reference palette ──────────── */
+/* ── Glass scene — always dark regardless of data-theme ─────────────────── */
+/* The glass scene is a self-contained dark environment.
+   Card images, vignette and glass surfaces provide the dark aesthetic.
+   Nav text, eyebrow labels and scene bg are pinned to light-on-dark. */
+
+/* Force scene background area dark in light mode */
+html[data-theme="light"] body.picker-open,
+html[data-theme="light"] body.cat-carousel-open {
+  background: #111111 !important;
+}
+html[data-theme="light"]:has(body.picker-open)::before,
+html[data-theme="light"]:has(body.cat-carousel-open)::before {
+  filter: blur(8px) saturate(0.5) brightness(0.18) !important;
+}
+html[data-theme="light"]:has(body.picker-open) body::before,
+html[data-theme="light"]:has(body.cat-carousel-open) body::before {
+  opacity: 0 !important;
+}
+
+/* Nav always dark when glass scene active */
+html[data-theme="light"] body.picker-open nav:not(.bottom-nav),
+html[data-theme="light"] body.cat-carousel-open nav:not(.bottom-nav) {
+  background: rgba(10,10,10,.90) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+html[data-theme="light"] body.picker-open .nav-logo,
+html[data-theme="light"] body.cat-carousel-open .nav-logo,
+html[data-theme="light"] body.picker-open .nav-link,
+html[data-theme="light"] body.cat-carousel-open .nav-link,
+html[data-theme="light"] body.picker-open .nav-link:visited,
+html[data-theme="light"] body.cat-carousel-open .nav-link:visited { color: rgba(245,245,245,.75) !important; }
+html[data-theme="light"] body.picker-open .nav-link.active,
+html[data-theme="light"] body.cat-carousel-open .nav-link.active { color: #fff !important; }
+html[data-theme="light"] body.picker-open .nav-user,
+html[data-theme="light"] body.cat-carousel-open .nav-user { color: rgba(245,245,245,.45) !important; }
+html[data-theme="light"] body.picker-open .theme-toggle,
+html[data-theme="light"] body.cat-carousel-open .theme-toggle {
+  background: rgba(255,255,255,.12) !important;
+  border-color: rgba(255,255,255,.20) !important;
+  color: rgba(245,245,245,.80) !important;
+}
+html[data-theme="light"] body.picker-open .sign-out-btn,
+html[data-theme="light"] body.cat-carousel-open .sign-out-btn {
+  color: rgba(245,245,245,.65) !important;
+  border-color: rgba(255,255,255,.20) !important;
+}
+
+/* Eyebrow labels always white on glass scene */
+html[data-theme="light"] body.picker-open .picker-eyebrow,
+html[data-theme="light"] body.cat-carousel-open .picker-eyebrow { color: rgba(245,245,245,.75) !important; }
+html[data-theme="light"] body.picker-open .picker-hero-right,
+html[data-theme="light"] body.cat-carousel-open .picker-hero-right { color: rgba(245,245,245,.70) !important; }
+html[data-theme="light"] body.picker-open .picker-hero-right strong,
+html[data-theme="light"] body.cat-carousel-open .picker-hero-right strong { color: rgba(245,245,245,.95) !important; }
+html[data-theme="light"] body.picker-open .picker-eyebrow-icon svg,
+html[data-theme="light"] body.cat-carousel-open .picker-eyebrow-icon svg { stroke: rgba(245,245,245,.70) !important; }
+
+/* ── Glass scene element ─────────────────────────────────────────────────── */
 .glass-scene {
   position: relative;
   overflow: hidden;
