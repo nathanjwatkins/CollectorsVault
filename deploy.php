@@ -1,19 +1,17 @@
 <?php
 /**
- * CollectorVault — GitHub Auto-Deploy Webhook
- * Place this file at: public_html/deploy.php
- * Set GitHub webhook to POST to: https://collectorsvault.store/deploy.php
+ * CollectorVault — GitHub Auto-Deploy Webhook v2
+ * Uses curl instead of file_get_contents for better Hostinger compatibility
  */
 
-// Secret key — must match the GitHub webhook secret
 define('DEPLOY_SECRET', 'cv_deploy_2025_nate');
+define('GITHUB_TOKEN',  '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');
+define('GITHUB_RAW',    'https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/');
 
-// Only allow POST from GitHub
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405); die('Method not allowed');
 }
 
-// Verify GitHub signature
 $payload   = file_get_contents('php://input');
 $signature = $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '';
 $expected  = 'sha256=' . hash_hmac('sha256', $payload, DEPLOY_SECRET);
@@ -24,51 +22,60 @@ if (!hash_equals($expected, $signature)) {
 
 $data = json_decode($payload, true);
 
-// Only deploy on pushes to main branch
 if (($data['ref'] ?? '') !== 'refs/heads/main') {
     http_response_code(200); die('Not main branch — skipped');
 }
 
-// Pull latest files from GitHub
-$repo_url = 'https://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@github.com/nathanjwatkins/CollectorsVault.git';
-$deploy_dir = __DIR__;
-
-// Files to deploy (excludes data/ and uploads/)
 $files = [
     'api.php', 'categories.js.php', 'collection.php', 'index.php',
     'logout.php', 'nav.php', 'scanner.php', 'shared.css',
     'theme.php', 'toast.php', '.htaccess'
 ];
 
-$log = [];
-$log[] = date('Y-m-d H:i:s') . ' — Deploy triggered by push to main';
+$log   = [];
+$log[] = date('Y-m-d H:i:s') . ' — Deploy triggered';
 $log[] = 'Commit: ' . ($data['after'] ?? 'unknown');
 $log[] = 'Message: ' . ($data['head_commit']['message'] ?? 'no message');
 
-// Use GitHub raw content API to fetch each file
-foreach ($files as $file) {
-    $url = "https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/{$file}";
-    $ctx = stream_context_create([
-        'http' => [
-            'method' => 'GET',
-            'header' => "Authorization: token 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\r\n" .
-                        "User-Agent: CollectorVault-Deploy\r\n",
-            'timeout' => 15,
-        ]
+function fetch_file($url, $token) {
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_HTTPHEADER     => [
+            'Authorization: token ' . $token,
+            'User-Agent: CollectorVault-Deploy/2.0',
+            'Accept: application/vnd.github.v3.raw',
+        ],
+        CURLOPT_SSL_VERIFYPEER => true,
     ]);
-    $content = @file_get_contents($url, false, $ctx);
-    if ($content !== false) {
-        file_put_contents($deploy_dir . '/' . $file, $content);
+    $content  = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error    = curl_error($ch);
+    curl_close($ch);
+
+    if ($content === false || $httpCode !== 200) {
+        return ['ok' => false, 'error' => "HTTP {$httpCode} — {$error}"];
+    }
+    return ['ok' => true, 'content' => $content];
+}
+
+$deploy_dir = __DIR__;
+
+foreach ($files as $file) {
+    $url    = GITHUB_RAW . $file;
+    $result = fetch_file($url, GITHUB_TOKEN);
+    if ($result['ok']) {
+        file_put_contents($deploy_dir . '/' . $file, $result['content']);
         $log[] = "  ✓ {$file}";
     } else {
-        $log[] = "  ✗ FAILED: {$file}";
+        $log[] = "  ✗ FAILED: {$file} — " . $result['error'];
     }
 }
 
 $log[] = 'Deploy complete.';
 $log_text = implode("\n", $log) . "\n\n";
-
-// Append to deploy log
 file_put_contents($deploy_dir . '/deploy.log', $log_text, FILE_APPEND);
 
 http_response_code(200);
