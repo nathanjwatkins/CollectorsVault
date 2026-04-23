@@ -547,13 +547,13 @@ body.cat-carousel-open .fab { display: none !important; }
   background-image: var(--bg-img-light);
   background-size: cover;
   background-position: center;
-  filter: blur(6px) saturate(1.1) brightness(0.45);
+  filter: blur(6px) saturate(1.1) brightness(0.65);
   transform: scale(1.06);
   pointer-events: none;
 }
 html[data-theme="dark"] .glass-scene::after {
   background-image: var(--bg-img-dark);
-  filter: blur(6px) saturate(0.9) brightness(0.28);
+  filter: blur(6px) saturate(0.9) brightness(0.45);
 }
 /* Dark mode fallback colour (shows before image loads) */
 html[data-theme="dark"] .glass-scene {
@@ -745,14 +745,15 @@ html {
   background: transparent !important;
 }
 
-/* Nav: let background show through with frost */
-nav:not(.bottom-nav) {
+/* Nav: frosted glass — only when NOT in glass-scene mode */
+/* When picker-open/cat-carousel-open, the existing shared.css dark nav rules apply */
+body:not(.picker-open):not(.cat-carousel-open) nav:not(.bottom-nav) {
   background: rgba(255, 255, 255, 0.70) !important;
   backdrop-filter: blur(16px) saturate(1.4) !important;
   -webkit-backdrop-filter: blur(16px) saturate(1.4) !important;
 }
-[data-theme="dark"] nav:not(.bottom-nav),
-html[data-theme="dark"] nav:not(.bottom-nav) {
+[data-theme="dark"] body:not(.picker-open):not(.cat-carousel-open) nav:not(.bottom-nav),
+html[data-theme="dark"] body:not(.picker-open):not(.cat-carousel-open) nav:not(.bottom-nav) {
   background: rgba(12, 11, 9, 0.75) !important;
 }
 
