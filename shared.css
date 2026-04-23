@@ -5,20 +5,21 @@ a { color: inherit; text-decoration: none; }
 
 /* ── TOKENS ─────────────────────────────────────────────────────────────── */
 :root {
-  --bg:        #F2F0EC;
+  /* Reference palette: athletic charcoal + cool grey + off-white */
+  --bg:        #F4F3F1;
   --surface:   #FFFFFF;
-  --surface2:  #ECEAE5;
-  --ink:       #0E0D0B;
-  --ink2:      #3A3832;
-  --ink3:      #8C8880;
-  --border:    #D8D5CF;
+  --surface2:  #EBEBEB;
+  --ink:       #141414;
+  --ink2:      #3D3D3D;
+  --ink3:      #888888;
+  --border:    #DCDCDC;
   --red:       #C13528;
   --green:     #1A6640;
   --gold:      #9B7A1A;
   --radius:    6px;
   --radius-lg: 12px;
-  --shadow:    0 2px 16px rgba(14,13,11,.08);
-  --shadow-lg: 0 8px 40px rgba(14,13,11,.14);
+  --shadow:    0 2px 16px rgba(0,0,0,.07);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.13);
   --font-sans: 'Geist', 'IBM Plex Sans', system-ui, sans-serif;
   --font-mono: 'Geist Mono', 'IBM Plex Mono', monospace;
   --nav-h:     52px;
@@ -26,18 +27,18 @@ a { color: inherit; text-decoration: none; }
 }
 
 [data-theme="dark"] {
-  --bg:        #0C0B09;
-  --surface:   #181512;
-  --surface2:  #1E1C18;
-  --ink:       #F0EDE7;
-  --ink2:      #C0BCB4;
-  --ink3:      #6A6660;
-  --border:    #2E2C28;
+  --bg:        #0E0E0E;
+  --surface:   #1A1A1A;
+  --surface2:  #222222;
+  --ink:       #F5F5F5;
+  --ink2:      #BEBEBE;
+  --ink3:      #707070;
+  --border:    #2E2E2E;
   --red:       #E04035;
   --green:     #2DA05C;
   --gold:      #C49B2A;
-  --shadow:    0 2px 16px rgba(0,0,0,.3);
-  --shadow-lg: 0 8px 40px rgba(0,0,0,.45);
+  --shadow:    0 2px 16px rgba(0,0,0,.35);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.55);
 }
 
 html {
@@ -521,7 +522,7 @@ body.cat-carousel-open .sign-out-btn {
   border-color: rgba(255,255,255,.18) !important;
 }
 body.picker-open .sign-out-btn:hover,
-body.cat-carousel-open .sign-out-btn:hover { color: rgba(240,237,231,.95) !important; border-color: rgba(255,255,255,.4) !important; }
+body.cat-carousel-open .sign-out-btn:hover { color: rgba(245,245,245,.95) !important; border-color: rgba(255,255,255,.4) !important; }
 
 /* Also hide bottom nav when glass carousel is open */
 body.picker-open .bottom-nav,
@@ -530,15 +531,14 @@ body.cat-carousel-open .bottom-nav { display: none !important; }
 body.picker-open .fab,
 body.cat-carousel-open .fab { display: none !important; }
 
-/* ── Bokeh scene — both light & dark use the same deep-dark base ─────────── */
+/* ── Glass scene — cool dark background from reference palette ──────────── */
 .glass-scene {
   position: relative;
   overflow: hidden;
-  /* transparent — photo shows via ::after, bokeh via ::before */
   background: transparent;
   transition: background 0.3s ease;
 }
-/* Photo background layer — sits at the very back */
+/* Photo background layer */
 .glass-scene::after {
   content: '';
   position: absolute;
@@ -547,58 +547,55 @@ body.cat-carousel-open .fab { display: none !important; }
   background-image: var(--bg-img-light);
   background-size: cover;
   background-position: center;
-  filter: blur(6px) saturate(1.2) brightness(0.75);
+  filter: blur(8px) saturate(0.85) brightness(0.55);
   transform: scale(1.06);
   pointer-events: none;
 }
 html[data-theme="dark"] .glass-scene::after {
   background-image: var(--bg-img-dark);
-  filter: blur(6px) saturate(1.0) brightness(0.60);
+  filter: blur(8px) saturate(0.80) brightness(0.40);
 }
-/* Dark mode fallback colour (shows before image loads) */
 html[data-theme="dark"] .glass-scene {
   background: transparent;
 }
+/* Cool dark vignette — replaces amber bokeh */
 .glass-scene::before {
   content: '';
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  /* Light mode: amber tint — reduced opacity so photo shows through */
   background:
-    radial-gradient(ellipse 65% 60% at 68% 30%, rgba(220,140,40,.38) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 70% at 85% 68%, rgba(180,100,25,.28) 0%, transparent 58%),
-    radial-gradient(ellipse 60% 50% at 14% 72%, rgba(160,90,20,.22) 0%, transparent 55%),
-    radial-gradient(ellipse 45% 45% at 48% 88%, rgba(130,70,15,.15) 0%, transparent 52%);
+    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(20,20,20,.55) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 80% at 100% 50%,  rgba(15,15,15,.40) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 80% at 0% 50%,    rgba(15,15,15,.35) 0%, transparent 65%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,  rgba(10,10,10,.50) 0%, transparent 70%);
   transition: opacity 0.3s ease;
 }
-/* Dark mode: deeper amber — also reduced so photo shows */
 html[data-theme="dark"] .glass-scene::before {
   background:
-    radial-gradient(ellipse 65% 60% at 68% 30%, rgba(180,100,25,.42) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 70% at 85% 68%, rgba(130,70,18,.30) 0%, transparent 58%),
-    radial-gradient(ellipse 60% 50% at 14% 72%, rgba(120,65,15,.25) 0%, transparent 55%),
-    radial-gradient(ellipse 45% 45% at 48% 88%, rgba(100,55,12,.15) 0%, transparent 52%);
+    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(10,10,10,.70) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 80% at 100% 50%,  rgba(8,8,8,.55) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 80% at 0% 50%,    rgba(8,8,8,.50) 0%, transparent 65%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,  rgba(5,5,5,.65) 0%, transparent 70%);
 }
 
 /* ── Glass card ──────────────────────────────────────────────────────────── */
 .glass-card {
-  /* Light mode: more opaque frosted glass */
-  background: rgba(255,255,255,.14);
-  border: 1px solid rgba(255,255,255,.22);
-  backdrop-filter: blur(24px) saturate(1.8) brightness(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8) brightness(1.4);
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(24px) saturate(1.4) brightness(1.15);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4) brightness(1.15);
   box-shadow:
-    0 4px 32px rgba(0,0,0,.30),
-    inset 0 1px 0 rgba(255,255,255,.22);
+    0 4px 32px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.18);
 }
 html[data-theme="dark"] .glass-card {
-  background: rgba(255,255,255,.08);
-  border-color: rgba(255,255,255,.14);
-  backdrop-filter: blur(24px) saturate(1.6) brightness(1.2);
-  -webkit-backdrop-filter: blur(24px) saturate(1.6) brightness(1.2);
-  box-shadow: 0 4px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.12);
+  backdrop-filter: blur(24px) saturate(1.2) brightness(1.1);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) brightness(1.1);
+  box-shadow: 0 4px 32px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10);
 }
 .glass-card::after {
   content: '';
@@ -616,16 +613,16 @@ html[data-theme="dark"] .glass-card {
 }
 
 /* ── Card text — always light (on dark background) ───────────────────────── */
-.glass-card .card-name         { color: rgba(240,237,231,.95); }
-.glass-card .card-desc         { color: rgba(240,237,231,.50); }
-.glass-card .card-count-label  { color: rgba(240,237,231,.50); }
+.glass-card .card-name         { color: rgba(245,245,245,.95); }
+.glass-card .card-desc         { color: rgba(245,245,245,.50); }
+.glass-card .card-count-label  { color: rgba(245,245,245,.50); }
 .glass-card .card-num          { color: rgba(255,255,255,.38); }
 .glass-card .card-num-icon svg { stroke: rgba(255,255,255,.45); }
 .glass-card .card-big-icon     { color: #fff; opacity: .10; }
 .glass-card .card-arrow {
-  background: rgba(255,255,255,.10);
-  border: 1px solid rgba(255,255,255,.18);
-  color: rgba(255,255,255,.55);
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.20);
+  color: rgba(255,255,255,.65);
 }
 .glass-card:hover .card-arrow {
   background: rgba(255,255,255,.20);
@@ -634,10 +631,10 @@ html[data-theme="dark"] .glass-card {
 }
 
 /* ── Header text — always light ─────────────────────────────────────────── */
-.glass-scene .picker-eyebrow            { color: rgba(240,237,231,.75); }
-.glass-scene .picker-hero-right         { color: rgba(240,237,231,.70); }
-.glass-scene .picker-hero-right strong  { color: rgba(240,237,231,.95); }
-.glass-scene .picker-eyebrow-icon svg   { stroke: rgba(240,237,231,.70); }
+.glass-scene .picker-eyebrow            { color: rgba(245,245,245,.75); }
+.glass-scene .picker-hero-right         { color: rgba(245,245,245,.70); }
+.glass-scene .picker-hero-right strong  { color: rgba(245,245,245,.95); }
+.glass-scene .picker-eyebrow-icon svg   { stroke: rgba(245,245,245,.70); }
 .glass-scene .picker-dot                { background: rgba(255,255,255,.30); }
 .glass-scene .picker-dot.active         { background: rgba(255,255,255,.85); }
 
@@ -647,7 +644,7 @@ html[data-theme="dark"] .glass-card {
   width: 30px; height: 30px; border-radius: 50%;
   background: rgba(255,255,255,.12);
   border: 1px solid rgba(255,255,255,.22);
-  color: rgba(240,237,231,.75);
+  color: rgba(245,245,245,.75);
   display: flex; align-items: center; justify-content: center;
   font-size: 18px; line-height: 1; cursor: pointer;
   font-family: var(--font-sans);
@@ -686,8 +683,8 @@ html[data-theme="dark"] .glass-card {
   --bg-img-dark:        url('/images/bg-dark.jpg');
   --bg-blur:            8px;
   --bg-noise:           0.15;
-  --bg-wash-light:      rgba(242, 240, 236, 0.52);
-  --bg-wash-dark:       rgba(12, 11, 9, 0.60);
+  --bg-wash-light:      rgba(240, 240, 240, 0.45);
+  --bg-wash-dark:       rgba(10, 10, 10, 0.58);
 }
 
 /* ── 2. Page background — blurred photo + grain ─────────────────────────── */

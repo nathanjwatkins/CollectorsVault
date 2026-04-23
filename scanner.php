@@ -401,13 +401,6 @@ $username = htmlspecialchars($_SESSION['user']);
 
       <!-- Cards -->
       <div class="picker-card glass-card" data-cat="cards" onclick="selectCatFromPicker('cards')">
-        <div class="card-bg">
-          <svg class="card-pattern" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
-            <defs><pattern id="pg1" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse"><rect x="5" y="5" width="50" height="35" rx="4" fill="none" stroke="#fff" stroke-width=".8"/><line x1="5" y1="18" x2="55" y2="18" stroke="#fff" stroke-width=".8"/></pattern></defs>
-            <rect width="400" height="600" fill="url(#pg1)"/>
-          </svg>
-        </div>
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>01</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">
@@ -418,13 +411,6 @@ $username = htmlspecialchars($_SESSION['user']);
       </div>
 
       <div class="picker-card glass-card" data-cat="shirts" onclick="selectCatFromPicker('shirts')">
-        <div class="card-bg">
-          <svg class="card-pattern" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
-            <defs><pattern id="pg2" x="0" y="0" width="70" height="80" patternUnits="userSpaceOnUse"><path d="M35 0 L70 20 L70 50 L35 70 L0 50 L0 20Z" fill="none" stroke="#fff" stroke-width=".8"/></pattern></defs>
-            <rect width="400" height="600" fill="url(#pg2)"/>
-          </svg>
-        </div>
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg></span>02</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">
@@ -435,13 +421,6 @@ $username = htmlspecialchars($_SESSION['user']);
       </div>
 
       <div class="picker-card glass-card" data-cat="games" onclick="selectCatFromPicker('games')">
-        <div class="card-bg">
-          <svg class="card-pattern" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
-            <defs><pattern id="pg3" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="20" fill="none" stroke="#fff" stroke-width=".8"/><line x1="5" y1="25" x2="20" y2="25" stroke="#fff" stroke-width=".8"/><line x1="30" y1="25" x2="45" y2="25" stroke="#fff" stroke-width=".8"/><line x1="25" y1="5" x2="25" y2="20" stroke="#fff" stroke-width=".8"/><line x1="25" y1="30" x2="25" y2="45" stroke="#fff" stroke-width=".8"/></pattern></defs>
-            <rect width="400" height="600" fill="url(#pg3)"/>
-          </svg>
-        </div>
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4m-2-2v4M15 11h.01M17 13h.01"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4m-2-2v4M15 11h.01M17 13h.01"/></svg></span>03</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">
@@ -452,13 +431,6 @@ $username = htmlspecialchars($_SESSION['user']);
       </div>
 
       <div class="picker-card glass-card" data-cat="vinyl" onclick="selectCatFromPicker('vinyl')">
-        <div class="card-bg">
-          <svg class="card-pattern" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
-            <defs><pattern id="pg4" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse"><circle cx="30" cy="30" r="28" fill="none" stroke="#fff" stroke-width=".8"/><circle cx="30" cy="30" r="20" fill="none" stroke="#fff" stroke-width=".5"/><circle cx="30" cy="30" r="10" fill="none" stroke="#fff" stroke-width=".8"/><circle cx="30" cy="30" r="3" fill="none" stroke="#fff" stroke-width=".8"/></pattern></defs>
-            <rect width="400" height="600" fill="url(#pg4)"/>
-          </svg>
-        </div>
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></span>04</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">
@@ -469,13 +441,6 @@ $username = htmlspecialchars($_SESSION['user']);
       </div>
 
       <div class="picker-card glass-card" data-cat="other" onclick="selectCatFromPicker('other')">
-        <div class="card-bg">
-          <svg class="card-pattern" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice">
-            <defs><pattern id="pg5" x="0" y="0" width="55" height="55" patternUnits="userSpaceOnUse"><polygon points="27,3 51,16 51,43 27,52 3,43 3,16" fill="none" stroke="#fff" stroke-width=".8"/></pattern></defs>
-            <rect width="400" height="600" fill="url(#pg5)"/>
-          </svg>
-        </div>
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></span>05</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">

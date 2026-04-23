@@ -20,7 +20,7 @@ $username = htmlspecialchars($_SESSION['user']);
 /* ── HERO ──────────────────────────────────────────────────────────────────── */
 .hero {
   /* Hero always dark regardless of theme — this is intentional design */
-  background: #0E0D0B;
+  background: #0E0E0E;
   padding: 20px 16px 16px;
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
@@ -28,11 +28,11 @@ $username = htmlspecialchars($_SESSION['user']);
 .hero-label {
   font-family: var(--font-mono); font-size: 9px;
   letter-spacing: .12em; text-transform: uppercase;
-  color: rgba(240,237,231,.35); margin-bottom: 6px;
+  color: rgba(245,245,245,.35); margin-bottom: 6px;
 }
 .hero-title {
   font-family: var(--font-sans); font-size: 26px; font-weight: 500;
-  color: #F0EDE7; margin-bottom: 20px; letter-spacing: -.03em;
+  color: #F5F5F5; margin-bottom: 20px; letter-spacing: -.03em;
 }
 
 /* ── BENTO STAT GRID ── */
@@ -65,14 +65,14 @@ $username = htmlspecialchars($_SESSION['user']);
 .stat-n {
   font-family: var(--font-mono);
   font-size: 26px; font-weight: 400;
-  color: #F0EDE7; line-height: 1;
+  color: #F5F5F5; line-height: 1;
   letter-spacing: -.02em;
   display: block;
 }
 .stat-l {
   font-family: var(--font-mono); font-size: 8px;
   letter-spacing: .1em; text-transform: uppercase;
-  color: rgba(240,237,231,.4); margin-top: 6px;
+  color: rgba(245,245,245,.4); margin-top: 6px;
   display: block;
 }
 
@@ -115,7 +115,7 @@ $username = htmlspecialchars($_SESSION['user']);
   background: rgba(255,255,255,.2); border-radius: 20px;
   padding: 1px 5px; font-size: 8px;
 }
-.cat-tab.active .ct-count { background: rgba(255,255,255,.18); color: rgba(240,237,231,.8); }
+.cat-tab.active .ct-count { background: rgba(255,255,255,.18); color: rgba(245,245,245,.8); }
 
 /* ── CONTROLS ──────────────────────────────────────────────────────────────── */
 .controls-bar {
@@ -713,7 +713,7 @@ body.cat-carousel-open .fab {
 }
 #catCarousel .card-value-label {
   font-family: var(--font-mono); font-size: 13px; font-weight: 500;
-  color: rgba(240,237,231,.85); letter-spacing: -.01em;
+  color: rgba(245,245,245,.85); letter-spacing: -.01em;
   margin-top: 6px;
 }
 #catCarousel .card-arrow {
@@ -801,7 +801,6 @@ body.cat-carousel-open .fab {
   <div class="picker-carousel-wrap">
     <div class="picker-carousel" id="colCarousel">
       <div class="picker-card glass-card" data-cat="all" onclick="selectCarouselCat('all')">
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>00</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">
@@ -811,7 +810,6 @@ body.cat-carousel-open .fab {
         </div>
       </div>
       <div class="picker-card glass-card" data-cat="cards" onclick="selectCarouselCat('cards')">
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>01</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">
@@ -821,7 +819,6 @@ body.cat-carousel-open .fab {
         </div>
       </div>
       <div class="picker-card glass-card" data-cat="shirts" onclick="selectCarouselCat('shirts')">
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10a2 2 0 002 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z"/></svg></span>02</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">
@@ -831,7 +828,6 @@ body.cat-carousel-open .fab {
         </div>
       </div>
       <div class="picker-card glass-card" data-cat="games" onclick="selectCarouselCat('games')">
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4m-2-2v4M15 11h.01M17 13h.01"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M6 12h4m-2-2v4M15 11h.01M17 13h.01"/></svg></span>03</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">
@@ -841,7 +837,6 @@ body.cat-carousel-open .fab {
         </div>
       </div>
       <div class="picker-card glass-card" data-cat="vinyl" onclick="selectCarouselCat('vinyl')">
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></span>04</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">
@@ -851,7 +846,6 @@ body.cat-carousel-open .fab {
         </div>
       </div>
       <div class="picker-card glass-card" data-cat="other" onclick="selectCarouselCat('other')">
-        <div class="card-big-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
         <div class="card-num"><span class="card-num-icon"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></span>05</div>
         <div class="card-arrow">↗</div>
         <div class="card-foot">
