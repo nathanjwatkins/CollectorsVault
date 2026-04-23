@@ -477,16 +477,27 @@ body.cat-carousel-open {
   /* Prevent any light bg showing below the glass scene */
   min-height: 100dvh;
 }
+/* Force page to dark when glass scene is active — scene is always dark */
 html:has(body.picker-open),
 html:has(body.cat-carousel-open) {
-  background: #111111;
+  background: #111111 !important;
 }
+/* Suppress the light-mode photo layer when glass scene is active */
+html:has(body.picker-open)::before,
+html:has(body.cat-carousel-open)::before {
+  filter: blur(8px) saturate(0.6) brightness(0.20) !important;
+}
+html:has(body.picker-open) body::before,
+html:has(body.cat-carousel-open) body::before {
+  opacity: 0 !important;
+}
+/* Nav always dark when glass scene is active — scene is always dark */
 body.picker-open nav:not(.bottom-nav),
 body.cat-carousel-open nav:not(.bottom-nav) {
-  background: rgba(15,15,15,.88);
-  border-bottom-color: rgba(255,255,255,.08);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(10,10,10,.90) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
 }
 /* Nav: precise light-on-dark overrides when glass scene is active */
 body.picker-open .nav-logo,
@@ -633,10 +644,17 @@ html[data-theme="dark"] .glass-card {
 }
 
 /* ── Header text — always light ─────────────────────────────────────────── */
-.glass-scene .picker-eyebrow            { color: rgba(245,245,245,.75); }
-.glass-scene .picker-hero-right         { color: rgba(245,245,245,.70); }
-.glass-scene .picker-hero-right strong  { color: rgba(245,245,245,.95); }
-.glass-scene .picker-eyebrow-icon svg   { stroke: rgba(245,245,245,.70); }
+/* Picker eyebrow text — always light regardless of theme (scene is always dark) */
+.glass-scene .picker-eyebrow,
+body.picker-open .picker-eyebrow,
+body.cat-carousel-open .picker-eyebrow   { color: rgba(245,245,245,.75) !important; }
+.glass-scene .picker-hero-right,
+body.picker-open .picker-hero-right,
+body.cat-carousel-open .picker-hero-right { color: rgba(245,245,245,.70) !important; }
+.glass-scene .picker-hero-right strong,
+body.picker-open .picker-hero-right strong { color: rgba(245,245,245,.95) !important; }
+.glass-scene .picker-eyebrow-icon svg,
+body.picker-open .picker-eyebrow-icon svg { stroke: rgba(245,245,245,.70) !important; }
 .glass-scene .picker-dot                { background: rgba(255,255,255,.30); }
 .glass-scene .picker-dot.active         { background: rgba(255,255,255,.85); }
 
@@ -1003,9 +1021,9 @@ nav:not(.bottom-nav) {
   -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
   border-bottom: 1px solid rgba(255,255,255,.08) !important;
 }
-[data-theme="light"] nav:not(.bottom-nav),
-body:not(.picker-open):not(.cat-carousel-open) [data-theme="light"] nav {
-  background: rgba(255,255,255,.75) !important;
+/* Light mode nav — only when NOT in glass scene */
+html[data-theme="light"] body:not(.picker-open):not(.cat-carousel-open) nav:not(.bottom-nav) {
+  background: rgba(255,255,255,.80) !important;
   border-bottom: 1px solid rgba(0,0,0,.08) !important;
 }
 
