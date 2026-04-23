@@ -547,13 +547,13 @@ body.cat-carousel-open .fab { display: none !important; }
   background-image: var(--bg-img-light);
   background-size: cover;
   background-position: center;
-  filter: blur(6px) saturate(1.1) brightness(0.65);
+  filter: blur(6px) saturate(1.2) brightness(0.75);
   transform: scale(1.06);
   pointer-events: none;
 }
 html[data-theme="dark"] .glass-scene::after {
   background-image: var(--bg-img-dark);
-  filter: blur(6px) saturate(0.9) brightness(0.45);
+  filter: blur(6px) saturate(1.0) brightness(0.60);
 }
 /* Dark mode fallback colour (shows before image loads) */
 html[data-theme="dark"] .glass-scene {
@@ -565,21 +565,21 @@ html[data-theme="dark"] .glass-scene {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  /* Light mode: warm bright amber */
+  /* Light mode: amber tint — reduced opacity so photo shows through */
   background:
-    radial-gradient(ellipse 65% 60% at 68% 30%, rgba(220,140,40,.75) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 70% at 85% 68%, rgba(180,100,25,.55) 0%, transparent 58%),
-    radial-gradient(ellipse 60% 50% at 14% 72%, rgba(160,90,20,.50) 0%, transparent 55%),
-    radial-gradient(ellipse 45% 45% at 48% 88%, rgba(130,70,15,.35) 0%, transparent 52%);
+    radial-gradient(ellipse 65% 60% at 68% 30%, rgba(220,140,40,.38) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 70% at 85% 68%, rgba(180,100,25,.28) 0%, transparent 58%),
+    radial-gradient(ellipse 60% 50% at 14% 72%, rgba(160,90,20,.22) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 45% at 48% 88%, rgba(130,70,15,.15) 0%, transparent 52%);
   transition: opacity 0.3s ease;
 }
-/* Dark mode: deeper, more muted amber */
+/* Dark mode: deeper amber — also reduced so photo shows */
 html[data-theme="dark"] .glass-scene::before {
   background:
-    radial-gradient(ellipse 65% 60% at 68% 30%, rgba(180,100,25,.55) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 70% at 85% 68%, rgba(130,70,18,.38) 0%, transparent 58%),
-    radial-gradient(ellipse 60% 50% at 14% 72%, rgba(120,65,15,.35) 0%, transparent 55%),
-    radial-gradient(ellipse 45% 45% at 48% 88%, rgba(100,55,12,.22) 0%, transparent 52%);
+    radial-gradient(ellipse 65% 60% at 68% 30%, rgba(180,100,25,.42) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 70% at 85% 68%, rgba(130,70,18,.30) 0%, transparent 58%),
+    radial-gradient(ellipse 60% 50% at 14% 72%, rgba(120,65,15,.25) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 45% at 48% 88%, rgba(100,55,12,.15) 0%, transparent 52%);
 }
 
 /* ── Glass card ──────────────────────────────────────────────────────────── */
