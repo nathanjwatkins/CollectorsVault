@@ -1009,24 +1009,20 @@ body.cat-carousel-open {
   border: 1px solid rgba(255,255,255,.80);
 }
 
-/* ── Nav (all pages) ────────────────────────────────────────────────────── */
-/* Dark mode: always dark glass */
-html[data-theme="dark"] nav:not(.bottom-nav),
-body.picker-open nav:not(.bottom-nav),
-body.cat-carousel-open nav:not(.bottom-nav) {
+/* ── Nav — simple theme-responsive glass ─────────────────────────────────── */
+/* Dark mode (includes carousel which is always forced to dark via JS) */
+html[data-theme="dark"] nav:not(.bottom-nav) {
   background: rgba(10,10,10,.90) !important;
   backdrop-filter: blur(20px) saturate(1.3) !important;
   -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
   border-bottom: 1px solid rgba(255,255,255,.08) !important;
-  color: rgba(245,245,245,.90) !important;
 }
-/* Light mode: white glass — but never when glass scene is active */
-html[data-theme="light"] body:not(.picker-open):not(.cat-carousel-open) nav:not(.bottom-nav) {
-  background: rgba(255,255,255,.80) !important;
+/* Light mode */
+html[data-theme="light"] nav:not(.bottom-nav) {
+  background: rgba(255,255,255,.82) !important;
   backdrop-filter: blur(20px) saturate(1.2) !important;
   -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
   border-bottom: 1px solid rgba(0,0,0,.08) !important;
-  color: #141414 !important;
 }
 
 /* ── Collection: hero ───────────────────────────────────────────────────── */

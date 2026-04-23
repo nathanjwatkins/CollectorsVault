@@ -17,7 +17,31 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=1776986578">
+<script>
+/* The scanner carousel glass scene is always dark.
+   We force data-theme='dark' on load, store user preference separately,
+   and restore it only when they enter the scan form. */
+(function() {
+  window._cvUserTheme = localStorage.getItem('cv_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', 'dark');
+})();
+/* Override toggleTheme so it respects the carousel's forced-dark state */
+window.addEventListener('DOMContentLoaded', function() {
+  var orig = window.toggleTheme;
+  window.toggleTheme = function() {
+    var isOnCarousel = document.body.classList.contains('picker-open');
+    var cur  = window._cvUserTheme;
+    var next = cur === 'dark' ? 'light' : 'dark';
+    window._cvUserTheme = next;
+    localStorage.setItem('cv_theme', next);
+    if (!isOnCarousel) {
+      document.documentElement.setAttribute('data-theme', next);
+    }
+    if (window._renderThemeIcon) _renderThemeIcon(next);
+  };
+});
+</script>
+<link rel="stylesheet" href="shared.css?v=1776990000">
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
