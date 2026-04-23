@@ -503,7 +503,7 @@ body.cat-carousel-open .fab { display: none !important; }
   background-image: var(--bg-img-light);
   background-size: cover;
   background-position: center;
-  filter: blur(8px) saturate(0.85) brightness(0.55);
+  filter: blur(8px) saturate(0.90) brightness(0.65);
   transform: scale(1.06);
   pointer-events: none;
 }
@@ -521,21 +521,22 @@ html[data-theme="dark"] .glass-scene {
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  /* Strong top scrim ensures text is always readable over any photo */
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(15,15,15,.65) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 80% at 100% 50%,  rgba(12,12,12,.50) 0%, transparent 65%),
-    radial-gradient(ellipse 60% 80% at 0% 50%,    rgba(12,12,12,.50) 0%, transparent 65%),
-    radial-gradient(ellipse 80% 60% at 50% 100%,  rgba(8,8,8,.75) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 50% at 0% 100%,   rgba(8,8,8,.85) 0%, transparent 60%);
+    linear-gradient(to bottom, rgba(0,0,0,.60) 0%, rgba(0,0,0,.15) 22%, transparent 40%),
+    radial-gradient(ellipse 60% 80% at 100% 50%,  rgba(12,12,12,.40) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 80% at 0% 50%,    rgba(12,12,12,.40) 0%, transparent 65%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,  rgba(8,8,8,.75)   0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 0% 100%,   rgba(8,8,8,.85)   0%, transparent 60%);
   transition: opacity 0.3s ease;
 }
 html[data-theme="dark"] .glass-scene::before {
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(5,5,5,.80) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 80% at 100% 50%,  rgba(5,5,5,.65) 0%, transparent 65%),
-    radial-gradient(ellipse 60% 80% at 0% 50%,    rgba(5,5,5,.65) 0%, transparent 65%),
-    radial-gradient(ellipse 80% 60% at 50% 100%,  rgba(0,0,0,.88) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 50% at 0% 100%,   rgba(0,0,0,.92) 0%, transparent 58%);
+    linear-gradient(to bottom, rgba(0,0,0,.72) 0%, rgba(0,0,0,.20) 22%, transparent 40%),
+    radial-gradient(ellipse 60% 80% at 100% 50%,  rgba(5,5,5,.55)  0%, transparent 65%),
+    radial-gradient(ellipse 60% 80% at 0% 50%,    rgba(5,5,5,.55)  0%, transparent 65%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,  rgba(0,0,0,.88)  0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 0% 100%,   rgba(0,0,0,.92)  0%, transparent 58%);
 }
 
 /* ── Glass card ──────────────────────────────────────────────────────────── */
@@ -590,10 +591,26 @@ html[data-theme="dark"] .glass-card {
 
 /* ── Header text — always light ─────────────────────────────────────────── */
 /* Picker eyebrow — use theme tokens so they respond to light/dark naturally */
-.glass-scene .picker-eyebrow            { color: var(--ink2); }
-.glass-scene .picker-hero-right         { color: var(--ink2); }
-.glass-scene .picker-hero-right strong  { color: var(--ink); }
-.glass-scene .picker-eyebrow-icon svg   { stroke: var(--ink2); }
+/* Eyebrow text on glass scene — dark mode: light text, light mode: dark text with shadow for contrast */
+.glass-scene .picker-eyebrow {
+  color: rgba(245,245,245,.80);
+  text-shadow: 0 1px 8px rgba(0,0,0,.55);
+}
+.glass-scene .picker-hero-right {
+  color: rgba(245,245,245,.75);
+  text-shadow: 0 1px 8px rgba(0,0,0,.55);
+}
+.glass-scene .picker-hero-right strong {
+  color: rgba(245,245,245,.95);
+  text-shadow: 0 1px 8px rgba(0,0,0,.55);
+}
+.glass-scene .picker-eyebrow-icon svg { stroke: rgba(245,245,245,.80); }
+
+/* Light mode: still white with shadow — photo bg is too variable for dark text */
+html[data-theme="light"] .glass-scene .picker-eyebrow,
+html[data-theme="light"] .glass-scene .picker-hero-right { color: rgba(245,245,245,.85); }
+html[data-theme="light"] .glass-scene .picker-hero-right strong { color: #fff; }
+html[data-theme="light"] .glass-scene .picker-eyebrow-icon svg { stroke: rgba(245,245,245,.85); }
 .glass-scene .picker-dot                { background: rgba(255,255,255,.30); }
 .glass-scene .picker-dot.active         { background: rgba(255,255,255,.85); }
 
