@@ -16,32 +16,51 @@ $username = htmlspecialchars($_SESSION['user']);
 <title>CollectorVault — Scanner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
-<?php include 'theme.php'; ?>
 <script>
-/* The scanner carousel glass scene is always dark.
-   We force data-theme='dark' on load, store user preference separately,
-   and restore it only when they enter the scan form. */
+/* ── Scanner theme management ───────────────────────────────────────────────
+   The carousel glass scene is ALWAYS dark. The scan form respects user pref.
+   We handle this entirely in JS — no CSS cascade fights.
+   ────────────────────────────────────────────────────────────────────────── */
 (function() {
+  // Store user preference, force dark for carousel on load
   window._cvUserTheme = localStorage.getItem('cv_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', 'dark');
-})();
-/* Override toggleTheme so it respects the carousel's forced-dark state */
-window.addEventListener('DOMContentLoaded', function() {
-  var orig = window.toggleTheme;
+
+  // Unified theme toggle — aware of whether we're on the carousel or form
   window.toggleTheme = function() {
-    var isOnCarousel = document.body.classList.contains('picker-open');
-    var cur  = window._cvUserTheme;
-    var next = cur === 'dark' ? 'light' : 'dark';
+    var next = window._cvUserTheme === 'dark' ? 'light' : 'dark';
     window._cvUserTheme = next;
     localStorage.setItem('cv_theme', next);
-    if (!isOnCarousel) {
+    // Only apply to DOM if we're on the scan form (not carousel)
+    var onCarousel = document.body.classList.contains('picker-open');
+    if (!onCarousel) {
       document.documentElement.setAttribute('data-theme', next);
     }
-    if (window._renderThemeIcon) _renderThemeIcon(next);
+    // Update icon
+    var wrap = document.getElementById('themeIconWrap');
+    if (wrap) {
+      if (next === 'dark') {
+        wrap.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" pointer-events="none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
+      } else {
+        wrap.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" pointer-events="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      }
+    }
   };
-});
+
+  // Render correct icon once DOM ready
+  document.addEventListener('DOMContentLoaded', function() {
+    var wrap = document.getElementById('themeIconWrap');
+    if (!wrap) return;
+    var t = window._cvUserTheme;
+    if (t === 'dark') {
+      wrap.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" pointer-events="none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
+    } else {
+      wrap.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" pointer-events="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
+  });
+})();
 </script>
-<link rel="stylesheet" href="shared.css?v=1776990000">
+<link rel="stylesheet" href="shared.css?v=1776992000">
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
@@ -613,6 +632,8 @@ function selectCatFromPicker(cat) {
   picker.style.transition = 'opacity .2s ease, transform .2s ease';
   picker.style.opacity = '0';
   picker.style.transform = 'translateY(-8px)';
+  // Restore user theme when entering scan form
+  document.documentElement.setAttribute('data-theme', window._cvUserTheme || 'dark');
   setTimeout(() => {
     picker.style.display = 'none';
     document.body.classList.remove('picker-open');
@@ -636,6 +657,8 @@ function showPicker() {
   app.style.display    = 'none';
   picker.style.display = '';
   document.body.classList.add('picker-open');
+  // Glass scene is always dark
+  document.documentElement.setAttribute('data-theme', 'dark');
   picker.style.opacity = '0';
   picker.style.transition = 'opacity .28s ease';
   requestAnimationFrame(() => requestAnimationFrame(() => { picker.style.opacity = '1'; }));
