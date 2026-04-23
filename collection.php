@@ -17,14 +17,15 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=1776894849">
+<link rel="stylesheet" href="shared.css?v=1776985682">
 <style>
 /* ── HERO ──────────────────────────────────────────────────────────────────── */
 .hero {
-  /* Hero always dark regardless of theme — this is intentional design */
-  background: #0E0E0E;
+  background: rgba(10,10,10,.45);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
   padding: 20px 16px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(255,255,255,.10);
 }
 .hero-inner { max-width: 1200px; margin: 0 auto; }
 .hero-label {
@@ -84,11 +85,15 @@ $username = htmlspecialchars($_SESSION['user']);
   display: flex; overflow-x: auto; gap: 6px;
   position: sticky; top: var(--nav-h, 52px); z-index: 90;
   -webkit-overflow-scrolling: touch; scrollbar-width: none;
-  /* Floating: background blur instead of solid */
-  background: rgba(242,240,236,.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(216,213,207,.6);
+  background: rgba(244,243,241,.55);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border-bottom: 1px solid rgba(255,255,255,.22);
+}
+[data-theme="dark"] .cat-tabs,
+html[data-theme="dark"] .cat-tabs {
+  background: rgba(10,10,10,.65);
+  border-bottom: 1px solid rgba(255,255,255,.08);
 }
 [data-theme="dark"] .cat-tabs {
   background: rgba(12,11,9,.85);
@@ -121,8 +126,16 @@ $username = htmlspecialchars($_SESSION['user']);
 
 /* ── CONTROLS ──────────────────────────────────────────────────────────────── */
 .controls-bar {
-  background: var(--bg); border-bottom: 1px solid var(--border);
+  background: rgba(244,243,241,.55);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border-bottom: 1px solid rgba(255,255,255,.20);
   padding: 8px 12px; display: flex; align-items: center; gap: 6px;
+}
+[data-theme="dark"] .controls-bar,
+html[data-theme="dark"] .controls-bar {
+  background: rgba(10,10,10,.60);
+  border-bottom: 1px solid rgba(255,255,255,.07);
 }
 .search-wrap { position: relative; flex: 1; min-width: 0; }
 .search-wrap::before {
@@ -133,34 +146,60 @@ $username = htmlspecialchars($_SESSION['user']);
 }
 .search-wrap input {
   width:100%; padding:7px 10px 7px 28px;
-  background:var(--surface); border:1px solid var(--border);
+  background: rgba(255,255,255,.22);
+  border: 1px solid rgba(255,255,255,.30);
   border-radius:var(--radius); font-family:var(--font-sans);
   font-size:13px; color:var(--ink);
+}
+[data-theme="dark"] .search-wrap input,
+html[data-theme="dark"] .search-wrap input {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
 }
 .search-wrap input::placeholder { color:var(--ink3); }
 .search-wrap input:focus { outline:none; border-color:var(--ink); }
 .sort-select {
-  background:var(--surface); border:1px solid var(--border);
+  background: rgba(255,255,255,.22);
+  border: 1px solid rgba(255,255,255,.30);
   border-radius:var(--radius); padding:7px 8px;
   font-family:var(--font-mono); font-size:9px; letter-spacing:.04em;
   color:var(--ink); cursor:pointer; flex-shrink:0;
+}
+[data-theme="dark"] .sort-select,
+html[data-theme="dark"] .sort-select {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
 }
 .view-toggle {
   display:flex; border:1px solid var(--border);
   border-radius:var(--radius); overflow:hidden; flex-shrink:0;
 }
 .vt-btn {
-  padding:6px 9px; background:var(--surface); border:none;
-  cursor:pointer; color:var(--ink3); transition:all .15s;
+  padding:6px 9px;
+  background: rgba(255,255,255,.22);
+  border:none;
+  cursor:pointer; color:var(--ink2); transition:all .15s;
   -webkit-tap-highlight-color:transparent;
   display:flex; align-items:center; justify-content:center;
 }
+[data-theme="dark"] .vt-btn,
+html[data-theme="dark"] .vt-btn {
+  background: rgba(255,255,255,.08);
+  color: var(--ink3);
+}
 .vt-btn svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.5; }
-.vt-btn.active { background:var(--ink); color:var(--surface); }
+.vt-btn.active { background: rgba(255,255,255,.88); color:#111; }
+[data-theme="dark"] .vt-btn.active,
+html[data-theme="dark"] .vt-btn.active {
+  background: rgba(255,255,255,.22); color:#fff;
+}
 
 /* ── REFRESH BAR ──────────────────────────────────────────────────────────── */
 .refresh-bar {
-  background:var(--surface2); border-bottom:1px solid var(--border);
+  background: rgba(244,243,241,.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,.15);
   padding:5px 12px; display:flex; align-items:center; gap:8px;
   font-family:var(--font-mono); font-size:9px; color:var(--ink3);
 }
@@ -177,7 +216,7 @@ $username = htmlspecialchars($_SESSION['user']);
 @keyframes spin360 { to{transform:rotate(360deg)} }
 
 /* ── BODY ──────────────────────────────────────────────────────────────────── */
-.col-body { max-width:1200px; margin:0 auto; padding:12px 12px 100px; }
+.col-body { max-width:1200px; margin:0 auto; padding:12px 12px 100px; background:transparent; }
 .items-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
 /* First card in bento grid spans full width */
 .items-grid .item-card:first-child { grid-column: 1 / -1; }
