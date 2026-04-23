@@ -606,11 +606,23 @@ html[data-theme="dark"] .glass-card {
 }
 .glass-scene .picker-eyebrow-icon svg { stroke: rgba(245,245,245,.80); }
 
-/* Light mode: still white with shadow — photo bg is too variable for dark text */
-html[data-theme="light"] .glass-scene .picker-eyebrow,
-html[data-theme="light"] .glass-scene .picker-hero-right { color: rgba(245,245,245,.85); }
-html[data-theme="light"] .glass-scene .picker-hero-right strong { color: #fff; }
-html[data-theme="light"] .glass-scene .picker-eyebrow-icon svg { stroke: rgba(245,245,245,.85); }
+/* Light mode: electric sky blue — pops against the pale photo background */
+html[data-theme="light"] .glass-scene .picker-eyebrow {
+  color: #38BEFF;
+  text-shadow: 0 1px 12px rgba(0,0,0,.45);
+}
+html[data-theme="light"] .glass-scene .picker-hero-right {
+  color: #38BEFF;
+  text-shadow: 0 1px 12px rgba(0,0,0,.45);
+}
+html[data-theme="light"] .glass-scene .picker-hero-right strong {
+  color: #69CFFF;
+  text-shadow: 0 1px 12px rgba(0,0,0,.45);
+}
+html[data-theme="light"] .glass-scene .picker-eyebrow-icon svg {
+  stroke: #38BEFF;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,.35));
+}
 .glass-scene .picker-dot                { background: rgba(255,255,255,.30); }
 .glass-scene .picker-dot.active         { background: rgba(255,255,255,.85); }
 
