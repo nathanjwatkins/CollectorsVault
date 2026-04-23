@@ -500,40 +500,35 @@ body.cat-carousel-open nav:not(.bottom-nav) {
   -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
 }
 /* Nav: precise light-on-dark overrides when glass scene is active */
+/* All nav elements always white when glass scene is active */
 body.picker-open .nav-logo,
-body.cat-carousel-open .nav-logo { color: rgba(240,237,231,.9) !important; }
-
+body.cat-carousel-open .nav-logo,
 body.picker-open .nav-link,
-body.cat-carousel-open .nav-link { color: rgba(240,237,231,.6) !important; }
+body.cat-carousel-open .nav-link,
 body.picker-open .nav-link:visited,
-body.cat-carousel-open .nav-link:visited { color: rgba(240,237,231,.6) !important; }
+body.cat-carousel-open .nav-link:visited { color: rgba(245,245,245,.75) !important; }
+
 body.picker-open .nav-link:hover,
-body.cat-carousel-open .nav-link:hover { background: rgba(255,255,255,.1) !important; color: rgba(240,237,231,.9) !important; }
+body.cat-carousel-open .nav-link:hover   { background: rgba(255,255,255,.10) !important; color: rgba(245,245,245,.95) !important; }
 body.picker-open .nav-link.active,
-body.cat-carousel-open .nav-link.active { background: rgba(255,255,255,.15) !important; color: #fff !important; }
+body.cat-carousel-open .nav-link.active  { background: rgba(255,255,255,.15) !important; color: #fff !important; }
 
 body.picker-open .nav-user,
-body.cat-carousel-open .nav-user { color: rgba(240,237,231,.5) !important; }
-
+body.cat-carousel-open .nav-user         { color: rgba(245,245,245,.45) !important; }
 body.picker-open .nav-divider,
-body.cat-carousel-open .nav-divider { background: rgba(255,255,255,.15) !important; }
+body.cat-carousel-open .nav-divider      { background: rgba(255,255,255,.15) !important; }
 
 body.picker-open .theme-toggle,
 body.cat-carousel-open .theme-toggle {
-  background: rgba(255,255,255,.1) !important;
+  background: rgba(255,255,255,.10) !important;
   border-color: rgba(255,255,255,.18) !important;
-  color: rgba(240,237,231,.8) !important;
+  color: rgba(245,245,245,.80) !important;
 }
-body.picker-open .theme-toggle:hover,
-body.cat-carousel-open .theme-toggle:hover { background: rgba(255,255,255,.18) !important; }
-
 body.picker-open .sign-out-btn,
 body.cat-carousel-open .sign-out-btn {
-  color: rgba(240,237,231,.6) !important;
+  color: rgba(245,245,245,.60) !important;
   border-color: rgba(255,255,255,.18) !important;
 }
-body.picker-open .sign-out-btn:hover,
-body.cat-carousel-open .sign-out-btn:hover { color: rgba(245,245,245,.95) !important; border-color: rgba(255,255,255,.4) !important; }
 
 /* Also hide bottom nav when glass carousel is open */
 body.picker-open .bottom-nav,
@@ -1015,16 +1010,23 @@ body.cat-carousel-open {
 }
 
 /* ── Nav (all pages) ────────────────────────────────────────────────────── */
-nav:not(.bottom-nav) {
-  background: rgba(12,12,12,.82) !important;
+/* Dark mode: always dark glass */
+html[data-theme="dark"] nav:not(.bottom-nav),
+body.picker-open nav:not(.bottom-nav),
+body.cat-carousel-open nav:not(.bottom-nav) {
+  background: rgba(10,10,10,.90) !important;
   backdrop-filter: blur(20px) saturate(1.3) !important;
   -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
   border-bottom: 1px solid rgba(255,255,255,.08) !important;
+  color: rgba(245,245,245,.90) !important;
 }
-/* Light mode nav — only when NOT in glass scene */
+/* Light mode: white glass — but never when glass scene is active */
 html[data-theme="light"] body:not(.picker-open):not(.cat-carousel-open) nav:not(.bottom-nav) {
   background: rgba(255,255,255,.80) !important;
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
   border-bottom: 1px solid rgba(0,0,0,.08) !important;
+  color: #141414 !important;
 }
 
 /* ── Collection: hero ───────────────────────────────────────────────────── */
