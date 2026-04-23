@@ -379,7 +379,7 @@ $username = htmlspecialchars($_SESSION['user']);
 }
 </style>
 </head>
-<body>
+<body class="picker-open">
 <?php include 'nav.php'; ?>
 
 <!-- ── CATEGORY PICKER — glassmorphism carousel ─────────────────────────── -->
@@ -597,7 +597,6 @@ const CAT_LABELS = {cards:'Trading Cards',shirts:'Football Shirts',games:'Video 
 let currentCat='cards', currentAI=null, currentB64=null, currentMime=null;
 
 loadRecent(); loadPills();
-document.body.classList.add('picker-open');
 
 function setCat(cat) {
   currentCat=cat;
