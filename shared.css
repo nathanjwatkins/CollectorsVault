@@ -722,25 +722,30 @@ html[data-theme="dark"]::before {
   background-image: var(--bg-img-dark);
 }
 
-/* Tinted wash over the blurred image — keeps everything readable */
+/* Tinted wash + vignette over the blurred image — keeps everything readable */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: var(--bg-wash-light);
+  background:
+    var(--bg-wash-light),
+    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(15,15,15,.55) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,  rgba(8,8,8,.70)   0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 0%   100%, rgba(8,8,8,.80)   0%, transparent 58%);
   pointer-events: none;
 }
 [data-theme="dark"] body::before,
 html[data-theme="dark"] body::before {
-  background: var(--bg-wash-dark);
+  background:
+    var(--bg-wash-dark),
+    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(5,5,5,.70)  0%, transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,  rgba(0,0,0,.85)  0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 0%   100%, rgba(0,0,0,.90)  0%, transparent 58%);
 }
 
-/* Make body itself transparent so the fixed bg shows through */
+/* Body transparent globally — photo always shows through */
 body {
-  background: transparent !important;
-}
-html {
   background: transparent !important;
 }
 
@@ -952,17 +957,22 @@ html[data-theme="dark"] .rc-tag {
 }
 
 /* ── 6. Scanner left panel + right panel — subtle frost ─────────────────── */
+/* Scan form left panel — frosted glass */
 .left {
-  background: rgba(255, 255, 255, 0.62) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-}
-.right {
-  background: transparent !important; /* let bg show, cards float over it */
+  background: rgba(244, 243, 241, 0.55) !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+  border-right: 1px solid rgba(255,255,255,.25) !important;
 }
 [data-theme="dark"] .left,
 html[data-theme="dark"] .left {
-  background: rgba(12, 11, 9, 0.68) !important;
+  background: rgba(14, 14, 14, 0.62) !important;
+  border-right: 1px solid rgba(255,255,255,.08) !important;
+}
+
+/* Recents right panel — fully transparent, cards float */
+.right {
+  background: transparent !important;
 }
 
 
@@ -989,4 +999,152 @@ html:has(body.cat-carousel-open) {
 body.picker-open,
 body.cat-carousel-open {
   background: transparent !important;
+}
+
+/* ── Collection page — frosted glass surfaces ───────────────────────────── */
+
+/* Category tab bar */
+.cat-tabs-wrap {
+  background: rgba(244, 243, 241, 0.60) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(255,255,255,.22) !important;
+}
+[data-theme="dark"] .cat-tabs-wrap,
+html[data-theme="dark"] .cat-tabs-wrap {
+  background: rgba(14, 14, 14, 0.65) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+
+/* Controls bar (search, sort, view toggle) */
+.controls-bar {
+  background: rgba(244, 243, 241, 0.55) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(255,255,255,.20) !important;
+}
+[data-theme="dark"] .controls-bar,
+html[data-theme="dark"] .controls-bar {
+  background: rgba(14, 14, 14, 0.60) !important;
+  border-bottom: 1px solid rgba(255,255,255,.07) !important;
+}
+
+/* Search input — glass */
+.search-wrap input {
+  background: rgba(255,255,255,.18) !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+  color: var(--ink) !important;
+}
+[data-theme="dark"] .search-wrap input,
+html[data-theme="dark"] .search-wrap input {
+  background: rgba(255,255,255,.07) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  color: var(--ink) !important;
+}
+.search-wrap input:focus {
+  border-color: rgba(255,255,255,.55) !important;
+  background: rgba(255,255,255,.25) !important;
+}
+[data-theme="dark"] .search-wrap input:focus,
+html[data-theme="dark"] .search-wrap input:focus {
+  border-color: rgba(255,255,255,.28) !important;
+  background: rgba(255,255,255,.10) !important;
+}
+
+/* Sort select + view toggle */
+.sort-select,
+.vt-btn {
+  background: rgba(255,255,255,.18) !important;
+  border-color: rgba(255,255,255,.22) !important;
+  color: var(--ink) !important;
+}
+[data-theme="dark"] .sort-select,
+[data-theme="dark"] .vt-btn,
+html[data-theme="dark"] .sort-select,
+html[data-theme="dark"] .vt-btn {
+  background: rgba(255,255,255,.07) !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+.vt-btn.active {
+  background: rgba(255,255,255,.85) !important;
+  color: #111 !important;
+}
+[data-theme="dark"] .vt-btn.active,
+html[data-theme="dark"] .vt-btn.active {
+  background: rgba(255,255,255,.20) !important;
+  color: #fff !important;
+}
+
+/* Refresh bar */
+.refresh-bar {
+  background: rgba(244, 243, 241, 0.45) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255,255,255,.15) !important;
+}
+[data-theme="dark"] .refresh-bar,
+html[data-theme="dark"] .refresh-bar {
+  background: rgba(14, 14, 14, 0.50) !important;
+  border-bottom: 1px solid rgba(255,255,255,.06) !important;
+}
+
+/* Collection grid background */
+.ic-grid-wrap {
+  background: transparent !important;
+}
+
+/* Scanner form fields — glass inputs */
+.fg input,
+.fg select,
+.pi-wrap input {
+  background: rgba(255,255,255,.18) !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  color: var(--ink) !important;
+}
+[data-theme="dark"] .fg input,
+[data-theme="dark"] .fg select,
+[data-theme="dark"] .pi-wrap input,
+html[data-theme="dark"] .fg input,
+html[data-theme="dark"] .fg select,
+html[data-theme="dark"] .pi-wrap input {
+  background: rgba(255,255,255,.07) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+}
+.fg input:focus,
+.fg select:focus {
+  border-color: rgba(255,255,255,.55) !important;
+}
+[data-theme="dark"] .fg input:focus,
+[data-theme="dark"] .fg select:focus,
+html[data-theme="dark"] .fg input:focus,
+html[data-theme="dark"] .fg select:focus {
+  border-color: rgba(255,255,255,.28) !important;
+}
+
+/* Dropzone */
+.dropzone {
+  background: rgba(255,255,255,.12) !important;
+  border-color: rgba(255,255,255,.25) !important;
+}
+[data-theme="dark"] .dropzone,
+html[data-theme="dark"] .dropzone {
+  background: rgba(255,255,255,.05) !important;
+  border-color: rgba(255,255,255,.12) !important;
+}
+.dropzone:hover {
+  background: rgba(255,255,255,.20) !important;
+  border-color: rgba(255,255,255,.50) !important;
+}
+
+/* Id-block (AI result card) */
+.id-block {
+  background: rgba(255,255,255,.15) !important;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+[data-theme="dark"] .id-block,
+html[data-theme="dark"] .id-block {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
 }
