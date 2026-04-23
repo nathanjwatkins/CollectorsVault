@@ -949,51 +949,26 @@ html[data-theme="dark"] .left {
 }
 
 
-/* ── PATCH v1.1 — suppress photo bg when glass carousel is active ──────────
-   When picker-open or cat-carousel-open is active, the .glass-scene element
-   provides its own dark bokeh background. We must hide the blurred photo
-   pseudo-elements on html so they don't bleed through behind the glass scene.
+/* ── PATCH v1.1 — glass-scene sits on top of photo bg ──────────────────────
+   The photo background shows everywhere on the page. .glass-scene is a
+   full-height block-level element with its own solid dark background — it
+   naturally covers the fixed photo layer beneath it. No suppression needed.
+   body and html stay transparent so the photo shows through everywhere else.
    ─────────────────────────────────────────────────────────────────────────── */
 
-body.picker-open ~ * html::before,
-body.picker-open ~ * html::after { display: none; }
+/* Ensure glass-scene stacks above the fixed html::before photo layer */
+.glass-scene {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+}
 
-/* The cleanest approach: target html directly when body has these classes.
-   CSS can't select an ancestor, so we use the existing body background rules
-   that shared.css already defines for these states, and ensure our transparent
-   override doesn't fight them. */
-
-/* Re-apply the dark body bg for glass states — overrides our transparent patch */
+/* Keep body/html transparent — photo always visible everywhere */
 body.picker-open,
 body.cat-carousel-open {
-  background: #1C1510 !important;
+  background: transparent !important;
 }
 html:has(body.picker-open),
 html:has(body.cat-carousel-open) {
-  background: #1C1510 !important;
-}
-
-/* Hide the blurred photo layer when glass scene is active */
-html:has(body.picker-open)::before,
-html:has(body.cat-carousel-open)::before {
-  opacity: 0;
-  pointer-events: none;
-}
-/* Hide grain layer too */
-html:has(body.picker-open)::after,
-html:has(body.cat-carousel-open)::after {
-  opacity: 0;
-  pointer-events: none;
-}
-/* Hide tinted wash */
-body.picker-open::before,
-body.cat-carousel-open::before {
-  opacity: 0 !important;
-  pointer-events: none;
-}
-
-/* Light mode: same suppression — light bg should not show behind dark glass scene */
-html:not([data-theme="dark"]):has(body.picker-open)::before,
-html:not([data-theme="dark"]):has(body.cat-carousel-open)::before {
-  opacity: 0;
+  background: transparent !important;
 }
