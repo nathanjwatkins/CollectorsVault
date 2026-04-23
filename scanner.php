@@ -17,26 +17,33 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=1776894849">
+<link rel="stylesheet" href="shared.css?v=1776985703">
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
 
 /* ── LEFT: SCANNER ───────────────────────────────────────────────────────── */
 .left {
-  background:var(--surface); border-bottom:1px solid var(--border);
+  background: rgba(244,243,241,.55);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border-bottom: 1px solid rgba(255,255,255,.20);
   padding:16px; display:flex; flex-direction:column; gap:14px;
-  /* On mobile .left stacks above .right — no extra bottom needed */
+}
+[data-theme="dark"] .left,
+html[data-theme="dark"] .left {
+  background: rgba(10,10,10,.62);
+  border-bottom: 1px solid rgba(255,255,255,.08);
 }
 
 /* Drop zone */
 .dropzone {
-  border:2px dashed var(--border); border-radius:var(--radius-lg);
+  border:2px dashed rgba(255,255,255,.28); border-radius:var(--radius-lg);
   padding:36px 16px; text-align:center; cursor:pointer;
-  background:var(--bg); transition:all .2s;
+  background:rgba(255,255,255,.10); transition:all .2s;
   -webkit-tap-highlight-color:transparent;
 }
-.dropzone:hover { border-color:var(--ink); background:var(--surface2); }
+.dropzone:hover { border-color:rgba(255,255,255,.60); background:rgba(255,255,255,.20); }
 .dropzone:active { transform:scale(.99); }
 .dropzone input { display:none; }
 .dz-icon { margin-bottom:12px; display:flex; justify-content:center; }
@@ -61,7 +68,7 @@ $username = htmlspecialchars($_SESSION['user']);
 
 /* Result form */
 #resultForm { display:none; }
-.id-block { background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; margin-bottom:12px; }
+.id-block { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.22); border-radius:var(--radius); padding:12px 14px; margin-bottom:12px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
 .id-name { font-family:var(--font-sans); font-size:18px; font-weight:500; color:var(--ink); margin-bottom:3px; }
 .id-meta { font-family:var(--font-mono); font-size:10px; color:var(--ink3); display:flex; align-items:center; gap:8px; flex-wrap:wrap; letter-spacing:.03em; }
 .conf-tag { padding:1px 6px; border-radius:3px; font-size:8px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; font-family:var(--font-mono); }
@@ -76,7 +83,7 @@ $username = htmlspecialchars($_SESSION['user']);
 .fg { display:flex; flex-direction:column; gap:3px; }
 .fg label { font-family:var(--font-mono); font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink3); }
 .fg input, .fg select {
-  background:var(--bg); border:1px solid var(--border);
+  background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25);
   border-radius:var(--radius); padding:7px 9px;
   font-family:var(--font-sans); font-size:12px; font-weight:400; color:var(--ink); width:100%;
   transition:border-color .15s;
@@ -89,7 +96,7 @@ $username = htmlspecialchars($_SESSION['user']);
 .pg label { font-family:var(--font-mono); font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); display:block; margin-bottom:3px; }
 .pi-wrap { position:relative; }
 .pi-wrap::before { content:'£'; position:absolute; left:9px; top:50%; transform:translateY(-50%); font-family:var(--font-mono); font-size:12px; color:var(--gold); pointer-events:none; }
-.pi-wrap input { padding-left:20px; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius); font-family:var(--font-mono); font-size:12px; font-weight:500; color:var(--gold); width:100%; padding-top:7px; padding-bottom:7px; }
+.pi-wrap input { padding-left:20px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.25); border-radius:var(--radius); font-family:var(--font-mono); font-size:12px; font-weight:500; color:var(--gold); width:100%; padding-top:7px; padding-bottom:7px; }
 .pi-wrap input:focus { outline:none; border-color:var(--gold); }
 
 /* Action btns */
@@ -102,8 +109,8 @@ $username = htmlspecialchars($_SESSION['user']);
 .btn-reset:hover { border-color:var(--ink); color:var(--ink); }
 
 /* ── RIGHT: RECENTS ──────────────────────────────────────────────────────── */
-.right { flex:1; padding:16px; padding-bottom:80px; background:var(--bg); }
-.right-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border); }
+.right { flex:1; padding:16px; padding-bottom:80px; background:transparent; }
+.right-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.15); }
 .right-title { font-family:var(--font-sans); font-size:16px; font-weight:500; color:var(--ink); }
 
 .recent-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
