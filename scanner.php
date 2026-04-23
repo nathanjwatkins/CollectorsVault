@@ -16,18 +16,8 @@ $username = htmlspecialchars($_SESSION['user']);
 <title>CollectorVault — Scanner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script>
-/* ── Scanner theme management ───────────────────────────────────────────────
-   The carousel glass scene is ALWAYS dark. The scan form respects user pref.
-   We handle this entirely in JS — no CSS cascade fights.
-   ────────────────────────────────────────────────────────────────────────── */
-(function() {
-  // Apply user theme immediately — theme.php handles this via localStorage
-  var t = localStorage.getItem('cv_theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', t);
-})();
-</script>
-<link rel="stylesheet" href="shared.css?v=1776992000">
+<?php include 'theme.php'; ?>
+<link rel="stylesheet" href="shared.css?v=1776994000">
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
