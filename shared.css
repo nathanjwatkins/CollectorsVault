@@ -641,3 +641,310 @@ html[data-theme="dark"] .glass-card {
   background: rgba(255,255,255,.22);
   color: rgba(240,237,231,1);
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COLLECTORVAULT — UI PATCH v1
+   Appended to shared.css — does not touch any rules above.
+   ═══════════════════════════════════════════════════════════════════════════
+
+   SETUP — upload two images to public_html/images/ on Hostinger:
+     bg-light.jpg  (warm/neutral tone, 1920×1080 recommended, ~400KB)
+     bg-dark.jpg   (dark/moody tone, same size)
+
+   Then for the carousel cards, upload per-category images to:
+     public_html/images/card-all.jpg
+     public_html/images/card-cards.jpg
+     public_html/images/card-shirts.jpg
+     public_html/images/card-games.jpg
+     public_html/images/card-vinyl.jpg
+     public_html/images/card-other.jpg
+
+   Tweak the variables below to taste.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Background image variables ──────────────────────────────────────── */
+:root {
+  --bg-img-light:       url('/images/bg-light.jpg');
+  --bg-img-dark:        url('/images/bg-dark.jpg');
+  --bg-blur:            8px;
+  --bg-noise:           0.15;
+  --bg-wash-light:      rgba(242, 240, 236, 0.52);
+  --bg-wash-dark:       rgba(12, 11, 9, 0.60);
+}
+
+/* ── 2. Page background — blurred photo + grain ─────────────────────────── */
+/* Use html instead of body so it sits behind everything including nav */
+html {
+  position: relative;
+}
+html::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image: var(--bg-img-light);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(var(--bg-blur)) saturate(1.15);
+  transform: scale(1.06); /* bleed compensation */
+}
+html::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='280' height='280' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 280px 280px;
+  opacity: var(--bg-noise);
+  pointer-events: none;
+}
+
+[data-theme="dark"] html::before,
+html[data-theme="dark"]::before {
+  background-image: var(--bg-img-dark);
+}
+
+/* Tinted wash over the blurred image — keeps everything readable */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--bg-wash-light);
+  pointer-events: none;
+}
+[data-theme="dark"] body::before,
+html[data-theme="dark"] body::before {
+  background: var(--bg-wash-dark);
+}
+
+/* Make body itself transparent so the fixed bg shows through */
+body {
+  background: transparent !important;
+}
+html {
+  background: transparent !important;
+}
+
+/* Nav: let background show through with frost */
+nav:not(.bottom-nav) {
+  background: rgba(255, 255, 255, 0.70) !important;
+  backdrop-filter: blur(16px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.4) !important;
+}
+[data-theme="dark"] nav:not(.bottom-nav),
+html[data-theme="dark"] nav:not(.bottom-nav) {
+  background: rgba(12, 11, 9, 0.75) !important;
+}
+
+/* Cat-bar: same frost treatment */
+.cat-bar {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+[data-theme="dark"] .cat-bar,
+html[data-theme="dark"] .cat-bar {
+  background: rgba(12, 11, 9, 0.70) !important;
+}
+
+/* Bottom nav frost */
+.bottom-nav {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+[data-theme="dark"] .bottom-nav,
+html[data-theme="dark"] .bottom-nav {
+  background: rgba(18, 15, 12, 0.88) !important;
+}
+
+/* ── 3. CAROUSEL PICKER CARDS — custom background image per category ──────
+   Both scanner (#catPicker) and collection (#catCarousel) use .picker-card.
+   We keep the existing glass-card blur/border from shared.css and layer
+   a full-bleed photo behind it using a pseudo-element.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.picker-card {
+  /* Ensure our ::before pseudo-element stacks correctly */
+  isolation: isolate;
+}
+
+/* Photo layer — sits behind the glass */
+.picker-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  border-radius: inherit;
+  /* Small scale so image is always centred/filled regardless of card size */
+  transform: scale(1.0);
+  transition: transform 0.4s ease;
+}
+.picker-card:hover::before {
+  transform: scale(1.04); /* subtle Ken Burns on hover */
+}
+
+/* Per-category images — update filenames to match what you upload */
+.picker-card[data-cat="all"]::before    { background-image: url('/images/card-all.jpg'); }
+.picker-card[data-cat="cards"]::before  { background-image: url('/images/card-cards.jpg'); }
+.picker-card[data-cat="shirts"]::before { background-image: url('/images/card-shirts.jpg'); }
+.picker-card[data-cat="games"]::before  { background-image: url('/images/card-games.jpg'); }
+.picker-card[data-cat="vinyl"]::before  { background-image: url('/images/card-vinyl.jpg'); }
+.picker-card[data-cat="other"]::before  { background-image: url('/images/card-other.jpg'); }
+
+/* The existing glass-card ::after already provides the diagonal gloss sheen.
+   Add a bottom scrim so card-foot text stays readable over any photo */
+.picker-card::after {
+  content: '' !important; /* override existing ::after from .glass-card */
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: inherit !important;
+  /* Split: top gloss sheen + bottom dark scrim in one gradient */
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.10) 0%,
+    transparent 40%,
+    transparent 52%,
+    rgba(0,0,0,0.55) 100%
+  ) !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+/* Ghost icon: pull slightly in front of scrim, slightly larger for photo bg */
+.card-big-icon {
+  z-index: 2;
+  opacity: 0.18 !important; /* more subtle against photos */
+}
+
+/* Card text: make sure it's above scrim */
+.card-num, .card-arrow, .card-foot {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── 4. COLLECTION item-card — glass treatment over eBay image ───────────
+   .item-card already uses full-bleed .ic-image + .ic-overlay gradient.
+   We just make the card itself glassy instead of solid surface2.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.item-card {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  backdrop-filter: blur(18px) saturate(1.6) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.6) brightness(1.1) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.10) !important;
+}
+.item-card:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.40) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    0 16px 48px rgba(0, 0, 0, 0.26),
+    0 4px 12px rgba(0, 0, 0, 0.14) !important;
+}
+
+[data-theme="dark"] .item-card,
+html[data-theme="dark"] .item-card {
+  background: rgba(14, 12, 9, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.28) !important;
+}
+[data-theme="dark"] .item-card:hover,
+html[data-theme="dark"] .item-card:hover {
+  background: rgba(20, 17, 13, 0.42) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Specular highlight strip across the very top of each item-card */
+.item-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75) 50%, transparent);
+  z-index: 10;
+  pointer-events: none;
+  border-radius: 0;
+}
+
+/* ── 5. SCANNER recent-card — glass treatment ────────────────────────────
+   .recent-card is in scanner.php — currently solid --surface.
+   Apply same glass logic.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.recent-card {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(16px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.5) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.70),
+    0 4px 20px rgba(0, 0, 0, 0.10) !important;
+}
+.recent-card:hover {
+  background: rgba(255, 255, 255, 0.68) !important;
+  border-color: rgba(255, 255, 255, 0.70) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    0 10px 32px rgba(0, 0, 0, 0.16) !important;
+}
+
+[data-theme="dark"] .recent-card,
+html[data-theme="dark"] .recent-card {
+  background: rgba(20, 17, 13, 0.52) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 4px 20px rgba(0, 0, 0, 0.38) !important;
+}
+[data-theme="dark"] .recent-card:hover,
+html[data-theme="dark"] .recent-card:hover {
+  background: rgba(28, 24, 18, 0.62) !important;
+}
+
+/* rc-thumb background: let the image breathe on glass */
+.rc-thumb {
+  background: rgba(14, 13, 11, 0.08) !important;
+}
+[data-theme="dark"] .rc-thumb,
+html[data-theme="dark"] .rc-thumb {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* rc-body: keep text colours — they work fine */
+.rc-tag {
+  background: rgba(255, 255, 255, 0.30) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+[data-theme="dark"] .rc-tag,
+html[data-theme="dark"] .rc-tag {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ── 6. Scanner left panel + right panel — subtle frost ─────────────────── */
+.left {
+  background: rgba(255, 255, 255, 0.62) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+.right {
+  background: transparent !important; /* let bg show, cards float over it */
+}
+[data-theme="dark"] .left,
+html[data-theme="dark"] .left {
+  background: rgba(12, 11, 9, 0.68) !important;
+}
+
