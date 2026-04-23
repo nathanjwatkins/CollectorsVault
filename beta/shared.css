@@ -1,0 +1,1246 @@
+/* CollectorVault — Design System v7 */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+a { color: inherit; text-decoration: none; }
+
+/* ── TOKENS ─────────────────────────────────────────────────────────────── */
+:root {
+  /* Reference palette: athletic charcoal + cool grey + off-white */
+  --bg:        #F4F3F1;
+  --surface:   #FFFFFF;
+  --surface2:  #EBEBEB;
+  --ink:       #141414;
+  --ink2:      #3D3D3D;
+  --ink3:      #888888;
+  --border:    #DCDCDC;
+  --red:       #C13528;
+  --green:     #1A6640;
+  --gold:      #9B7A1A;
+  --radius:    6px;
+  --radius-lg: 12px;
+  --shadow:    0 2px 16px rgba(0,0,0,.07);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.13);
+  --font-sans: 'Geist', 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'IBM Plex Mono', monospace;
+  --nav-h:     52px;
+  --cat-h:     40px;
+}
+
+[data-theme="dark"] {
+  --bg:        #0E0E0E;
+  --surface:   #1A1A1A;
+  --surface2:  #222222;
+  --ink:       #F5F5F5;
+  --ink2:      #BEBEBE;
+  --ink3:      #707070;
+  --border:    #2E2E2E;
+  --red:       #E04035;
+  --green:     #2DA05C;
+  --gold:      #C49B2A;
+  --shadow:    0 2px 16px rgba(0,0,0,.35);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,.55);
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  background: var(--bg);
+  color-scheme: light;
+}
+[data-theme="dark"] html,
+html[data-theme="dark"] { color-scheme: dark; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  transition: background-color .2s ease, color .2s ease;
+  /* Bottom nav clearance on mobile */
+  padding-bottom: 60px;
+}
+
+/* ── NAV ── works with both <nav> (old) and <nav class="top-nav"> (new) ─── */
+nav:not(.bottom-nav) {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  height: var(--nav-h);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  transition: background-color .2s ease, border-color .2s ease;
+  will-change: transform;
+}
+
+.nav-logo {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .04em;
+  color: var(--ink);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color .2s ease;
+}
+.nav-logo em { font-style: normal; }
+
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 14px;
+  display: none;
+  transition: background-color .2s ease;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.nav-link {
+  height: 30px;
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  text-decoration: none;
+  border-radius: var(--radius);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background-color .15s, color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-link:visited { color: var(--ink3); }
+.nav-link:hover   { background: var(--surface2); color: var(--ink); }
+.nav-link.active  { background: var(--ink); color: var(--surface); }
+.nav-link svg {
+  width: 13px; height: 13px;
+  stroke: currentColor; fill: none; stroke-width: 1.5;
+  flex-shrink: 0; display: block; pointer-events: none;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.nav-user {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink3);
+  letter-spacing: .04em;
+  display: none;
+  white-space: nowrap;
+}
+
+/* ── THEME TOGGLE ──────────────────────────────────────────────────────────── */
+.theme-toggle {
+  width: 30px; height: 30px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--ink);
+  transition: background-color .2s, border-color .15s, color .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.theme-toggle:hover { border-color: var(--ink); }
+.theme-toggle svg {
+  width: 13px; height: 13px;
+  stroke: currentColor; fill: none; stroke-width: 1.5;
+  display: block; pointer-events: none;
+}
+
+/* ── SIGN OUT ──────────────────────────────────────────────────────────────── */
+.sign-out-btn {
+  height: 30px;
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color .15s, color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.sign-out-btn:visited { color: var(--ink3); }
+.sign-out-btn:hover   { border-color: var(--ink); color: var(--ink); }
+.sign-out-btn svg {
+  width: 13px; height: 13px;
+  stroke: currentColor; fill: none; stroke-width: 1.5;
+  flex-shrink: 0; display: block; pointer-events: none;
+}
+.sign-out-btn .sign-out-label { display: none; }
+
+/* ── BOTTOM NAV — mobile only ──────────────────────────────────────────────── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  display: flex;
+  align-items: stretch;
+  background: rgba(255,255,255,.95);
+  border-top: 1px solid var(--border);
+  z-index: 300;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+[data-theme="dark"] .bottom-nav {
+  background: rgba(24,21,18,.95);
+}
+
+.bn-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .15s;
+  position: relative;
+}
+.bn-item:visited { color: var(--ink3); }
+.bn-item svg {
+  width: 22px; height: 22px;
+  stroke: currentColor; fill: none; stroke-width: 1.5;
+}
+.bn-item.active { color: var(--ink); }
+.bn-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 24px; height: 2px;
+  background: var(--ink);
+  border-radius: 0 0 2px 2px;
+}
+
+/* ── FLOATING ACTION BUTTON ────────────────────────────────────────────────── */
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: 76px; /* 60px bottom-nav + 16px gap */
+  width: 52px; height: 52px;
+  background: var(--ink);
+  color: var(--surface);
+  border-radius: 50%;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  z-index: 290;
+  box-shadow: 0 4px 20px rgba(0,0,0,.28);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s;
+}
+.fab svg {
+  width: 22px; height: 22px;
+  stroke: currentColor; fill: none; stroke-width: 1.5;
+  pointer-events: none;
+}
+.fab:hover  { transform: scale(1.08); box-shadow: 0 6px 28px rgba(0,0,0,.38); }
+.fab:active { transform: scale(.94); }
+
+/* ── CATEGORY BAR ──────────────────────────────────────────────────────────── */
+.cat-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 12px;
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 100;
+  transition: background-color .2s ease, border-color .2s ease;
+}
+.cat-bar::-webkit-scrollbar { display: none; }
+
+.cat-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 0 10px;
+  height: var(--cat-h);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--ink3);
+  white-space: nowrap;
+  border-bottom: 1.5px solid transparent;
+  margin-bottom: -1px;
+  flex-shrink: 0;
+  transition: color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cat-btn:hover  { color: var(--ink); }
+.cat-btn.active { color: var(--ink); border-bottom-color: var(--ink); }
+.cat-btn svg {
+  width: 13px; height: 13px;
+  stroke: currentColor; fill: none; stroke-width: 1.5;
+  flex-shrink: 0; pointer-events: none;
+}
+
+.cat-pill {
+  background: var(--surface2);
+  border-radius: 20px;
+  padding: 1px 6px;
+  font-size: 8px;
+  color: var(--ink3);
+  font-family: var(--font-mono);
+  line-height: 1.6;
+  transition: background-color .2s ease, color .2s ease;
+}
+.cat-btn.active .cat-pill { background: var(--ink); color: var(--surface); }
+
+/* ── BUTTONS ───────────────────────────────────────────────────────────────── */
+.btn-sm {
+  height: 30px;
+  padding: 0 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity .15s, border-color .15s, color .15s, background-color .15s;
+}
+.btn-sm:visited { color: inherit; }
+.btn-sm svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.5; pointer-events: none; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--ink2); }
+.btn-outline:hover { border-color: var(--ink); color: var(--ink); }
+.btn-solid { background: var(--ink); color: var(--surface); }
+.btn-solid:hover { opacity: .85; }
+.btn-solid:visited { color: var(--surface); }
+
+/* ── PANEL LABEL ───────────────────────────────────────────────────────────── */
+.panel-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── TOAST ─────────────────────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 76px; /* above bottom nav on mobile */
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .06em;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 600;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+  transition: opacity .22s ease, transform .22s ease;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── SAVE SUCCESS ANIMATION ────────────────────────────────────────────────── */
+@keyframes cv-check   { to { stroke-dashoffset: 0; } }
+@keyframes cv-pop     { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes cv-fade    { 0%{opacity:0} 12%{opacity:1} 75%{opacity:1} 100%{opacity:0} }
+
+.save-success-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 700;
+  display: flex; align-items: center; justify-content: center;
+  animation: cv-fade 1.9s ease forwards;
+  pointer-events: none;
+}
+.save-success-circle {
+  width: 88px; height: 88px;
+  background: var(--ink);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  animation: cv-pop .32s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+.save-success-circle svg {
+  width: 44px; height: 44px;
+  stroke: var(--surface); fill: none;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 60; stroke-dashoffset: 60;
+  animation: cv-check .38s ease .22s forwards;
+}
+
+/* ── SKELETON SCREENS ──────────────────────────────────────────────────────── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .5; }
+}
+.skeleton-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.skeleton-img {
+  width: 100%;
+  background: var(--surface2);
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────────────────────────── */
+@media (min-width: 480px) {
+  .sign-out-btn .sign-out-label { display: inline; }
+}
+
+@media (min-width: 640px) {
+  :root { --nav-h: 58px; --cat-h: 44px; }
+  nav:not(.bottom-nav) { padding: 0 24px; }
+  .bottom-nav { display: none; }
+  .fab        { display: none; }
+  body        { padding-bottom: 0; }
+  #toast      { bottom: 28px; }
+  .nav-divider { display: block; }
+  .nav-user    { display: block; }
+  .nav-link  { height: 32px; padding: 0 12px; }
+  .theme-toggle { width: 32px; height: 32px; }
+  .sign-out-btn { height: 32px; }
+  .btn-sm   { height: 32px; }
+  .cat-bar  { padding: 0 24px; }
+  .cat-btn  { padding: 0 14px; }
+}
+
+@media (min-width: 960px) {
+  nav:not(.bottom-nav) { padding: 0 40px; }
+  .cat-bar { padding: 0 40px; }
+}
+
+/* ── GLASSMORPHISM CAROUSEL — shared across scanner + collection ────────── */
+
+/* ── Page background when carousel/picker is open ───────────────────────── */
+/* Both light + dark use the same deep dark so glassmorphism always works */
+body.picker-open,
+body.cat-carousel-open {
+  background: #111111;
+  /* Prevent any light bg showing below the glass scene */
+  min-height: 100dvh;
+}
+/* html:has picker-open overrides removed — page background responds to theme naturally */
+/* picker-open nav: no overrides — nav responds to theme naturally */
+
+/* Also hide bottom nav when glass carousel is open */
+body.picker-open .bottom-nav,
+body.cat-carousel-open .bottom-nav { display: none !important; }
+/* And FAB */
+body.picker-open .fab,
+body.cat-carousel-open .fab { display: none !important; }
+
+/* ── Glass scene element ─────────────────────────────────────────────────── */
+.glass-scene {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  transition: background 0.3s ease;
+}
+/* Photo background layer */
+.glass-scene::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--bg-img-light);
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px) saturate(0.90) brightness(0.65);
+  transform: scale(1.06);
+  pointer-events: none;
+}
+html[data-theme="dark"] .glass-scene::after {
+  background-image: var(--bg-img-dark);
+  filter: blur(8px) saturate(0.80) brightness(0.40);
+}
+html[data-theme="dark"] .glass-scene {
+  background: transparent;
+}
+/* Cool dark vignette — replaces amber bokeh */
+.glass-scene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Strong top scrim ensures text is always readable over any photo */
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,.60) 0%, rgba(0,0,0,.15) 22%, transparent 40%),
+    radial-gradient(ellipse 60% 80% at 100% 50%,  rgba(12,12,12,.40) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 80% at 0% 50%,    rgba(12,12,12,.40) 0%, transparent 65%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,  rgba(8,8,8,.75)   0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 0% 100%,   rgba(8,8,8,.85)   0%, transparent 60%);
+  transition: opacity 0.3s ease;
+}
+html[data-theme="dark"] .glass-scene::before {
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,.72) 0%, rgba(0,0,0,.20) 22%, transparent 40%),
+    radial-gradient(ellipse 60% 80% at 100% 50%,  rgba(5,5,5,.55)  0%, transparent 65%),
+    radial-gradient(ellipse 60% 80% at 0% 50%,    rgba(5,5,5,.55)  0%, transparent 65%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,  rgba(0,0,0,.88)  0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 0% 100%,   rgba(0,0,0,.92)  0%, transparent 58%);
+}
+
+/* ── Glass card ──────────────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(24px) saturate(1.4) brightness(1.15);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4) brightness(1.15);
+  box-shadow:
+    0 4px 32px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+html[data-theme="dark"] .glass-card {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.12);
+  backdrop-filter: blur(24px) saturate(1.2) brightness(1.1);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) brightness(1.1);
+  box-shadow: 0 4px 32px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10);
+}
+.glass-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgba(255,255,255,.12) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 1;
+}
+.glass-card:hover {
+  background: rgba(255,255,255,.16);
+  border-color: rgba(255,255,255,.28);
+  box-shadow: 0 8px 40px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.22);
+}
+
+/* ── Card text — always light (on dark background) ───────────────────────── */
+.glass-card .card-name         { color: rgba(245,245,245,.95); }
+.glass-card .card-desc         { color: rgba(245,245,245,.50); }
+.glass-card .card-count-label  { color: rgba(245,245,245,.50); }
+.glass-card .card-num          { color: rgba(255,255,255,.38); }
+.glass-card .card-num-icon svg { stroke: rgba(255,255,255,.45); }
+.glass-card .card-big-icon     { color: #fff; opacity: .10; }
+.glass-card .card-arrow {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.20);
+  color: rgba(255,255,255,.65);
+}
+.glass-card:hover .card-arrow {
+  background: rgba(255,255,255,.20);
+  color: rgba(255,255,255,.9);
+  transform: translate(1px,-1px);
+}
+
+/* ── Header text — always light ─────────────────────────────────────────── */
+/* Picker eyebrow — use theme tokens so they respond to light/dark naturally */
+/* Eyebrow text on glass scene — dark mode: light text, light mode: dark text with shadow for contrast */
+.glass-scene .picker-eyebrow {
+  color: rgba(245,245,245,.80);
+  text-shadow: 0 1px 8px rgba(0,0,0,.55);
+}
+.glass-scene .picker-hero-right {
+  color: rgba(245,245,245,.75);
+  text-shadow: 0 1px 8px rgba(0,0,0,.55);
+}
+.glass-scene .picker-hero-right strong {
+  color: rgba(245,245,245,.95);
+  text-shadow: 0 1px 8px rgba(0,0,0,.55);
+}
+.glass-scene .picker-eyebrow-icon svg { stroke: rgba(245,245,245,.80); }
+
+/* Light mode: electric sky blue — pops against the pale photo background */
+html[data-theme="light"] .glass-scene .picker-eyebrow {
+  color: #38BEFF;
+  text-shadow: 0 1px 12px rgba(0,0,0,.45);
+}
+html[data-theme="light"] .glass-scene .picker-hero-right {
+  color: #38BEFF;
+  text-shadow: 0 1px 12px rgba(0,0,0,.45);
+}
+html[data-theme="light"] .glass-scene .picker-hero-right strong {
+  color: #69CFFF;
+  text-shadow: 0 1px 12px rgba(0,0,0,.45);
+}
+html[data-theme="light"] .glass-scene .picker-eyebrow-icon svg {
+  stroke: #38BEFF;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,.35));
+}
+.glass-scene .picker-dot                { background: rgba(255,255,255,.30); }
+.glass-scene .picker-dot.active         { background: rgba(255,255,255,.85); }
+
+/* Close button on collection carousel — always light (on dark bg) */
+.carousel-close {
+  position: absolute; top: 18px; right: 20px; z-index: 10;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.22);
+  color: rgba(245,245,245,.75);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; line-height: 1; cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background .15s, color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.carousel-close:hover {
+  background: rgba(255,255,255,.22);
+  color: rgba(240,237,231,1);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COLLECTORVAULT — UI PATCH v1
+   Appended to shared.css — does not touch any rules above.
+   ═══════════════════════════════════════════════════════════════════════════
+
+   SETUP — upload two images to public_html/images/ on Hostinger:
+     bg-light.jpg  (warm/neutral tone, 1920×1080 recommended, ~400KB)
+     bg-dark.jpg   (dark/moody tone, same size)
+
+   Then for the carousel cards, upload per-category images to:
+     public_html/images/card-all.jpg
+     public_html/images/card-cards.jpg
+     public_html/images/card-shirts.jpg
+     public_html/images/card-games.jpg
+     public_html/images/card-vinyl.jpg
+     public_html/images/card-other.jpg
+
+   Tweak the variables below to taste.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Background image variables ──────────────────────────────────────── */
+:root {
+  --bg-img-light:       url('/images/bg-light.jpg');
+  --bg-img-dark:        url('/images/bg-dark.jpg');
+  --bg-blur:            8px;
+  --bg-noise:           0.15;
+  --bg-wash-light:      rgba(240, 240, 240, 0.45);
+  --bg-wash-dark:       rgba(10, 10, 10, 0.58);
+}
+
+/* ── 2. Page background — blurred photo + grain ─────────────────────────── */
+/* Use html instead of body so it sits behind everything including nav */
+html {
+  position: relative;
+}
+html::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-image: var(--bg-img-light);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: blur(var(--bg-blur)) saturate(1.15);
+  transform: scale(1.06); /* bleed compensation */
+}
+html::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='280' height='280' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 280px 280px;
+  opacity: var(--bg-noise);
+  pointer-events: none;
+}
+
+[data-theme="dark"] html::before,
+html[data-theme="dark"]::before {
+  background-image: var(--bg-img-dark);
+}
+
+/* Tinted wash + vignette over the blurred image — keeps everything readable */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    var(--bg-wash-light),
+    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(15,15,15,.55) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,  rgba(8,8,8,.70)   0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 0%   100%, rgba(8,8,8,.80)   0%, transparent 58%);
+  pointer-events: none;
+}
+[data-theme="dark"] body::before,
+html[data-theme="dark"] body::before {
+  background:
+    var(--bg-wash-dark),
+    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(5,5,5,.70)  0%, transparent 70%),
+    radial-gradient(ellipse 80% 50% at 50% 100%,  rgba(0,0,0,.85)  0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 0%   100%, rgba(0,0,0,.90)  0%, transparent 58%);
+}
+
+/* Body transparent globally — photo always shows through */
+body {
+  background: transparent !important;
+}
+
+/* Nav override handled by glass surface system below */
+
+/* Cat-bar: same frost treatment */
+.cat-bar {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+[data-theme="dark"] .cat-bar,
+html[data-theme="dark"] .cat-bar {
+  background: rgba(12, 11, 9, 0.70) !important;
+}
+
+/* Bottom nav frost */
+.bottom-nav {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+[data-theme="dark"] .bottom-nav,
+html[data-theme="dark"] .bottom-nav {
+  background: rgba(18, 15, 12, 0.88) !important;
+}
+
+/* ── 3. CAROUSEL PICKER CARDS — custom background image per category ──────
+   Both scanner (#catPicker) and collection (#catCarousel) use .picker-card.
+   We keep the existing glass-card blur/border from shared.css and layer
+   a full-bleed photo behind it using a pseudo-element.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.picker-card {
+  /* Ensure our ::before pseudo-element stacks correctly */
+  isolation: isolate;
+}
+
+/* Photo layer — sits behind the glass */
+.picker-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  border-radius: inherit;
+  /* Small scale so image is always centred/filled regardless of card size */
+  transform: scale(1.0);
+  transition: transform 0.4s ease;
+}
+.picker-card:hover::before {
+  transform: scale(1.04); /* subtle Ken Burns on hover */
+}
+
+/* Per-category images — update filenames to match what you upload */
+.picker-card[data-cat="all"]::before    { background-image: url('/images/card-all.jpg'); }
+.picker-card[data-cat="cards"]::before  { background-image: url('/images/card-cards.jpg'); }
+.picker-card[data-cat="shirts"]::before { background-image: url('/images/card-shirts.jpg'); }
+.picker-card[data-cat="games"]::before  { background-image: url('/images/card-games.jpg'); }
+.picker-card[data-cat="vinyl"]::before  { background-image: url('/images/card-vinyl.jpg'); }
+.picker-card[data-cat="other"]::before  { background-image: url('/images/card-other.jpg'); }
+
+/* The existing glass-card ::after already provides the diagonal gloss sheen.
+   Add a bottom scrim so card-foot text stays readable over any photo */
+.picker-card::after {
+  content: '' !important; /* override existing ::after from .glass-card */
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: inherit !important;
+  /* Split: top gloss sheen + bottom dark scrim in one gradient */
+  background: linear-gradient(
+    160deg,
+    rgba(255,255,255,0.10) 0%,
+    transparent 40%,
+    transparent 52%,
+    rgba(0,0,0,0.55) 100%
+  ) !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+/* Ghost icon: pull slightly in front of scrim, slightly larger for photo bg */
+.card-big-icon {
+  z-index: 2;
+  opacity: 0.18 !important; /* more subtle against photos */
+}
+
+/* Card text: make sure it's above scrim */
+.card-num, .card-arrow, .card-foot {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── 4. COLLECTION item-card — glass treatment over eBay image ───────────
+   .item-card already uses full-bleed .ic-image + .ic-overlay gradient.
+   We just make the card itself glassy instead of solid surface2.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.item-card {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  backdrop-filter: blur(18px) saturate(1.6) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.6) brightness(1.1) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.10) !important;
+}
+.item-card:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.40) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    0 16px 48px rgba(0, 0, 0, 0.26),
+    0 4px 12px rgba(0, 0, 0, 0.14) !important;
+}
+
+[data-theme="dark"] .item-card,
+html[data-theme="dark"] .item-card {
+  background: rgba(14, 12, 9, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.28) !important;
+}
+[data-theme="dark"] .item-card:hover,
+html[data-theme="dark"] .item-card:hover {
+  background: rgba(20, 17, 13, 0.42) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Specular highlight strip across the very top of each item-card */
+.item-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75) 50%, transparent);
+  z-index: 10;
+  pointer-events: none;
+  border-radius: 0;
+}
+
+/* ── 5. SCANNER recent-card — glass treatment ────────────────────────────
+   .recent-card is in scanner.php — currently solid --surface.
+   Apply same glass logic.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.recent-card {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(16px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.5) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.70),
+    0 4px 20px rgba(0, 0, 0, 0.10) !important;
+}
+.recent-card:hover {
+  background: rgba(255, 255, 255, 0.68) !important;
+  border-color: rgba(255, 255, 255, 0.70) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.80),
+    0 10px 32px rgba(0, 0, 0, 0.16) !important;
+}
+
+[data-theme="dark"] .recent-card,
+html[data-theme="dark"] .recent-card {
+  background: rgba(20, 17, 13, 0.52) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 4px 20px rgba(0, 0, 0, 0.38) !important;
+}
+[data-theme="dark"] .recent-card:hover,
+html[data-theme="dark"] .recent-card:hover {
+  background: rgba(20,20,20,.65) !important;
+}
+
+/* rc-thumb background: let the image breathe on glass */
+.rc-thumb {
+  background: rgba(14, 13, 11, 0.08) !important;
+}
+[data-theme="dark"] .rc-thumb,
+html[data-theme="dark"] .rc-thumb {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* rc-body: keep text colours — they work fine */
+.rc-tag {
+  background: rgba(255, 255, 255, 0.30) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+[data-theme="dark"] .rc-tag,
+html[data-theme="dark"] .rc-tag {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ── 6. Scanner left panel + right panel — subtle frost ─────────────────── */
+/* Recents right panel — transparent, cards float over photo */
+.right {
+  background: transparent !important;
+}
+
+
+/* ── PATCH v1.1 — glass-scene sits on top of photo bg ──────────────────────
+   The photo background shows everywhere on the page. .glass-scene is a
+   full-height block-level element with its own solid dark background — it
+   naturally covers the fixed photo layer beneath it. No suppression needed.
+   body and html stay transparent so the photo shows through everywhere else.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Ensure glass-scene stacks above the fixed html::before photo layer */
+.glass-scene {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  min-height: 100dvh;
+}
+
+/* Solid dark bg on html when glass scene active — fills nav/bottom gaps */
+html:has(body.picker-open),
+html:has(body.cat-carousel-open) {
+  background: #111111 !important;
+}
+body.picker-open,
+body.cat-carousel-open {
+  background: transparent !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLASS SURFACE SYSTEM — dark-first design
+   Dark mode is primary. Light mode is a secondary, higher-contrast variant.
+   All surfaces are translucent, floating over the blurred photo background.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Shared glass panel utility ─────────────────────────────────────────── */
+.glass-panel {
+  background: rgba(18,18,18,.72);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid rgba(255,255,255,.10);
+}
+[data-theme="light"] .glass-panel {
+  background: rgba(255,255,255,.62);
+  border: 1px solid rgba(255,255,255,.80);
+}
+
+/* ── Nav — simple theme-responsive glass ─────────────────────────────────── */
+/* Dark mode (includes carousel which is always forced to dark via JS) */
+html[data-theme="dark"] nav:not(.bottom-nav) {
+  background: rgba(10,10,10,.90) !important;
+  backdrop-filter: blur(20px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.3) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+/* Light mode */
+html[data-theme="light"] nav:not(.bottom-nav) {
+  background: rgba(255,255,255,.82) !important;
+  backdrop-filter: blur(20px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
+  border-bottom: 1px solid rgba(0,0,0,.08) !important;
+}
+
+/* ── Collection: hero ───────────────────────────────────────────────────── */
+.hero {
+  background: rgba(10,10,10,.55) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+[data-theme="light"] .hero {
+  background: rgba(255,255,255,.45) !important;
+  border-bottom: 1px solid rgba(255,255,255,.60) !important;
+}
+/* Ensure hero text is always readable */
+[data-theme="light"] .hero-label  { color: rgba(20,20,20,.50) !important; }
+[data-theme="light"] .hero-title  { color: #141414 !important; }
+[data-theme="light"] .stat-n      { color: #141414 !important; }
+[data-theme="light"] .stat-l      { color: rgba(20,20,20,.45) !important; }
+[data-theme="light"] .stat-card   {
+  background: rgba(255,255,255,.40) !important;
+  border-color: rgba(0,0,0,.10) !important;
+}
+
+/* ── Collection: category tabs ──────────────────────────────────────────── */
+.cat-tabs-wrap,
+.cat-tabs {
+  background: rgba(12,12,12,.75) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+[data-theme="light"] .cat-tabs-wrap,
+[data-theme="light"] .cat-tabs {
+  background: rgba(255,255,255,.65) !important;
+  border-bottom: 1px solid rgba(0,0,0,.08) !important;
+}
+
+/* ── Collection: controls bar ───────────────────────────────────────────── */
+.controls-bar {
+  background: rgba(12,12,12,.70) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(255,255,255,.07) !important;
+}
+[data-theme="light"] .controls-bar {
+  background: rgba(255,255,255,.60) !important;
+  border-bottom: 1px solid rgba(0,0,0,.07) !important;
+}
+
+/* ── Search input ───────────────────────────────────────────────────────── */
+.search-wrap input {
+  background: rgba(255,255,255,.08) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  color: rgba(245,245,245,.90) !important;
+}
+.search-wrap input::placeholder { color: rgba(245,245,245,.30) !important; }
+[data-theme="light"] .search-wrap input {
+  background: rgba(0,0,0,.06) !important;
+  border: 1px solid rgba(0,0,0,.12) !important;
+  color: #141414 !important;
+}
+[data-theme="light"] .search-wrap input::placeholder { color: rgba(20,20,20,.35) !important; }
+.search-wrap input:focus {
+  border-color: rgba(255,255,255,.35) !important;
+  background: rgba(255,255,255,.12) !important;
+  outline: none !important;
+}
+[data-theme="light"] .search-wrap input:focus {
+  border-color: rgba(0,0,0,.30) !important;
+  background: rgba(255,255,255,.85) !important;
+}
+
+/* ── Sort select ────────────────────────────────────────────────────────── */
+.sort-select {
+  background: rgba(255,255,255,.08) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  color: rgba(245,245,245,.85) !important;
+}
+[data-theme="light"] .sort-select {
+  background: rgba(0,0,0,.06) !important;
+  border: 1px solid rgba(0,0,0,.12) !important;
+  color: #141414 !important;
+}
+
+/* ── View toggle ────────────────────────────────────────────────────────── */
+.view-toggle {
+  border: 1px solid rgba(255,255,255,.14) !important;
+}
+[data-theme="light"] .view-toggle {
+  border: 1px solid rgba(0,0,0,.12) !important;
+}
+.vt-btn {
+  background: rgba(255,255,255,.06) !important;
+  color: rgba(245,245,245,.50) !important;
+}
+[data-theme="light"] .vt-btn {
+  background: rgba(0,0,0,.04) !important;
+  color: rgba(20,20,20,.50) !important;
+}
+.vt-btn.active {
+  background: rgba(245,245,245,.90) !important;
+  color: #111 !important;
+}
+[data-theme="light"] .vt-btn.active {
+  background: #141414 !important;
+  color: #fff !important;
+}
+
+/* ── Refresh bar ────────────────────────────────────────────────────────── */
+.refresh-bar {
+  background: rgba(12,12,12,.60) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(255,255,255,.06) !important;
+  color: rgba(245,245,245,.40) !important;
+}
+[data-theme="light"] .refresh-bar {
+  background: rgba(255,255,255,.55) !important;
+  border-bottom: 1px solid rgba(0,0,0,.06) !important;
+  color: rgba(20,20,20,.45) !important;
+}
+
+/* ── Scanner left panel ─────────────────────────────────────────────────── */
+.left {
+  background: rgba(12,12,12,.78) !important;
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+  border-right: 1px solid rgba(255,255,255,.08) !important;
+  border-bottom: 1px solid rgba(255,255,255,.08) !important;
+}
+[data-theme="light"] .left {
+  background: rgba(255,255,255,.65) !important;
+  border-right: 1px solid rgba(0,0,0,.08) !important;
+  border-bottom: 1px solid rgba(0,0,0,.08) !important;
+}
+
+/* ── Scanner form inputs ────────────────────────────────────────────────── */
+.fg input,
+.fg select,
+.pi-wrap input {
+  background: rgba(255,255,255,.07) !important;
+  border: 1px solid rgba(255,255,255,.14) !important;
+  color: rgba(245,245,245,.90) !important;
+}
+[data-theme="light"] .fg input,
+[data-theme="light"] .fg select,
+[data-theme="light"] .pi-wrap input {
+  background: rgba(0,0,0,.05) !important;
+  border: 1px solid rgba(0,0,0,.12) !important;
+  color: #141414 !important;
+}
+.fg input:focus, .fg select:focus {
+  border-color: rgba(255,255,255,.35) !important;
+}
+[data-theme="light"] .fg input:focus,
+[data-theme="light"] .fg select:focus {
+  border-color: rgba(0,0,0,.30) !important;
+}
+.fg label { color: rgba(245,245,245,.40) !important; }
+[data-theme="light"] .fg label { color: rgba(20,20,20,.45) !important; }
+.fg input::placeholder { color: rgba(245,245,245,.22) !important; }
+[data-theme="light"] .fg input::placeholder { color: rgba(20,20,20,.30) !important; }
+
+/* ── Dropzone ───────────────────────────────────────────────────────────── */
+.dropzone {
+  background: rgba(255,255,255,.05) !important;
+  border-color: rgba(255,255,255,.18) !important;
+}
+[data-theme="light"] .dropzone {
+  background: rgba(255,255,255,.35) !important;
+  border-color: rgba(0,0,0,.15) !important;
+}
+.dropzone:hover {
+  background: rgba(255,255,255,.10) !important;
+  border-color: rgba(255,255,255,.45) !important;
+}
+[data-theme="light"] .dropzone:hover {
+  background: rgba(255,255,255,.55) !important;
+  border-color: rgba(0,0,0,.30) !important;
+}
+.dz-title { color: rgba(245,245,245,.80) !important; }
+.dz-sub   { color: rgba(245,245,245,.35) !important; }
+[data-theme="light"] .dz-title { color: #141414 !important; }
+[data-theme="light"] .dz-sub   { color: rgba(20,20,20,.45) !important; }
+
+/* ── AI result / id-block ───────────────────────────────────────────────── */
+.id-block {
+  background: rgba(255,255,255,.06) !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+[data-theme="light"] .id-block {
+  background: rgba(255,255,255,.50) !important;
+  border: 1px solid rgba(0,0,0,.10) !important;
+}
+.id-name { color: rgba(245,245,245,.92) !important; }
+[data-theme="light"] .id-name { color: #141414 !important; }
+.id-meta { color: rgba(245,245,245,.45) !important; }
+[data-theme="light"] .id-meta { color: rgba(20,20,20,.50) !important; }
+
+/* ── Recent cards (scanner right panel) ─────────────────────────────────── */
+.recent-card {
+  background: rgba(18,18,18,.70) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+[data-theme="light"] .recent-card {
+  background: rgba(255,255,255,.55) !important;
+  border: 1px solid rgba(255,255,255,.80) !important;
+}
+.rc-name { color: rgba(245,245,245,.90) !important; }
+.rc-meta { color: rgba(245,245,245,.40) !important; }
+[data-theme="light"] .rc-name { color: #141414 !important; }
+[data-theme="light"] .rc-meta { color: rgba(20,20,20,.50) !important; }
+
+/* ── Collection grid background ─────────────────────────────────────────── */
+.ic-grid-wrap, .col-body { background: transparent !important; }
+
+/* ── Bottom nav ─────────────────────────────────────────────────────────── */
+.bottom-nav {
+  background: rgba(10,10,10,.88) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-top: 1px solid rgba(255,255,255,.08) !important;
+}
+[data-theme="light"] .bottom-nav {
+  background: rgba(255,255,255,.85) !important;
+  border-top: 1px solid rgba(0,0,0,.08) !important;
+}
+
+/* ── Scan button + action buttons ───────────────────────────────────────── */
+.btn-save {
+  background: rgba(245,245,245,.92) !important;
+  color: #111 !important;
+}
+.btn-save:hover { background: rgba(245,245,245,1) !important; }
+[data-theme="light"] .btn-save {
+  background: #141414 !important;
+  color: #fff !important;
+}
+
+/* ── Right panel header ─────────────────────────────────────────────────── */
+.right-hdr { border-bottom: 1px solid rgba(255,255,255,.10) !important; }
+.right-title { color: rgba(245,245,245,.80) !important; }
+[data-theme="light"] .right-hdr { border-bottom: 1px solid rgba(0,0,0,.08) !important; }
+[data-theme="light"] .right-title { color: #141414 !important; }
