@@ -46,6 +46,8 @@ html {
   scroll-behavior: smooth;
   background: var(--bg);
   color-scheme: light;
+  /* Fallback fills nav area + bottom strip on glass-scene pages */
+  background-color: #111111;
 }
 [data-theme="dark"] html,
 html[data-theme="dark"] { color-scheme: dark; }
