@@ -1,0 +1,2 @@
+# Beta environment — separate PHP session from main site
+php_value session.name CVBETA
