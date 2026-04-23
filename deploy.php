@@ -32,6 +32,12 @@ $files = [
     'theme.php', 'toast.php', '.htaccess'
 ];
 
+$beta_files = [
+    'api.php', 'categories.js.php', 'collection.php', 'index.php',
+    'logout.php', 'nav.php', 'scanner.php', 'shared.css',
+    'theme.php', 'toast.php', '.htaccess'
+];
+
 $log   = [];
 $log[] = date('Y-m-d H:i:s') . ' — Deploy triggered';
 $log[] = 'Commit: ' . ($data['after'] ?? 'unknown');
@@ -71,6 +77,21 @@ foreach ($files as $file) {
         $log[] = "  ✓ {$file}";
     } else {
         $log[] = "  ✗ FAILED: {$file} — " . $result['error'];
+    }
+}
+
+// Deploy beta files
+$beta_dir = $deploy_dir . '/beta';
+if (is_dir($beta_dir)) {
+    $beta_raw = 'https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/beta/';
+    foreach ($beta_files as $file) {
+        $result = fetch_file($beta_raw . $file, GITHUB_TOKEN);
+        if ($result['ok']) {
+            file_put_contents($beta_dir . '/' . $file, $result['content']);
+            $log[] = "  ✓ beta/{$file}";
+        } else {
+            $log[] = "  ✗ FAILED: beta/{$file} — " . $result['error'];
+        }
     }
 }
 
