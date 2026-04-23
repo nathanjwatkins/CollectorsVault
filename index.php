@@ -10,6 +10,8 @@ if (isset($_SESSION['user'])) { header('Location: scanner.php'); exit; }
 <script>
 (function(){var t=localStorage.getItem('cv_theme')||'light';document.documentElement.setAttribute('data-theme',t);}());
 </script>
+<meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F3F1" media="(prefers-color-scheme: light)">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>CollectorVault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
