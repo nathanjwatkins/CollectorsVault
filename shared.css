@@ -267,7 +267,7 @@ nav:not(.bottom-nav) {
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   z-index: 290;
-  box-shadow: 0 4px 20px rgba(14,13,11,.28);
+  box-shadow: 0 4px 20px rgba(0,0,0,.28);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s;
@@ -277,7 +277,7 @@ nav:not(.bottom-nav) {
   stroke: currentColor; fill: none; stroke-width: 1.5;
   pointer-events: none;
 }
-.fab:hover  { transform: scale(1.08); box-shadow: 0 6px 28px rgba(14,13,11,.38); }
+.fab:hover  { transform: scale(1.08); box-shadow: 0 6px 28px rgba(0,0,0,.38); }
 .fab:active { transform: scale(.94); }
 
 /* ── CATEGORY BAR ──────────────────────────────────────────────────────────── */
@@ -402,7 +402,7 @@ nav:not(.bottom-nav) {
 
 .save-success-overlay {
   position: fixed; inset: 0;
-  background: rgba(14,13,11,.5);
+  background: rgba(0,0,0,.5);
   z-index: 700;
   display: flex; align-items: center; justify-content: center;
   animation: cv-fade 1.9s ease forwards;
@@ -473,17 +473,17 @@ nav:not(.bottom-nav) {
 /* Both light + dark use the same deep dark so glassmorphism always works */
 body.picker-open,
 body.cat-carousel-open {
-  background: #1C1510;
+  background: #111111;
   /* Prevent any light bg showing below the glass scene */
   min-height: 100dvh;
 }
 html:has(body.picker-open),
 html:has(body.cat-carousel-open) {
-  background: #1C1510;
+  background: #111111;
 }
 body.picker-open nav:not(.bottom-nav),
 body.cat-carousel-open nav:not(.bottom-nav) {
-  background: rgba(28,21,16,.85);
+  background: rgba(15,15,15,.88);
   border-bottom-color: rgba(255,255,255,.08);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -926,7 +926,7 @@ html[data-theme="dark"] .recent-card {
 }
 [data-theme="dark"] .recent-card:hover,
 html[data-theme="dark"] .recent-card:hover {
-  background: rgba(28, 24, 18, 0.62) !important;
+  background: rgba(20,20,20,.65) !important;
 }
 
 /* rc-thumb background: let the image breathe on glass */
