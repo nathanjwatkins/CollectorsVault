@@ -1320,7 +1320,16 @@ html[data-theme="light"] nav:not(.bottom-nav) {
 .left {
   position: relative;
 }
-.left > * {
+/* Target specific left panel children rather than all descendants */
+.left .dropzone,
+.left .id-block,
+.left #scanningState,
+.left #errorBox,
+.left .fg,
+.left .btn-save,
+.left .btn-reset,
+.left .cat-btn-row,
+.left #previewImg {
   position: relative;
   z-index: 1;
 }
