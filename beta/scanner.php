@@ -2,12 +2,9 @@
 ob_start();
 header('Cache-Control: no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
-ini_set('session.cookie_httponly',1); ini_set('session.cookie_secure',1); ini_set('session.cookie_samesite','Lax');
 session_name('CVBETA');
 ini_set('session.cookie_path', '/beta/');
-ini_set('session.cookie_samesite', 'Lax');
-ini_set('session.cookie_secure', '1');
-ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_httponly',1); ini_set('session.cookie_secure',1); ini_set('session.cookie_samesite','Lax');
 session_start();
 if (!isset($_SESSION['user'])) { header('Location: index.php'); exit; }
 $username = htmlspecialchars($_SESSION['user']);
@@ -24,7 +21,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=beta1777019674">
+<link rel="stylesheet" href="shared.css?v=beta1777020265">
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
@@ -396,21 +393,6 @@ html[data-theme="dark"] .left {
 </style>
 </head>
 <body class="picker-open">
-<script>
-window.onerror = function(msg, src, line, col, err) {
-  var d = document.createElement('div');
-  d.style.cssText = 'position:fixed;top:60px;left:0;right:0;background:#c13528;color:#fff;padding:12px 16px;font-family:monospace;font-size:11px;z-index:9999;white-space:pre-wrap;word-break:break-all';
-  d.textContent = 'JS ERROR: ' + msg + '\nFile: ' + src + '\nLine: ' + line + ':' + col;
-  document.body.appendChild(d);
-  return false;
-};
-window.addEventListener('unhandledrejection', function(e) {
-  var d = document.createElement('div');
-  d.style.cssText = 'position:fixed;top:60px;left:0;right:0;background:#c13528;color:#fff;padding:12px 16px;font-family:monospace;font-size:11px;z-index:9999;word-break:break-all';
-  d.textContent = 'PROMISE ERROR: ' + (e.reason?.message || e.reason || 'unknown');
-  document.body.appendChild(d);
-});
-</script>
 <?php include 'nav.php'; ?>
 
 <!-- ── CATEGORY PICKER — glassmorphism carousel ─────────────────────────── -->
