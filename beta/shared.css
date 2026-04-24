@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
 /* CollectorVault — Design System v7 */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1244,3 +1246,575 @@ html[data-theme="light"] nav:not(.bottom-nav) {
 .right-title { color: rgba(245,245,245,.80) !important; }
 [data-theme="light"] .right-hdr { border-bottom: 1px solid rgba(0,0,0,.08) !important; }
 [data-theme="light"] .right-title { color: #141414 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COLLECTORVAULT BETA — FUTURISTIC REDESIGN
+   Inspired by: Awwwards SOTD, moodboard references, high-tech aesthetic
+   Palette: Electric cyan #00D4FF · Near-black #080808 · Pure white #F5F5F5
+   Type: Space Grotesk (display) + Space Mono (data/mono)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Global resets for new type system ───────────────────────────────────── */
+* { font-family: 'Space Grotesk', system-ui, sans-serif; }
+
+/* ── Navigation — ultra-thin with cyan accent line ───────────────────────── */
+nav:not(.bottom-nav) {
+  background: rgba(8,8,8,.92) !important;
+  backdrop-filter: blur(24px) saturate(1.8) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
+  border-bottom: 1px solid rgba(0,212,255,.15) !important;
+  box-shadow: 0 1px 0 rgba(0,212,255,.08) !important;
+}
+[data-theme="light"] nav:not(.bottom-nav) {
+  background: rgba(255,255,255,.92) !important;
+  border-bottom: 1px solid rgba(0,212,255,.20) !important;
+  box-shadow: 0 1px 0 rgba(0,212,255,.10) !important;
+}
+
+/* Nav logo — cyan glow */
+.nav-logo {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  letter-spacing: .04em !important;
+  color: #F5F5F5 !important;
+}
+[data-theme="light"] .nav-logo { color: #080808 !important; }
+.nav-logo em {
+  font-style: normal !important;
+  color: var(--accent) !important;
+}
+
+/* Nav links */
+.nav-link {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 9px !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase !important;
+}
+.nav-link.active {
+  background: rgba(0,212,255,.12) !important;
+  color: var(--accent) !important;
+  border-radius: 4px !important;
+}
+
+/* Theme toggle — cyan ring */
+.theme-toggle {
+  border: 1px solid rgba(0,212,255,.25) !important;
+  background: rgba(0,212,255,.06) !important;
+}
+.theme-toggle:hover {
+  border-color: rgba(0,212,255,.55) !important;
+  box-shadow: var(--glow-sm) !important;
+}
+
+/* ── Glass scene — deep dark with cyan atmosphere ────────────────────────── */
+.glass-scene {
+  background: #040608 !important;
+}
+.glass-scene::before {
+  background:
+    linear-gradient(to bottom, rgba(0,10,20,.85) 0%, rgba(0,5,12,.30) 25%, transparent 50%),
+    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(0,212,255,.06) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at 15% 70%, rgba(123,97,255,.05) 0%, transparent 65%),
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(0,0,0,.90) 0%, transparent 70%) !important;
+}
+
+/* ── Picker cards — sharp glass with cyan edge ───────────────────────────── */
+.glass-card {
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  backdrop-filter: blur(20px) saturate(1.6) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.6) !important;
+  border-radius: 10px !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 8px 40px rgba(0,0,0,.60),
+    0 0 0 0 rgba(0,212,255,0) !important;
+  transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease !important;
+}
+.glass-card:hover {
+  border-color: rgba(0,212,255,.30) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 12px 48px rgba(0,0,0,.70),
+    0 0 30px rgba(0,212,255,.08) !important;
+  transform: translateY(-4px) !important;
+}
+
+/* Card footer text */
+.card-foot {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: -.01em !important;
+  color: #F5F5F5 !important;
+}
+.card-subs {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .06em !important;
+  color: rgba(245,245,245,.35) !important;
+  text-transform: uppercase !important;
+}
+.card-num {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 9px !important;
+  color: var(--accent) !important;
+  letter-spacing: .08em !important;
+}
+.card-arrow {
+  border: 1px solid rgba(0,212,255,.20) !important;
+  background: rgba(0,212,255,.06) !important;
+  color: var(--accent) !important;
+  border-radius: 50% !important;
+}
+
+/* Picker eyebrow */
+.picker-eyebrow {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 10px !important;
+  letter-spacing: .20em !important;
+  color: var(--accent) !important;
+  text-shadow: var(--glow-sm) !important;
+}
+.picker-eyebrow-icon svg { stroke: var(--accent) !important; }
+.picker-hero-right {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: 13px !important;
+  color: rgba(245,245,245,.65) !important;
+  line-height: 1.7 !important;
+}
+.picker-hero-right strong {
+  color: rgba(245,245,245,.92) !important;
+  font-weight: 600 !important;
+}
+
+/* Dot indicators */
+.picker-dot { background: rgba(0,212,255,.20) !important; }
+.picker-dot.active {
+  background: var(--accent) !important;
+  box-shadow: var(--glow-sm) !important;
+}
+
+/* ── Collection: hero stats — dominant numerals ──────────────────────────── */
+.hero {
+  background: rgba(6,6,10,.60) !important;
+  backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(0,212,255,.10) !important;
+}
+.hero-title {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: clamp(30px, 5vw, 52px) !important;
+  font-weight: 700 !important;
+  letter-spacing: -.04em !important;
+  color: #F5F5F5 !important;
+  line-height: 1.0 !important;
+}
+.hero-label {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .22em !important;
+  color: var(--accent) !important;
+  text-transform: uppercase !important;
+}
+
+/* Stat cards */
+.stat-card {
+  background: rgba(255,255,255,.03) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  border-radius: 8px !important;
+  padding: 18px 16px 14px !important;
+  transition: border-color .2s, box-shadow .2s !important;
+}
+.stat-card:hover {
+  border-color: rgba(0,212,255,.20) !important;
+  box-shadow: 0 0 24px rgba(0,212,255,.06) !important;
+}
+.stat-n {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: clamp(32px, 5vw, 52px) !important;
+  font-weight: 300 !important;
+  letter-spacing: -.04em !important;
+  line-height: 1 !important;
+  color: #F5F5F5 !important;
+}
+#sGainCard .stat-n {
+  font-size: clamp(36px, 6vw, 60px) !important;
+  font-weight: 200 !important;
+  color: var(--green) !important;
+  text-shadow: 0 0 30px rgba(0,230,118,.20) !important;
+}
+#sGainCard { grid-column: span 2 !important; }
+@media (min-width: 540px) { #sGainCard { grid-column: span 1 !important; } }
+
+.stat-l {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+  letter-spacing: .18em !important;
+  color: rgba(245,245,245,.28) !important;
+  margin-top: 10px !important;
+  text-transform: uppercase !important;
+}
+
+/* ── Category tabs ───────────────────────────────────────────────────────── */
+.cat-tab {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .10em !important;
+  border-radius: 4px !important;
+}
+.cat-tab.active {
+  background: rgba(0,212,255,.12) !important;
+  color: var(--accent) !important;
+  border-color: rgba(0,212,255,.25) !important;
+}
+.ct-count {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+}
+
+/* ── Controls bar ────────────────────────────────────────────────────────── */
+.controls-bar {
+  background: rgba(6,6,10,.82) !important;
+  backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(0,212,255,.08) !important;
+}
+[data-theme="light"] .controls-bar {
+  background: rgba(255,255,255,.90) !important;
+  border-bottom: 1px solid rgba(0,212,255,.12) !important;
+}
+.search-wrap input {
+  font-family: 'Space Grotesk', sans-serif !important;
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  border-radius: 4px !important;
+  color: #F5F5F5 !important;
+  font-size: 12px !important;
+}
+.search-wrap input:focus {
+  border-color: rgba(0,212,255,.40) !important;
+  box-shadow: 0 0 0 3px rgba(0,212,255,.08) !important;
+  outline: none !important;
+}
+[data-theme="light"] .search-wrap input {
+  background: rgba(0,0,0,.04) !important;
+  border-color: rgba(0,0,0,.12) !important;
+  color: #080808 !important;
+}
+.sort-select {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .06em !important;
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  color: rgba(245,245,245,.70) !important;
+  border-radius: 4px !important;
+}
+.vt-btn { background: rgba(255,255,255,.04) !important; }
+.vt-btn.active {
+  background: rgba(0,212,255,.15) !important;
+  color: var(--accent) !important;
+}
+
+/* ── Collection item cards ───────────────────────────────────────────────── */
+.item-card {
+  background: rgba(255,255,255,.03) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  transition: border-color .25s, box-shadow .25s, transform .25s !important;
+}
+.item-card:hover {
+  border-color: rgba(0,212,255,.25) !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,.50), 0 0 20px rgba(0,212,255,.06) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Index number */
+.ic-index {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .10em !important;
+  color: var(--accent) !important;
+  opacity: .60 !important;
+  text-shadow: none !important;
+}
+
+/* Item name */
+.ic-name {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: -.01em !important;
+  line-height: 1.2 !important;
+}
+.ic-sub {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .05em !important;
+  opacity: .45 !important;
+}
+.ic-cat-badge {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+  letter-spacing: .10em !important;
+  background: rgba(0,212,255,.10) !important;
+  color: var(--accent) !important;
+  border: 1px solid rgba(0,212,255,.20) !important;
+  border-radius: 3px !important;
+}
+.ic-value {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: -.01em !important;
+  color: #F5F5F5 !important;
+}
+
+/* Price change badges */
+.ic-change.up {
+  color: var(--green) !important;
+  text-shadow: 0 0 12px rgba(0,230,118,.30) !important;
+}
+.ic-change.down { color: var(--red) !important; }
+
+/* ── Scanner left panel ──────────────────────────────────────────────────── */
+.left {
+  background: rgba(6,6,10,.82) !important;
+  border-right: 1px solid rgba(0,212,255,.08) !important;
+  border-bottom: 1px solid rgba(0,212,255,.08) !important;
+}
+[data-theme="light"] .left {
+  background: rgba(255,255,255,.90) !important;
+  border-right: 1px solid rgba(0,212,255,.12) !important;
+}
+
+/* Form labels */
+.fg label {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .14em !important;
+  color: rgba(245,245,245,.40) !important;
+  text-transform: uppercase !important;
+}
+[data-theme="light"] .fg label { color: rgba(8,8,8,.40) !important; }
+
+/* Form inputs */
+.fg input, .fg select, .pi-wrap input {
+  font-family: 'Space Grotesk', sans-serif !important;
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  border-radius: 4px !important;
+  color: #F5F5F5 !important;
+  font-size: 12px !important;
+}
+[data-theme="light"] .fg input,
+[data-theme="light"] .fg select,
+[data-theme="light"] .pi-wrap input {
+  background: rgba(0,0,0,.04) !important;
+  border-color: rgba(0,0,0,.12) !important;
+  color: #080808 !important;
+}
+.fg input:focus, .fg select:focus {
+  border-color: rgba(0,212,255,.40) !important;
+  box-shadow: 0 0 0 3px rgba(0,212,255,.08) !important;
+  outline: none !important;
+}
+
+/* Dropzone */
+.dropzone {
+  background: rgba(0,212,255,.02) !important;
+  border: 1.5px dashed rgba(0,212,255,.20) !important;
+  border-radius: 8px !important;
+  transition: all .2s !important;
+}
+.dropzone:hover {
+  background: rgba(0,212,255,.05) !important;
+  border-color: rgba(0,212,255,.45) !important;
+  box-shadow: var(--glow-sm) !important;
+}
+.dz-title {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 600 !important;
+  color: rgba(245,245,245,.80) !important;
+  font-size: 13px !important;
+}
+.dz-sub {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 9px !important;
+  letter-spacing: .06em !important;
+  color: rgba(245,245,245,.28) !important;
+}
+
+/* Save button */
+.btn-save {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  letter-spacing: .08em !important;
+  text-transform: uppercase !important;
+  background: var(--accent) !important;
+  color: #080808 !important;
+  border-radius: 5px !important;
+  border: none !important;
+  box-shadow: var(--glow-sm) !important;
+  transition: box-shadow .2s, transform .15s !important;
+}
+.btn-save:hover {
+  box-shadow: var(--glow-cyan) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Scan buttons */
+.scan-btn, .btn-primary {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 600 !important;
+  background: rgba(0,212,255,.12) !important;
+  border: 1px solid rgba(0,212,255,.30) !important;
+  color: var(--accent) !important;
+  border-radius: 5px !important;
+}
+.scan-btn:hover, .btn-primary:hover {
+  background: rgba(0,212,255,.20) !important;
+  box-shadow: var(--glow-sm) !important;
+}
+
+/* Scan button (main camera) */
+.btn-scan {
+  background: var(--accent) !important;
+  color: #080808 !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  box-shadow: var(--glow-sm) !important;
+}
+
+/* ── Recent cards (scanner right) ────────────────────────────────────────── */
+.recent-card {
+  background: rgba(255,255,255,.03) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  border-radius: 8px !important;
+  transition: border-color .2s !important;
+}
+.recent-card:hover {
+  border-color: rgba(0,212,255,.20) !important;
+}
+.rc-name {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 12px !important;
+  color: #F5F5F5 !important;
+}
+.rc-cat {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+  letter-spacing: .10em !important;
+  color: var(--accent) !important;
+}
+.rc-val {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #F5F5F5 !important;
+}
+.rc-tag {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+  background: rgba(0,212,255,.08) !important;
+  border-color: rgba(0,212,255,.15) !important;
+  color: var(--accent) !important;
+}
+
+/* ── Bottom nav ──────────────────────────────────────────────────────────── */
+.bottom-nav {
+  background: rgba(6,6,10,.95) !important;
+  border-top: 1px solid rgba(0,212,255,.10) !important;
+  backdrop-filter: blur(24px) !important;
+}
+[data-theme="light"] .bottom-nav {
+  background: rgba(255,255,255,.96) !important;
+  border-top: 1px solid rgba(0,212,255,.15) !important;
+}
+.bn-item.active svg { stroke: var(--accent) !important; }
+.bn-item.active .bn-label {
+  color: var(--accent) !important;
+  font-family: 'Space Mono', monospace !important;
+}
+
+/* ── FAB ─────────────────────────────────────────────────────────────────── */
+.fab {
+  background: var(--accent) !important;
+  color: #080808 !important;
+  box-shadow: var(--glow-cyan) !important;
+  border-radius: 50% !important;
+}
+.fab:hover { box-shadow: 0 0 30px rgba(0,212,255,.55), 0 0 80px rgba(0,212,255,.20) !important; }
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.modal-sheet, .modal-inner {
+  background: rgba(8,8,12,.96) !important;
+  border: 1px solid rgba(0,212,255,.12) !important;
+  backdrop-filter: blur(32px) !important;
+}
+.modal-title {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -.02em !important;
+}
+.modal-price {
+  font-family: 'Space Mono', monospace !important;
+  font-weight: 700 !important;
+  color: var(--accent) !important;
+  text-shadow: var(--glow-sm) !important;
+}
+
+/* ── Refresh bar ─────────────────────────────────────────────────────────── */
+.refresh-bar {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .06em !important;
+  background: rgba(6,6,10,.80) !important;
+  border-bottom: 1px solid rgba(0,212,255,.08) !important;
+  color: rgba(245,245,245,.30) !important;
+}
+
+/* ── Toasts ──────────────────────────────────────────────────────────────── */
+.toast {
+  font-family: 'Space Grotesk', sans-serif !important;
+  background: rgba(0,212,255,.12) !important;
+  border: 1px solid rgba(0,212,255,.30) !important;
+  color: var(--accent) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* ── ID Block (AI result) ────────────────────────────────────────────────── */
+.id-block {
+  background: rgba(0,212,255,.04) !important;
+  border: 1px solid rgba(0,212,255,.15) !important;
+  border-radius: 6px !important;
+}
+.id-name {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  color: #F5F5F5 !important;
+}
+.id-meta {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 9px !important;
+  color: rgba(245,245,245,.40) !important;
+}
+
+/* ── Scrollbar styling ───────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(0,212,255,.25);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,.50); }
+
+/* ── Selection ───────────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(0,212,255,.25);
+  color: #F5F5F5;
+}
