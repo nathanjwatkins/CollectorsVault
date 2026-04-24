@@ -1,8 +1,7 @@
 <?php
 ob_start();
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
-header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
 ini_set('session.cookie_httponly',1); ini_set('session.cookie_secure',1); ini_set('session.cookie_samesite','Lax');
 session_start();
 if (!isset($_SESSION['user'])) { header('Location: index.php'); exit; }
