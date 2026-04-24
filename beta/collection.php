@@ -21,7 +21,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=beta1777021873">
+<link rel="stylesheet" href="shared.css?v=beta1777072529">
 <style>
 /* ── HERO ──────────────────────────────────────────────────────────────────── */
 .hero {
@@ -929,7 +929,11 @@ body.cat-carousel-open .fab {
         <span class="stat-n" id="sInvested">—</span>
         <span class="stat-l">Invested</span>
       </div>
-      <div class="stat-card" id="sGainCard">
+      <div class="stat-card" id="sGainCard" style="position:relative;overflow:hidden">
+        <svg viewBox="0 0 200 200" style="position:absolute;inset:-20px;width:calc(100%+40px);height:calc(100%+40px);pointer-events:none;opacity:.12">
+          <circle cx="100" cy="100" r="80" fill="none" stroke="#C8FF00" stroke-width="0.8" stroke-dasharray="5 10"/>
+          <circle cx="100" cy="100" r="60" fill="none" stroke="#C8FF00" stroke-width="0.4" stroke-dasharray="3 14"/>
+        </svg>
         <span class="stat-n" id="sGain">—</span>
         <span class="stat-l">Gain / Loss</span>
       </div>
