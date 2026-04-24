@@ -2,12 +2,9 @@
 ob_start();
 header('Cache-Control: no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
-ini_set('session.cookie_httponly',1); ini_set('session.cookie_secure',1); ini_set('session.cookie_samesite','Lax');
 session_name('CVBETA');
 ini_set('session.cookie_path', '/beta/');
-ini_set('session.cookie_samesite', 'Lax');
-ini_set('session.cookie_secure', '1');
-ini_set('session.cookie_httponly', '1');
+ini_set('session.cookie_httponly',1); ini_set('session.cookie_secure',1); ini_set('session.cookie_samesite','Lax');
 session_start();
 if (!isset($_SESSION['user'])) { header('Location: index.php'); exit; }
 $username = htmlspecialchars($_SESSION['user']);
@@ -24,7 +21,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=beta1777019674">
+<link rel="stylesheet" href="shared.css?v=beta1777020265">
 <style>
 /* ── HERO ──────────────────────────────────────────────────────────────────── */
 .hero {
@@ -829,21 +826,6 @@ body.cat-carousel-open .fab {
 </style>
 </head>
 <body>
-<script>
-window.onerror = function(msg, src, line, col, err) {
-  var d = document.createElement('div');
-  d.style.cssText = 'position:fixed;top:60px;left:0;right:0;background:#c13528;color:#fff;padding:12px 16px;font-family:monospace;font-size:11px;z-index:9999;white-space:pre-wrap;word-break:break-all';
-  d.textContent = 'JS ERROR: ' + msg + '\nFile: ' + src + '\nLine: ' + line + ':' + col;
-  document.body.appendChild(d);
-  return false;
-};
-window.addEventListener('unhandledrejection', function(e) {
-  var d = document.createElement('div');
-  d.style.cssText = 'position:fixed;top:60px;left:0;right:0;background:#c13528;color:#fff;padding:12px 16px;font-family:monospace;font-size:11px;z-index:9999;word-break:break-all';
-  d.textContent = 'PROMISE ERROR: ' + (e.reason?.message || e.reason || 'unknown');
-  document.body.appendChild(d);
-});
-</script>
 <?php include 'nav.php'; ?>
 
 <!-- ── CATEGORY CAROUSEL OVERLAY ──────────────────────────────────────── -->
@@ -1157,11 +1139,11 @@ function renderItems(items) {
   </div>`;
     return;
   }
-  el.innerHTML=items.map((i,idx)=>currentView==='grid'?renderGrid(i,idx):renderList(i,idx)).join('');
+  el.innerHTML=items.map(i=>currentView==='grid'?renderGrid(i):renderList(i)).join('');
   setTimeout(loadImagesForVisible,100);
 }
 
-function renderGrid(item, idx) {
+function renderGrid(item) {
   const icon=ICONS[item.category]||ICONS.other;
   const img=imageCache[item.id];
   const imgEl=img?`<img src="${img}" alt="${esc(item.name)}" loading="lazy" onerror="imgErr(this,'${item.id}')"/>`:`<div class="fallback-icon">${icon}</div>`;
@@ -1169,9 +1151,7 @@ function renderGrid(item, idx) {
   const badge=priceBadge(item.id);
   const p=priceData[item.id];
   const ebayVal=p&&p.avg_10?`<span style="font-family:var(--font-mono);font-size:9px;color:rgba(240,237,231,.55)">£${parseFloat(p.avg_10).toFixed(0)} eBay</span>`:'';
-  const idxLabel = String((idx||0)+1).padStart(2,'0');
   const html=`<div class="item-card" id="card-${esc(item.id)}" onclick="openModal('${esc(item.id)}')">
-    <div class="ic-index">${idxLabel}</div>
     <div class="swipe-delete-zone">
       <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
       Delete

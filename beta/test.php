@@ -5,24 +5,27 @@ ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.cookie_secure', '1');
 ini_set('session.cookie_httponly', '1');
 session_start();
-header('Content-Type: text/plain');
-
-echo "User: " . ($_SESSION['user'] ?? 'NOT SET') . "\n\n";
-
-// Test the exact API call that scanner makes
-$data_dir = __DIR__ . '/../data/';
-$collection_file = $data_dir . 'collection.csv';
-
-echo "Collection file: $collection_file\n";
-echo "Collection exists: " . (file_exists($collection_file) ? 'YES' : 'NO') . "\n";
-
-if (file_exists($collection_file)) {
-    $lines = file($collection_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    echo "Collection rows: " . count($lines) . "\n";
-}
-
-// Test categories.js.php include
-echo "\ncategories.js.php exists: " . (file_exists(__DIR__ . '/categories.js.php') ? 'YES' : 'NO') . "\n";
-echo "nav.php exists: " . (file_exists(__DIR__ . '/nav.php') ? 'YES' : 'NO') . "\n";
-echo "theme.php exists: " . (file_exists(__DIR__ . '/theme.php') ? 'YES' : 'NO') . "\n";
-echo "shared.css exists: " . (file_exists(__DIR__ . '/shared.css') ? 'YES' : 'NO') . "\n";
+if (!isset($_SESSION['user'])) { die('NOT LOGGED IN'); }
+$username = htmlspecialchars($_SESSION['user']);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Beta Test</title>
+<?php include 'theme.php'; ?>
+<link rel="stylesheet" href="shared.css?v=test001">
+</head>
+<body>
+<p style="color:white;font-family:monospace;padding:20px">Step 1: PHP OK, user=<?= $username ?></p>
+<?php include 'nav.php'; ?>
+<p style="color:white;font-family:monospace;padding:20px">Step 2: nav.php included OK</p>
+<script>
+document.write('<p style="color:lime;font-family:monospace;padding:20px">Step 3: JS running OK</p>');
+</script>
+<script>
+<?php include 'categories.js.php'; ?>
+document.write('<p style="color:lime;font-family:monospace;padding:20px">Step 4: categories.js.php OK</p>');
+</script>
+</body>
+</html>
