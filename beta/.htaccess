@@ -1,1 +1,5 @@
 # Beta environment
+<FilesMatch "\.css$">
+  Header set Cache-Control "no-cache, must-revalidate"
+  Header set Pragma "no-cache"
+</FilesMatch>
