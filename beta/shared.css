@@ -2452,7 +2452,6 @@ nav:not(.bottom-nav) {
   opacity: 1;
 }
 .left { position: relative !important; }
-.left > * { position: relative; z-index: 1; }
 
 /* ── Circular SVG progress ring for gain/loss stat ──────────────────────── */
 .stat-ring-wrap {
