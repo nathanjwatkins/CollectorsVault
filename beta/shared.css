@@ -18,8 +18,8 @@ a { color: inherit; text-decoration: none; }
   --red:       #FF3B30;
   --green:     #00C853;
   --gold:      #FFD60A;
-  --accent:    #00D4FF;
-  --accent2:   #7B61FF;
+  --accent:    #C8FF00;
+  --accent2:   #E8FF00;
   --radius:    4px;
   --radius-lg: 10px;
   --shadow:    0 2px 20px rgba(0,0,0,.06);
@@ -28,8 +28,8 @@ a { color: inherit; text-decoration: none; }
   --font-mono: 'Space Mono', monospace;
   --nav-h:     52px;
   --cat-h:     40px;
-  --glow-cyan: 0 0 20px rgba(0,212,255,.35), 0 0 60px rgba(0,212,255,.12);
-  --glow-sm:   0 0 12px rgba(0,212,255,.25);
+  --glow-acid: 0 0 20px rgba(200,255,0,.40), 0 0 60px rgba(200,255,0,.15);
+  --glow-sm:   0 0 14px rgba(200,255,0,.30);
 }
 
 [data-theme="dark"] {
@@ -43,12 +43,12 @@ a { color: inherit; text-decoration: none; }
   --red:       #FF453A;
   --green:     #00E676;
   --gold:      #FFD60A;
-  --accent:    #00D4FF;
-  --accent2:   #7B61FF;
+  --accent:    #C8FF00;
+  --accent2:   #E8FF00;
   --shadow:    0 2px 20px rgba(0,0,0,.60);
   --shadow-lg: 0 12px 60px rgba(0,0,0,.80);
-  --glow-cyan: 0 0 20px rgba(0,212,255,.40), 0 0 60px rgba(0,212,255,.15);
-  --glow-sm:   0 0 12px rgba(0,212,255,.30);
+  --glow-acid: 0 0 20px rgba(200,255,0,.45), 0 0 80px rgba(200,255,0,.18);
+  --glow-sm:   0 0 14px rgba(200,255,0,.35);
 }
 
 html {
@@ -1258,7 +1258,7 @@ html[data-theme="light"] nav:not(.bottom-nav) {
 /* ═══════════════════════════════════════════════════════════════════════════
    COLLECTORVAULT BETA — FUTURISTIC REDESIGN
    Inspired by: Awwwards SOTD, moodboard references, high-tech aesthetic
-   Palette: Electric cyan #00D4FF · Near-black #080808 · Pure white #F5F5F5
+   Palette: Electric cyan #C8FF00 · Near-black #080808 · Pure white #F5F5F5
    Type: Space Grotesk (display) + Space Mono (data/mono)
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -1270,13 +1270,13 @@ nav:not(.bottom-nav) {
   background: rgba(8,8,8,.92) !important;
   backdrop-filter: blur(24px) saturate(1.8) !important;
   -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
-  border-bottom: 1px solid rgba(0,212,255,.15) !important;
-  box-shadow: 0 1px 0 rgba(0,212,255,.08) !important;
+  border-bottom: 1px solid rgba(200,255,0,.15) !important;
+  box-shadow: 0 1px 0 rgba(200,255,0,.08) !important;
 }
 [data-theme="light"] nav:not(.bottom-nav) {
   background: rgba(255,255,255,.92) !important;
-  border-bottom: 1px solid rgba(0,212,255,.20) !important;
-  box-shadow: 0 1px 0 rgba(0,212,255,.10) !important;
+  border-bottom: 1px solid rgba(200,255,0,.20) !important;
+  box-shadow: 0 1px 0 rgba(200,255,0,.10) !important;
 }
 
 /* Nav logo — cyan glow */
@@ -1301,18 +1301,18 @@ nav:not(.bottom-nav) {
   text-transform: uppercase !important;
 }
 .nav-link.active {
-  background: rgba(0,212,255,.12) !important;
+  background: rgba(200,255,0,.12) !important;
   color: var(--accent) !important;
   border-radius: 4px !important;
 }
 
 /* Theme toggle — cyan ring */
 .theme-toggle {
-  border: 1px solid rgba(0,212,255,.25) !important;
-  background: rgba(0,212,255,.06) !important;
+  border: 1px solid rgba(200,255,0,.20) !important;
+  background: rgba(200,255,0,.06) !important;
 }
 .theme-toggle:hover {
-  border-color: rgba(0,212,255,.55) !important;
+  border-color: rgba(200,255,0,.55) !important;
   box-shadow: var(--glow-sm) !important;
 }
 
@@ -1323,7 +1323,7 @@ nav:not(.bottom-nav) {
 .glass-scene::before {
   background:
     linear-gradient(to bottom, rgba(0,10,20,.85) 0%, rgba(0,5,12,.30) 25%, transparent 50%),
-    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(0,212,255,.06) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at 85% 30%, rgba(200,255,0,.06) 0%, transparent 65%),
     radial-gradient(ellipse 70% 50% at 15% 70%, rgba(123,97,255,.05) 0%, transparent 65%),
     radial-gradient(ellipse 80% 40% at 50% 100%, rgba(0,0,0,.90) 0%, transparent 70%) !important;
 }
@@ -1338,15 +1338,15 @@ nav:not(.bottom-nav) {
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.08),
     0 8px 40px rgba(0,0,0,.60),
-    0 0 0 0 rgba(0,212,255,0) !important;
+    0 0 0 0 rgba(200,255,0,0) !important;
   transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease !important;
 }
 .glass-card:hover {
-  border-color: rgba(0,212,255,.30) !important;
+  border-color: rgba(200,255,0,.30) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.10),
     0 12px 48px rgba(0,0,0,.70),
-    0 0 30px rgba(0,212,255,.08) !important;
+    0 0 30px rgba(200,255,0,.08) !important;
   transform: translateY(-4px) !important;
 }
 
@@ -1372,8 +1372,8 @@ nav:not(.bottom-nav) {
   letter-spacing: .08em !important;
 }
 .card-arrow {
-  border: 1px solid rgba(0,212,255,.20) !important;
-  background: rgba(0,212,255,.06) !important;
+  border: 1px solid rgba(200,255,0,.20) !important;
+  background: rgba(200,255,0,.06) !important;
   color: var(--accent) !important;
   border-radius: 50% !important;
 }
@@ -1399,7 +1399,7 @@ nav:not(.bottom-nav) {
 }
 
 /* Dot indicators */
-.picker-dot { background: rgba(0,212,255,.20) !important; }
+.picker-dot { background: rgba(200,255,0,.20) !important; }
 .picker-dot.active {
   background: var(--accent) !important;
   box-shadow: var(--glow-sm) !important;
@@ -1409,7 +1409,7 @@ nav:not(.bottom-nav) {
 .hero {
   background: rgba(6,6,10,.60) !important;
   backdrop-filter: blur(24px) !important;
-  border-bottom: 1px solid rgba(0,212,255,.10) !important;
+  border-bottom: 1px solid rgba(200,255,0,.10) !important;
 }
 .hero-title {
   font-family: 'Space Grotesk', sans-serif !important;
@@ -1436,8 +1436,8 @@ nav:not(.bottom-nav) {
   transition: border-color .2s, box-shadow .2s !important;
 }
 .stat-card:hover {
-  border-color: rgba(0,212,255,.20) !important;
-  box-shadow: 0 0 24px rgba(0,212,255,.06) !important;
+  border-color: rgba(200,255,0,.20) !important;
+  box-shadow: 0 0 24px rgba(200,255,0,.06) !important;
 }
 .stat-n {
   font-family: 'Space Grotesk', sans-serif !important;
@@ -1450,8 +1450,8 @@ nav:not(.bottom-nav) {
 #sGainCard .stat-n {
   font-size: clamp(36px, 6vw, 60px) !important;
   font-weight: 200 !important;
-  color: var(--green) !important;
-  text-shadow: 0 0 30px rgba(0,230,118,.20) !important;
+  color: #C8FF00 !important;
+  text-shadow: 0 0 24px rgba(200,255,0,.30) !important;
 }
 #sGainCard { grid-column: span 2 !important; }
 @media (min-width: 540px) { #sGainCard { grid-column: span 1 !important; } }
@@ -1473,9 +1473,9 @@ nav:not(.bottom-nav) {
   border-radius: 4px !important;
 }
 .cat-tab.active {
-  background: rgba(0,212,255,.12) !important;
+  background: rgba(200,255,0,.12) !important;
   color: var(--accent) !important;
-  border-color: rgba(0,212,255,.25) !important;
+  border-color: rgba(200,255,0,.20) !important;
 }
 .ct-count {
   font-family: 'Space Mono', monospace !important;
@@ -1486,11 +1486,11 @@ nav:not(.bottom-nav) {
 .controls-bar {
   background: rgba(6,6,10,.82) !important;
   backdrop-filter: blur(20px) !important;
-  border-bottom: 1px solid rgba(0,212,255,.08) !important;
+  border-bottom: 1px solid rgba(200,255,0,.08) !important;
 }
 [data-theme="light"] .controls-bar {
   background: rgba(255,255,255,.90) !important;
-  border-bottom: 1px solid rgba(0,212,255,.12) !important;
+  border-bottom: 1px solid rgba(200,255,0,.12) !important;
 }
 .search-wrap input {
   font-family: 'Space Grotesk', sans-serif !important;
@@ -1501,8 +1501,8 @@ nav:not(.bottom-nav) {
   font-size: 12px !important;
 }
 .search-wrap input:focus {
-  border-color: rgba(0,212,255,.40) !important;
-  box-shadow: 0 0 0 3px rgba(0,212,255,.08) !important;
+  border-color: rgba(200,255,0,.40) !important;
+  box-shadow: 0 0 0 3px rgba(200,255,0,.08) !important;
   outline: none !important;
 }
 [data-theme="light"] .search-wrap input {
@@ -1521,7 +1521,7 @@ nav:not(.bottom-nav) {
 }
 .vt-btn { background: rgba(255,255,255,.04) !important; }
 .vt-btn.active {
-  background: rgba(0,212,255,.15) !important;
+  background: rgba(200,255,0,.15) !important;
   color: var(--accent) !important;
 }
 
@@ -1534,8 +1534,8 @@ nav:not(.bottom-nav) {
   transition: border-color .25s, box-shadow .25s, transform .25s !important;
 }
 .item-card:hover {
-  border-color: rgba(0,212,255,.25) !important;
-  box-shadow: 0 8px 40px rgba(0,0,0,.50), 0 0 20px rgba(0,212,255,.06) !important;
+  border-color: rgba(200,255,0,.20) !important;
+  box-shadow: 0 8px 40px rgba(0,0,0,.50), 0 0 20px rgba(200,255,0,.06) !important;
   transform: translateY(-2px) !important;
 }
 
@@ -1567,9 +1567,9 @@ nav:not(.bottom-nav) {
   font-family: 'Space Mono', monospace !important;
   font-size: 7px !important;
   letter-spacing: .10em !important;
-  background: rgba(0,212,255,.10) !important;
+  background: rgba(200,255,0,.10) !important;
   color: var(--accent) !important;
-  border: 1px solid rgba(0,212,255,.20) !important;
+  border: 1px solid rgba(200,255,0,.20) !important;
   border-radius: 3px !important;
 }
 .ic-value {
@@ -1590,12 +1590,12 @@ nav:not(.bottom-nav) {
 /* ── Scanner left panel ──────────────────────────────────────────────────── */
 .left {
   background: rgba(6,6,10,.82) !important;
-  border-right: 1px solid rgba(0,212,255,.08) !important;
-  border-bottom: 1px solid rgba(0,212,255,.08) !important;
+  border-right: 1px solid rgba(200,255,0,.08) !important;
+  border-bottom: 1px solid rgba(200,255,0,.08) !important;
 }
 [data-theme="light"] .left {
   background: rgba(255,255,255,.90) !important;
-  border-right: 1px solid rgba(0,212,255,.12) !important;
+  border-right: 1px solid rgba(200,255,0,.12) !important;
 }
 
 /* Form labels */
@@ -1625,21 +1625,21 @@ nav:not(.bottom-nav) {
   color: #080808 !important;
 }
 .fg input:focus, .fg select:focus {
-  border-color: rgba(0,212,255,.40) !important;
-  box-shadow: 0 0 0 3px rgba(0,212,255,.08) !important;
+  border-color: rgba(200,255,0,.40) !important;
+  box-shadow: 0 0 0 3px rgba(200,255,0,.08) !important;
   outline: none !important;
 }
 
 /* Dropzone */
 .dropzone {
-  background: rgba(0,212,255,.02) !important;
-  border: 1.5px dashed rgba(0,212,255,.20) !important;
+  background: rgba(200,255,0,.02) !important;
+  border: 1.5px dashed rgba(200,255,0,.20) !important;
   border-radius: 8px !important;
   transition: all .2s !important;
 }
 .dropzone:hover {
-  background: rgba(0,212,255,.05) !important;
-  border-color: rgba(0,212,255,.45) !important;
+  background: rgba(200,255,0,.05) !important;
+  border-color: rgba(200,255,0,.45) !important;
   box-shadow: var(--glow-sm) !important;
 }
 .dz-title {
@@ -1670,7 +1670,7 @@ nav:not(.bottom-nav) {
   transition: box-shadow .2s, transform .15s !important;
 }
 .btn-save:hover {
-  box-shadow: var(--glow-cyan) !important;
+  box-shadow: var(--glow-acid) !important;
   transform: translateY(-1px) !important;
 }
 
@@ -1678,13 +1678,13 @@ nav:not(.bottom-nav) {
 .scan-btn, .btn-primary {
   font-family: 'Space Grotesk', sans-serif !important;
   font-weight: 600 !important;
-  background: rgba(0,212,255,.12) !important;
-  border: 1px solid rgba(0,212,255,.30) !important;
+  background: rgba(200,255,0,.12) !important;
+  border: 1px solid rgba(200,255,0,.30) !important;
   color: var(--accent) !important;
   border-radius: 5px !important;
 }
 .scan-btn:hover, .btn-primary:hover {
-  background: rgba(0,212,255,.20) !important;
+  background: rgba(200,255,0,.20) !important;
   box-shadow: var(--glow-sm) !important;
 }
 
@@ -1705,7 +1705,7 @@ nav:not(.bottom-nav) {
   transition: border-color .2s !important;
 }
 .recent-card:hover {
-  border-color: rgba(0,212,255,.20) !important;
+  border-color: rgba(200,255,0,.20) !important;
 }
 .rc-name {
   font-family: 'Space Grotesk', sans-serif !important;
@@ -1728,20 +1728,20 @@ nav:not(.bottom-nav) {
 .rc-tag {
   font-family: 'Space Mono', monospace !important;
   font-size: 7px !important;
-  background: rgba(0,212,255,.08) !important;
-  border-color: rgba(0,212,255,.15) !important;
+  background: rgba(200,255,0,.08) !important;
+  border-color: rgba(200,255,0,.15) !important;
   color: var(--accent) !important;
 }
 
 /* ── Bottom nav ──────────────────────────────────────────────────────────── */
 .bottom-nav {
   background: rgba(6,6,10,.95) !important;
-  border-top: 1px solid rgba(0,212,255,.10) !important;
+  border-top: 1px solid rgba(200,255,0,.10) !important;
   backdrop-filter: blur(24px) !important;
 }
 [data-theme="light"] .bottom-nav {
   background: rgba(255,255,255,.96) !important;
-  border-top: 1px solid rgba(0,212,255,.15) !important;
+  border-top: 1px solid rgba(200,255,0,.15) !important;
 }
 .bn-item.active svg { stroke: var(--accent) !important; }
 .bn-item.active .bn-label {
@@ -1753,15 +1753,15 @@ nav:not(.bottom-nav) {
 .fab {
   background: var(--accent) !important;
   color: #080808 !important;
-  box-shadow: var(--glow-cyan) !important;
+  box-shadow: var(--glow-acid) !important;
   border-radius: 50% !important;
 }
-.fab:hover { box-shadow: 0 0 30px rgba(0,212,255,.55), 0 0 80px rgba(0,212,255,.20) !important; }
+.fab:hover { box-shadow: 0 0 30px rgba(200,255,0,.55), 0 0 80px rgba(200,255,0,.20) !important; }
 
 /* ── Modal ───────────────────────────────────────────────────────────────── */
 .modal-sheet, .modal-inner {
   background: rgba(8,8,12,.96) !important;
-  border: 1px solid rgba(0,212,255,.12) !important;
+  border: 1px solid rgba(200,255,0,.12) !important;
   backdrop-filter: blur(32px) !important;
 }
 .modal-title {
@@ -1782,23 +1782,23 @@ nav:not(.bottom-nav) {
   font-size: 8px !important;
   letter-spacing: .06em !important;
   background: rgba(6,6,10,.80) !important;
-  border-bottom: 1px solid rgba(0,212,255,.08) !important;
+  border-bottom: 1px solid rgba(200,255,0,.08) !important;
   color: rgba(245,245,245,.30) !important;
 }
 
 /* ── Toasts ──────────────────────────────────────────────────────────────── */
 .toast {
   font-family: 'Space Grotesk', sans-serif !important;
-  background: rgba(0,212,255,.12) !important;
-  border: 1px solid rgba(0,212,255,.30) !important;
+  background: rgba(200,255,0,.12) !important;
+  border: 1px solid rgba(200,255,0,.30) !important;
   color: var(--accent) !important;
   backdrop-filter: blur(20px) !important;
 }
 
 /* ── ID Block (AI result) ────────────────────────────────────────────────── */
 .id-block {
-  background: rgba(0,212,255,.04) !important;
-  border: 1px solid rgba(0,212,255,.15) !important;
+  background: rgba(200,255,0,.04) !important;
+  border: 1px solid rgba(200,255,0,.15) !important;
   border-radius: 6px !important;
 }
 .id-name {
@@ -1816,13 +1816,564 @@ nav:not(.bottom-nav) {
 ::-webkit-scrollbar { width: 3px; height: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0,212,255,.25);
+  background: rgba(200,255,0,.20);
   border-radius: 3px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(0,212,255,.50); }
+::-webkit-scrollbar-thumb:hover { background: rgba(200,255,0,.45); }
 
 /* ── Selection ───────────────────────────────────────────────────────────── */
 ::selection {
-  background: rgba(0,212,255,.25);
+  background: rgba(200,255,0,.20);
   color: #F5F5F5;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BETA DASHBOARD LAYOUT — Car instrument cluster inspired
+   Reference: Hyundai/Tesla/ADAS HMI aesthetic
+   Accent: Acid yellow-green #C8FF00
+   Base: Deep dark #080808 with star-field noise texture
+   Type: Space Grotesk (numerals) + Space Mono (labels)
+   Language: Horizontal zones, sharp edges, large data, tiny labels
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Star-field noise texture on body ───────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 400px 400px;
+  opacity: 0.022;
+  pointer-events: none;
+}
+
+/* ── Acid edge strip on nav ─────────────────────────────────────────────── */
+nav:not(.bottom-nav)::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(200,255,0,.15) 20%,
+    rgba(200,255,0,.60) 50%,
+    rgba(200,255,0,.15) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* ── Nav — instrument panel top bar ─────────────────────────────────────── */
+nav:not(.bottom-nav) {
+  background: rgba(6,6,8,.98) !important;
+  border-bottom: 1px solid rgba(200,255,0,.08) !important;
+  box-shadow: none !important;
+}
+.nav-logo em { color: #C8FF00 !important; }
+
+/* ── Collection hero — dashboard instrument cluster ─────────────────────── */
+.hero {
+  background: rgba(6,6,8,.95) !important;
+  border-bottom: 1px solid rgba(200,255,0,.10) !important;
+  padding: 0 !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,255,0,.30) 50%, transparent);
+}
+.hero-inner {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  padding: 0 !important;
+}
+@media (min-width: 640px) {
+  .hero-inner {
+    grid-template-columns: auto 1fr auto auto !important;
+    align-items: stretch !important;
+  }
+}
+
+/* Hero label */
+.hero-label {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+  letter-spacing: .28em !important;
+  color: #C8FF00 !important;
+  text-transform: uppercase !important;
+  opacity: .70 !important;
+}
+
+/* Hero title */
+.hero-title {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: clamp(28px, 4vw, 42px) !important;
+  font-weight: 700 !important;
+  letter-spacing: -.03em !important;
+  color: #F5F5F5 !important;
+  line-height: 1.0 !important;
+}
+
+/* ── Stat cards — instrument cluster readouts ────────────────────────────── */
+.stats-bento {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 1px !important;
+  background: rgba(200,255,0,.06) !important;
+  border: 1px solid rgba(200,255,0,.06) !important;
+  border-radius: 0 !important;
+}
+@media (min-width: 640px) {
+  .stats-bento {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  #sGainCard { grid-column: span 1 !important; }
+}
+.stat-card {
+  background: rgba(6,6,8,.96) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 20px 18px 16px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: background .2s !important;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: rgba(200,255,0,.12);
+}
+.stat-card:hover { background: rgba(10,10,14,.96) !important; }
+
+.stat-n {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: clamp(36px, 5vw, 58px) !important;
+  font-weight: 200 !important;
+  letter-spacing: -.04em !important;
+  line-height: 1 !important;
+  color: #F5F5F5 !important;
+}
+#sGainCard { grid-column: span 2 !important; }
+#sGainCard .stat-n {
+  font-size: clamp(42px, 6vw, 68px) !important;
+  font-weight: 100 !important;
+  color: #C8FF00 !important;
+  text-shadow: 0 0 40px rgba(200,255,0,.25) !important;
+}
+.stat-l {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+  letter-spacing: .22em !important;
+  color: rgba(245,245,245,.25) !important;
+  margin-top: 10px !important;
+  text-transform: uppercase !important;
+  display: block !important;
+}
+
+/* ── Category tabs — instrument mode selector ───────────────────────────── */
+.cat-tabs {
+  background: rgba(6,6,8,.96) !important;
+  border-bottom: 1px solid rgba(200,255,0,.08) !important;
+  gap: 0 !important;
+}
+.cat-tab {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .14em !important;
+  border-radius: 0 !important;
+  border-right: 1px solid rgba(200,255,0,.06) !important;
+  padding: 10px 14px !important;
+}
+.cat-tab.active {
+  background: rgba(200,255,0,.08) !important;
+  color: #C8FF00 !important;
+  border-bottom: 1px solid #C8FF00 !important;
+  border-color: rgba(200,255,0,.08) !important;
+  box-shadow: 0 4px 16px rgba(200,255,0,.08) !important;
+}
+.ct-count {
+  background: rgba(200,255,0,.12) !important;
+  color: #C8FF00 !important;
+  font-family: 'Space Mono', monospace !important;
+}
+
+/* ── Controls bar — panel toolbar ───────────────────────────────────────── */
+.controls-bar {
+  background: rgba(6,6,8,.96) !important;
+  border-bottom: 1px solid rgba(200,255,0,.06) !important;
+  border-radius: 0 !important;
+}
+.search-wrap input {
+  background: rgba(200,255,0,.03) !important;
+  border: 1px solid rgba(200,255,0,.10) !important;
+  border-radius: 2px !important;
+  color: #F5F5F5 !important;
+  font-family: 'Space Mono', monospace !important;
+  font-size: 10px !important;
+  letter-spacing: .04em !important;
+}
+.search-wrap input::placeholder { color: rgba(245,245,245,.18) !important; }
+.search-wrap input:focus {
+  border-color: rgba(200,255,0,.40) !important;
+  box-shadow: 0 0 0 2px rgba(200,255,0,.08) !important;
+}
+.sort-select {
+  background: rgba(200,255,0,.03) !important;
+  border: 1px solid rgba(200,255,0,.10) !important;
+  border-radius: 2px !important;
+  color: rgba(245,245,245,.60) !important;
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+}
+.vt-btn {
+  background: rgba(200,255,0,.03) !important;
+  border-color: rgba(200,255,0,.08) !important;
+  border-radius: 2px !important;
+}
+.vt-btn.active {
+  background: rgba(200,255,0,.12) !important;
+  color: #C8FF00 !important;
+}
+
+/* ── Collection item cards — data panel readout ─────────────────────────── */
+.item-card {
+  background: rgba(8,8,12,.96) !important;
+  border: 1px solid rgba(255,255,255,.06) !important;
+  border-radius: 2px !important;
+  transition: border-color .2s, box-shadow .2s !important;
+  overflow: hidden !important;
+}
+.item-card:hover {
+  border-color: rgba(200,255,0,.25) !important;
+  box-shadow: 0 0 20px rgba(200,255,0,.06),
+              0 8px 32px rgba(0,0,0,.60) !important;
+}
+.ic-index {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .12em !important;
+  color: #C8FF00 !important;
+  opacity: .50 !important;
+}
+.ic-name {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: -.01em !important;
+  color: #F5F5F5 !important;
+}
+.ic-sub {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  color: rgba(245,245,245,.35) !important;
+  letter-spacing: .04em !important;
+}
+.ic-cat-badge {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+  letter-spacing: .10em !important;
+  background: rgba(200,255,0,.08) !important;
+  color: #C8FF00 !important;
+  border: 1px solid rgba(200,255,0,.18) !important;
+  border-radius: 1px !important;
+}
+.ic-value {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #F5F5F5 !important;
+  letter-spacing: -.01em !important;
+}
+.ic-change.up {
+  color: #C8FF00 !important;
+  text-shadow: 0 0 10px rgba(200,255,0,.35) !important;
+}
+.ic-change.down { color: rgba(255,67,58,1) !important; }
+
+/* ── Scanner left panel — instrument input zone ─────────────────────────── */
+.left {
+  background: rgba(6,6,8,.96) !important;
+  border-right: 1px solid rgba(200,255,0,.08) !important;
+  border-bottom: 1px solid rgba(200,255,0,.06) !important;
+  border-radius: 0 !important;
+}
+.fg label {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+  letter-spacing: .20em !important;
+  color: rgba(200,255,0,.50) !important;
+  text-transform: uppercase !important;
+}
+.fg input, .fg select, .pi-wrap input {
+  font-family: 'Space Mono', monospace !important;
+  background: rgba(200,255,0,.02) !important;
+  border: 1px solid rgba(200,255,0,.10) !important;
+  border-radius: 2px !important;
+  color: #F5F5F5 !important;
+  font-size: 11px !important;
+  letter-spacing: .02em !important;
+}
+.fg input:focus, .fg select:focus {
+  border-color: rgba(200,255,0,.40) !important;
+  box-shadow: 0 0 0 2px rgba(200,255,0,.08) !important;
+}
+.fg input::placeholder { color: rgba(245,245,245,.18) !important; }
+
+/* Dropzone */
+.dropzone {
+  background: rgba(200,255,0,.02) !important;
+  border: 1.5px dashed rgba(200,255,0,.18) !important;
+  border-radius: 4px !important;
+}
+.dropzone:hover {
+  background: rgba(200,255,0,.05) !important;
+  border-color: rgba(200,255,0,.45) !important;
+  box-shadow: 0 0 20px rgba(200,255,0,.08) !important;
+}
+.dz-title {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 600 !important;
+  color: rgba(245,245,245,.75) !important;
+}
+.dz-sub {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 9px !important;
+  color: rgba(245,245,245,.25) !important;
+  letter-spacing: .06em !important;
+}
+
+/* Save button — acid yellow CTA */
+.btn-save {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  letter-spacing: .10em !important;
+  text-transform: uppercase !important;
+  background: #C8FF00 !important;
+  color: #080808 !important;
+  border: none !important;
+  border-radius: 2px !important;
+  box-shadow: 0 0 20px rgba(200,255,0,.25) !important;
+}
+.btn-save:hover {
+  box-shadow: 0 0 32px rgba(200,255,0,.45) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── Recent cards ────────────────────────────────────────────────────────── */
+.recent-card {
+  background: rgba(8,8,12,.96) !important;
+  border: 1px solid rgba(255,255,255,.05) !important;
+  border-radius: 2px !important;
+}
+.recent-card:hover { border-color: rgba(200,255,0,.20) !important; }
+.rc-cat {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+  letter-spacing: .12em !important;
+  color: #C8FF00 !important;
+}
+.rc-name {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 600 !important;
+  color: #F5F5F5 !important;
+}
+.rc-val {
+  font-family: 'Space Mono', monospace !important;
+  font-weight: 700 !important;
+  color: #F5F5F5 !important;
+}
+.rc-tag {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 7px !important;
+  background: rgba(200,255,0,.06) !important;
+  border-color: rgba(200,255,0,.14) !important;
+  color: #C8FF00 !important;
+  border-radius: 1px !important;
+}
+
+/* ── Bottom nav ──────────────────────────────────────────────────────────── */
+.bottom-nav {
+  background: rgba(4,4,6,.98) !important;
+  border-top: 1px solid rgba(200,255,0,.10) !important;
+}
+.bn-item.active { color: #C8FF00 !important; }
+.bn-item.active::before { background: #C8FF00 !important; }
+.bn-item.active svg { stroke: #C8FF00 !important; }
+
+/* ── FAB — acid glow ─────────────────────────────────────────────────────── */
+.fab {
+  background: #C8FF00 !important;
+  color: #080808 !important;
+  border-radius: 2px !important;
+  box-shadow: 0 0 24px rgba(200,255,0,.35) !important;
+}
+.fab:hover {
+  box-shadow: 0 0 40px rgba(200,255,0,.55),
+              0 0 80px rgba(200,255,0,.20) !important;
+}
+
+/* ── Modal ───────────────────────────────────────────────────────────────── */
+.modal-sheet, .modal-inner {
+  background: rgba(6,6,8,.98) !important;
+  border: 1px solid rgba(200,255,0,.12) !important;
+  border-radius: 4px !important;
+  backdrop-filter: blur(32px) !important;
+}
+.modal-title {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: -.02em !important;
+}
+.modal-price {
+  font-family: 'Space Mono', monospace !important;
+  font-weight: 700 !important;
+  color: #C8FF00 !important;
+  text-shadow: 0 0 16px rgba(200,255,0,.30) !important;
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+#toast {
+  font-family: 'Space Mono', monospace !important;
+  background: rgba(200,255,0,.10) !important;
+  border: 1px solid rgba(200,255,0,.25) !important;
+  color: #C8FF00 !important;
+  border-radius: 2px !important;
+  letter-spacing: .06em !important;
+}
+
+/* ── ID Block (AI scan result) ───────────────────────────────────────────── */
+.id-block {
+  background: rgba(200,255,0,.03) !important;
+  border: 1px solid rgba(200,255,0,.14) !important;
+  border-radius: 2px !important;
+}
+.id-name {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 700 !important;
+  color: #F5F5F5 !important;
+}
+.id-meta {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 9px !important;
+  color: rgba(245,245,245,.38) !important;
+  letter-spacing: .04em !important;
+}
+
+/* ── Picker cards — instrument zone panels ───────────────────────────────── */
+.glass-card {
+  border-radius: 4px !important;
+  border: 1px solid rgba(255,255,255,.06) !important;
+  background: rgba(8,8,12,.80) !important;
+  transition: border-color .25s, box-shadow .25s, transform .25s !important;
+}
+.glass-card:hover {
+  border-color: rgba(200,255,0,.30) !important;
+  box-shadow: 0 0 30px rgba(200,255,0,.08),
+              0 12px 48px rgba(0,0,0,.70) !important;
+  transform: translateY(-3px) !important;
+}
+.card-num {
+  font-family: 'Space Mono', monospace !important;
+  color: #C8FF00 !important;
+  font-size: 9px !important;
+}
+.card-foot {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  color: #F5F5F5 !important;
+  letter-spacing: -.01em !important;
+}
+.card-subs {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  color: rgba(245,245,245,.30) !important;
+  letter-spacing: .06em !important;
+}
+.card-arrow {
+  background: rgba(200,255,0,.08) !important;
+  border: 1px solid rgba(200,255,0,.20) !important;
+  color: #C8FF00 !important;
+  border-radius: 50% !important;
+}
+
+/* ── Picker eyebrow ──────────────────────────────────────────────────────── */
+.picker-eyebrow {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 9px !important;
+  letter-spacing: .22em !important;
+  color: #C8FF00 !important;
+  text-shadow: 0 0 16px rgba(200,255,0,.40) !important;
+}
+.picker-eyebrow-icon svg { stroke: #C8FF00 !important; }
+.picker-hero-right {
+  font-family: 'Space Grotesk', sans-serif !important;
+  font-size: 13px !important;
+  color: rgba(245,245,245,.60) !important;
+  line-height: 1.7 !important;
+}
+.picker-hero-right strong {
+  color: rgba(245,245,245,.90) !important;
+  font-weight: 600 !important;
+}
+.picker-dot { background: rgba(200,255,0,.18) !important; }
+.picker-dot.active {
+  background: #C8FF00 !important;
+  box-shadow: 0 0 10px rgba(200,255,0,.50) !important;
+}
+
+/* ── Glass scene atmosphere ──────────────────────────────────────────────── */
+.glass-scene {
+  background: #040406 !important;
+}
+.glass-scene::before {
+  background:
+    linear-gradient(to bottom, rgba(0,8,0,.75) 0%, rgba(0,4,0,.20) 20%, transparent 45%),
+    radial-gradient(ellipse 70% 40% at 80% 20%, rgba(200,255,0,.04) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 40% at 20% 80%, rgba(200,255,0,.03) 0%, transparent 65%),
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(0,0,0,.92) 0%, transparent 70%) !important;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 2px; height: 2px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(200,255,0,.20);
+  border-radius: 1px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(200,255,0,.45); }
+
+/* ── Selection ───────────────────────────────────────────────────────────── */
+::selection {
+  background: rgba(200,255,0,.18);
+  color: #080808;
+}
+
+/* ── Refresh bar ─────────────────────────────────────────────────────────── */
+.refresh-bar {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 8px !important;
+  letter-spacing: .08em !important;
+  background: rgba(6,6,8,.96) !important;
+  border-bottom: 1px solid rgba(200,255,0,.06) !important;
+  color: rgba(245,245,245,.25) !important;
+}
+
+/* ── Light mode overrides — keep dashboard feel ──────────────────────────── */
+[data-theme="light"] .stat-card { background: rgba(248,248,248,.98) !important; }
+[data-theme="light"] .stat-n { color: #080808 !important; }
+[data-theme="light"] #sGainCard .stat-n { color: #2A7A00 !important; }
+[data-theme="light"] .stat-l { color: rgba(8,8,8,.35) !important; }
+[data-theme="light"] .item-card { background: rgba(252,252,252,.98) !important; border-color: rgba(0,0,0,.08) !important; }
+[data-theme="light"] .ic-name { color: #080808 !important; }
+[data-theme="light"] .left { background: rgba(250,250,250,.96) !important; }
+[data-theme="light"] .fg label { color: rgba(100,120,0,.70) !important; }
+[data-theme="light"] .fg input, [data-theme="light"] .fg select { color: #080808 !important; background: rgba(200,255,0,.04) !important; }
