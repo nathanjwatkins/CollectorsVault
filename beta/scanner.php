@@ -391,6 +391,21 @@ html[data-theme="dark"] .left {
 </style>
 </head>
 <body class="picker-open">
+<script>
+window.onerror = function(msg, src, line, col, err) {
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;top:60px;left:0;right:0;background:#c13528;color:#fff;padding:12px 16px;font-family:monospace;font-size:11px;z-index:9999;white-space:pre-wrap;word-break:break-all';
+  d.textContent = 'JS ERROR: ' + msg + '\nFile: ' + src + '\nLine: ' + line + ':' + col;
+  document.body.appendChild(d);
+  return false;
+};
+window.addEventListener('unhandledrejection', function(e) {
+  var d = document.createElement('div');
+  d.style.cssText = 'position:fixed;top:60px;left:0;right:0;background:#c13528;color:#fff;padding:12px 16px;font-family:monospace;font-size:11px;z-index:9999;word-break:break-all';
+  d.textContent = 'PROMISE ERROR: ' + (e.reason?.message || e.reason || 'unknown');
+  document.body.appendChild(d);
+});
+</script>
 <?php include 'nav.php'; ?>
 
 <!-- ── CATEGORY PICKER — glassmorphism carousel ─────────────────────────── -->
