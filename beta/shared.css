@@ -1245,141 +1245,191 @@ html[data-theme="light"] nav:not(.bottom-nav) {
 [data-theme="light"] .right-hdr { border-bottom: 1px solid rgba(0,0,0,.08) !important; }
 [data-theme="light"] .right-title { color: #141414 !important; }
 
+
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   COLLECTORVAULT BETA — Moodboard-driven design upgrades
+   BETA — 1. DOMINANT STAT NUMBERS
+   Dashboard metric treatment — numbers are the hero, labels are captions.
    ═══════════════════════════════════════════════════════════════════════════ */
-
-/* ── 1. Dot grid texture — technical/data aesthetic ─────────────────────── */
-/* Applied to stat cards and scanner left panel */
-.stats-bento,
-.left {
-  background-image: radial-gradient(
-    circle, rgba(255,255,255,.12) 1px, transparent 1px
-  ) !important;
-  background-size: 24px 24px !important;
-  background-position: 0 0 !important;
-}
-[data-theme="light"] .stats-bento,
-[data-theme="light"] .left {
-  background-image: radial-gradient(
-    circle, rgba(0,0,0,.07) 1px, transparent 1px
-  ) !important;
-  background-size: 24px 24px !important;
-}
-/* Ensure the glass backdrop still renders on .left */
-.left {
-  background-color: rgba(12,12,12,.78) !important;
-}
-[data-theme="light"] .left {
-  background-color: rgba(255,255,255,.65) !important;
-}
-
-/* ── 2. Dominant stat numbers — dashboard metric treatment ──────────────── */
 .stat-n {
-  font-size: clamp(36px, 5vw, 56px) !important;
-  font-weight: 300 !important;
-  letter-spacing: -.03em !important;
-  line-height: 1 !important;
+  font-size: clamp(38px, 6vw, 60px);
+  font-weight: 300;
+  letter-spacing: -.035em;
+  line-height: 1;
+  display: block;
+  color: #F5F5F5;
 }
-/* Gain/loss card — make it the hero stat */
+.stat-l {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(245,245,245,.35);
+  margin-top: 10px;
+  display: block;
+}
+.stat-card {
+  padding: 20px 18px 16px;
+  position: relative;
+  overflow: hidden;
+}
+/* Gain/loss card spans full width on mobile for maximum impact */
 #sGainCard {
   grid-column: span 2;
 }
 #sGainCard .stat-n {
-  font-size: clamp(42px, 6vw, 68px) !important;
+  font-size: clamp(44px, 7vw, 72px);
+  font-weight: 200;
 }
 @media (min-width: 540px) {
-  #sGainCard {
-    grid-column: span 1;
-  }
+  #sGainCard { grid-column: span 1; }
+}
+[data-theme="light"] .stat-n { color: #141414; }
+[data-theme="light"] .stat-l { color: rgba(20,20,20,.40); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BETA — 2. DOT GRID TEXTURE
+   Technical data aesthetic on stat cards and scanner left panel.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.stats-bento::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.10) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+  z-index: 0;
+}
+.stats-bento {
+  position: relative;
+}
+.stat-card {
+  position: relative;
+  z-index: 1;
+}
+/* Dot grid on scanner left panel */
+.left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 0;
+}
+.left {
+  position: relative;
+}
+.left > * {
+  position: relative;
+  z-index: 1;
+}
+[data-theme="light"] .stats-bento::before {
+  background-image: radial-gradient(circle, rgba(0,0,0,.07) 1px, transparent 1px);
+}
+[data-theme="light"] .left::before {
+  background-image: radial-gradient(circle, rgba(0,0,0,.06) 1px, transparent 1px);
 }
 
-/* ── 3. Hero title — larger, more editorial ─────────────────────────────── */
-.hero-title {
-  font-size: clamp(32px, 5vw, 52px) !important;
-  font-weight: 500 !important;
-  letter-spacing: -.04em !important;
-  line-height: 1.0 !important;
-}
-.hero-label {
-  font-size: 9px !important;
-  letter-spacing: .18em !important;
-}
-
-/* ── 4. Collection item cards — sequential index number ─────────────────── */
-/* The index number is injected via JS below — this styles it */
+/* ═══════════════════════════════════════════════════════════════════════════
+   BETA — 3. SEQUENTIAL INDEX NUMBERS
+   Editorial catalogued aesthetic — each item numbered in the vault.
+   ═══════════════════════════════════════════════════════════════════════════ */
 .ic-index {
   position: absolute;
   top: 10px;
-  left: 10px;
+  left: 11px;
   font-family: var(--font-mono);
   font-size: 9px;
-  letter-spacing: .08em;
-  color: rgba(245,245,245,.45);
-  z-index: 5;
+  letter-spacing: .10em;
+  color: rgba(245,245,245,.50);
+  z-index: 6;
   line-height: 1;
   pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0,0,0,.40);
 }
-.item-card {
-  position: relative;
-}
+.item-card { position: relative; }
 
-/* ── 5. Nav wordmark — slightly larger, more presence ───────────────────── */
-.nav-logo {
-  font-size: 13px !important;
-  letter-spacing: .06em !important;
-}
-
-/* ── 6. Picker card foot — mono label refinement ────────────────────────── */
-.card-foot {
-  letter-spacing: .06em !important;
-}
-.card-subs {
-  font-size: 9px !important;
-  letter-spacing: .04em !important;
-  opacity: .55 !important;
-}
-
-/* ── 7. Price/value — stronger weight contrast ──────────────────────────── */
-.ic-price {
-  font-size: 13px !important;
+/* ═══════════════════════════════════════════════════════════════════════════
+   BETA — 4. DISPLAY TYPOGRAPHY
+   Hero headings larger and more editorial. Weight contrast sharpened.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.hero-title {
+  font-size: clamp(34px, 5.5vw, 56px) !important;
   font-weight: 500 !important;
-  letter-spacing: -.01em !important;
+  letter-spacing: -.04em !important;
+  line-height: 1.0 !important;
+  color: #F5F5F5 !important;
 }
+.hero-label {
+  font-size: 9px !important;
+  letter-spacing: .20em !important;
+  color: rgba(245,245,245,.35) !important;
+  margin-bottom: 8px !important;
+}
+[data-theme="light"] .hero-title { color: #141414 !important; }
+[data-theme="light"] .hero-label { color: rgba(20,20,20,.40) !important; }
 
-/* ── 8. Scanner eyebrow — larger, more impact ───────────────────────────── */
+/* Scanner eyebrow — more presence */
 .picker-eyebrow {
   font-size: 11px !important;
-  letter-spacing: .16em !important;
+  letter-spacing: .18em !important;
 }
 .picker-hero-right {
   font-size: 12px !important;
-  line-height: 1.6 !important;
+  line-height: 1.65 !important;
 }
 .picker-hero-right strong {
+  font-weight: 600 !important;
+}
+
+/* Nav logotype */
+.nav-logo {
   font-size: 13px !important;
+  letter-spacing: .08em !important;
 }
 
-/* ── 9. Stat card dot grid container refinement ─────────────────────────── */
-.stats-bento {
-  gap: 10px !important;
+/* ═══════════════════════════════════════════════════════════════════════════
+   BETA — 5. PRICE / VALUE HIERARCHY
+   Stronger weight contrast on item cards. Value is the data point.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.ic-value {
+  font-family: var(--font-mono) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: -.01em !important;
+  color: #F5F5F5 !important;
 }
-.stat-card {
-  padding: 18px 16px 14px !important;
-  position: relative !important;
-  overflow: hidden !important;
+.ic-name {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: -.01em !important;
+  line-height: 1.25 !important;
 }
-/* Mono label refinement */
-.stat-l {
-  font-size: 7px !important;
-  letter-spacing: .16em !important;
+.ic-sub {
+  font-size: 10px !important;
+  opacity: .55 !important;
+  letter-spacing: .02em !important;
+  margin-top: 2px !important;
+}
+/* eBay price — secondary, clearly subordinate */
+.ic-foot {
   margin-top: 8px !important;
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 8px !important;
 }
-
-/* ── 10. Collection grid — slightly larger cards on desktop ─────────────── */
-@media (min-width: 640px) {
-  .items-grid.grid-view {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
-    gap: 14px !important;
-  }
+/* Price badge refinement */
+.price-badge {
+  font-size: 8px !important;
+  letter-spacing: .06em !important;
+  padding: 2px 5px !important;
+  border-radius: 3px !important;
+  font-family: var(--font-mono) !important;
+}
+/* Stat card value labels — gold treatment */
+.rc-val {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: -.01em !important;
 }
