@@ -20,7 +20,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=beta1776989231
+<link rel="stylesheet" href="shared.css?v=beta1776989504
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
@@ -787,7 +787,7 @@ function showError(msg){const el=document.getElementById('errorBox');el.textCont
 
 async function loadRecent(){
   try{
-    const r=await fetch('api.php?action=collection&category=all',{credentials:'same-origin'});
+    const r=await fetch('/beta/api.php?action=collection&category=all',{credentials:'same-origin'});
     const d=await r.json();if(!d.ok)return;
     renderRecent(d.items.slice(0,12));
   }catch(e){}
@@ -861,7 +861,7 @@ function openRecentModal(item){
 
 async function loadPills(){
   try{
-    const r=await fetch('api.php?action=stats',{credentials:'same-origin'});
+    const r=await fetch('/beta/api.php?action=stats',{credentials:'same-origin'});
     const d=await r.json();if(!d.ok)return;
     Object.entries(d.stats.by_cat||{}).forEach(([cat,n])=>{
       const pill=document.getElementById('pill-'+cat);if(pill)pill.textContent=n;

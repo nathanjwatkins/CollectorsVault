@@ -20,7 +20,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=beta1776989231
+<link rel="stylesheet" href="shared.css?v=beta1776989504
 <style>
 /* ── HERO ──────────────────────────────────────────────────────────────────── */
 .hero {
@@ -1019,8 +1019,8 @@ renderSkeletons(); loadAll(); loadStats();
 async function loadAll() {
   try {
     const [cr, pr] = await Promise.all([
-      fetch('api.php?action=collection&category=all', {credentials:'same-origin'}),
-      fetch('api.php?action=getPrices', {credentials:'same-origin'})
+      fetch('/beta/api.php?action=collection&category=all', {credentials:'same-origin'}),
+      fetch('/beta/api.php?action=getPrices', {credentials:'same-origin'})
     ]);
     const col = await cr.json(), price = await pr.json();
     if (!col.ok) throw new Error(col.error||'Load failed');
@@ -1037,7 +1037,7 @@ async function loadAll() {
 
 async function loadStats() {
   try {
-    const r = await fetch('api.php?action=stats',{credentials:'same-origin'});
+    const r = await fetch('/beta/api.php?action=stats',{credentials:'same-origin'});
     const d = await r.json(); if (!d.ok) return;
     const s = d.stats;
     ['sTotal','sInvested','sValue','sGain'].forEach(id=>{
@@ -1206,7 +1206,7 @@ async function loadImagesForVisible(){
 async function loadImg(id,query,cat,fallback){
   const wrap=document.getElementById('iw-'+id);
   try{
-    const resp=await fetch('api.php?'+new URLSearchParams({action:'getImage',id,query,cat}),{credentials:'same-origin'});
+    const resp=await fetch('/beta/api.php?'+new URLSearchParams({action:'getImage',id,query,cat}),{credentials:'same-origin'});
     const data=await resp.json();
     const src=(data.ok&&data.url)?data.url:(fallback||null);
     if(src){imageCache[id]=src;setImgEl(wrap,src,query,id);}
@@ -1227,7 +1227,7 @@ async function refreshImg(id,query,cat){
   const wrap=document.getElementById('iw-'+id);
   if(wrap)wrap.classList.add('loading');
   delete imageCache[id];
-  const resp=await fetch('api.php?'+new URLSearchParams({action:'getImage',id,query,cat,refresh:'1'}),{credentials:'same-origin'});
+  const resp=await fetch('/beta/api.php?'+new URLSearchParams({action:'getImage',id,query,cat,refresh:'1'}),{credentials:'same-origin'});
   const data=await resp.json();
   if(data.ok&&data.url){imageCache[id]=data.url;setImgEl(wrap,data.url,query,id);}
   else{if(wrap)wrap.classList.remove('loading');showToast('No image found');}
