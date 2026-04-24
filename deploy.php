@@ -35,7 +35,7 @@ $files = [
 $beta_files = [
     'api.php', 'categories.js.php', 'collection.php', 'index.php',
     'logout.php', 'nav.php', 'scanner.php', 'shared.css',
-    'theme.php', 'toast.php', '.htaccess'
+    'theme.php', 'toast.php', '.htaccess', 'test.php'
 ];
 
 $log   = [];
