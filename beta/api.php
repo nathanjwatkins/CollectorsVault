@@ -31,8 +31,8 @@ define('GEMINI_MODELS', [
     'gemini-2.0-flash',      // fallback — retiring June 2026, keep until then
 ]);
 define('GOOGLE_CSE_ID', 'YOUR_CSE_ID_HERE');
-define('DATA_DIR',        __DIR__ . '/data/');
-define('UPLOADS_DIR',     __DIR__ . '/uploads/');
+define('DATA_DIR',        __DIR__ . '/../data/');  // Share live site data
+define('UPLOADS_DIR',     __DIR__ . '/../uploads/');  // Share live site uploads
 define('USERS_FILE',      DATA_DIR . 'users.csv');
 define('COLLECTION_FILE', DATA_DIR . 'collection.csv');
 define('PRICES_FILE',     DATA_DIR . 'prices.csv');
