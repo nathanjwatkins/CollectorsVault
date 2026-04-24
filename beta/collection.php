@@ -21,7 +21,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=beta1777020550">
+<link rel="stylesheet" href="shared.css?v=beta1777021873">
 <style>
 /* ── HERO ──────────────────────────────────────────────────────────────────── */
 .hero {
