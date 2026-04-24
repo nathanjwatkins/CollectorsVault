@@ -12,7 +12,7 @@ ini_set('session.cookie_secure', 1);
 ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.use_strict_mode', 1);
 
-session_start();
+session_name('CVBETA'); session_start();
 
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');

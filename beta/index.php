@@ -2,7 +2,7 @@
 ob_start();
 header('Cache-Control: no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
-session_start();
+session_name('CVBETA'); session_start();
 if (isset($_SESSION['user'])) { header('Location: scanner.php'); exit; }
 ?>
 <!DOCTYPE html>
