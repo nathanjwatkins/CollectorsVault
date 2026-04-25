@@ -272,7 +272,7 @@ body::before {
   .cv-mobile-controls { display: none; }
 }
 
-/* Mobile wordmark */
+/* Mobile wordmark — hidden on desktop where sidebar wordmark takes over */
 .cv-mobile-wordmark {
   font-family: var(--font);
   font-size: 13px;
@@ -280,6 +280,10 @@ body::before {
   letter-spacing: -.01em;
   color: var(--ink);
   white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+  .cv-mobile-wordmark { display: none; }
 }
 
 .cv-mobile-wordmark em {
