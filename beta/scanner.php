@@ -42,7 +42,7 @@ $username = htmlspecialchars($_SESSION['user']);
 }
 
 .picker-header {
-  padding: 24px 24px 0;
+  padding: 28px 28px 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -219,7 +219,7 @@ $username = htmlspecialchars($_SESSION['user']);
 
 .cat-zone-name {
   font-family: var(--font);
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: -.02em;
   color: var(--ink);
@@ -350,7 +350,7 @@ $username = htmlspecialchars($_SESSION['user']);
 
 /* Left — dropzone + form */
 .scan-left {
-  padding: 20px;
+  padding: 20px 20px 20px 20px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -599,7 +599,7 @@ $username = htmlspecialchars($_SESSION['user']);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
+  padding: 14px 20px 14px 20px;
   border-bottom: 1px solid var(--border);
 }
 
