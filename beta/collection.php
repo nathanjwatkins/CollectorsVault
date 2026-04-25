@@ -158,7 +158,7 @@ body{padding-bottom:60px}
       <div class="cv-wordmark-text">Collector<em>Vault</em></div>
       <div class="cv-wordmark-tag">Collectibles Manager</div>
     </div>
-    <div class="cv-mobile-wordmark">Collector<em>Vault</em></div>
+    <div class="cv-mobile-wordmark" style="display:none">Collector<em>Vault</em></div>
     <nav class="cv-nav">
       <a href="/beta/scanner.php" class="cv-nav-item">
         <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
