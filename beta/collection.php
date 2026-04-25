@@ -21,7 +21,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=cv3_002">
+<link rel="stylesheet" href="shared.css?v=cv3_1777146472
 <style>
 /* COLLECTION PAGE */
 .stats-zone{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
