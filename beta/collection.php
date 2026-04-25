@@ -22,6 +22,9 @@ $username = htmlspecialchars($_SESSION['user']);
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
 <link rel="stylesheet" href="shared.css?v=cv3_1777147123">
+<style>@media(max-width:899px){.cv-mobile-wordmark{display:block!important}}</style>
+</head>
+<body>
 <div class="cv-app">
   <aside class="cv-sidebar">
     <div class="cv-wordmark">
