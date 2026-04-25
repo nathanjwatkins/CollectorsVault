@@ -132,7 +132,7 @@ body::before {
 
 /* Sidebar wordmark */
 .cv-wordmark {
-  padding: 32px 24px 24px;
+  padding: 32px 22px 24px;
   display: none;
   flex-direction: column;
   gap: 2px;
