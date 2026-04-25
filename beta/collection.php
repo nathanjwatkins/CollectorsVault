@@ -36,7 +36,7 @@ $username = htmlspecialchars($_SESSION['user']);
 .stat-value.is-gain{color:var(--acid);text-shadow:0 0 40px rgba(200,255,0,.18)}
 .stat-value.is-loss{color:var(--red)}
 
-.coll-toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;background:var(--surface);position:sticky;top:56px;z-index:100;flex-shrink:0}
+.coll-toolbar{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;background:var(--surface);position:sticky;top:56px;z-index:100;flex-shrink:0}
 .coll-toolbar::-webkit-scrollbar{display:none}
 @media(min-width:900px){.coll-toolbar{top:0}}
 
@@ -60,9 +60,9 @@ $username = htmlspecialchars($_SESSION['user']);
 .view-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5}
 .view-btn.active{background:var(--acid-dim);color:var(--acid)}
 
-.price-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;flex-shrink:0}
+.price-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 20px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;flex-shrink:0}
 
-.coll-body{padding:16px}
+.coll-body{padding:16px 20px}
 .items-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 @media(min-width:480px){.items-grid{grid-template-columns:repeat(3,1fr)}}
 @media(min-width:700px){.items-grid{grid-template-columns:repeat(4,1fr)}}
@@ -270,9 +270,13 @@ body{padding-bottom:60px}
       </div>
       <div class="modal-fields" id="modalFields"></div>
       <div class="modal-actions">
+        <button class="modal-btn" onclick="openEdit(currentModalId)">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
         <button class="modal-btn" onclick="refreshSinglePrice(currentModalId)">
           <svg viewBox="0 0 24 24"><polyline points="23,4 23,11 16,11"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 11"/></svg>
-          Refresh price
+          Refresh
         </button>
         <button class="modal-btn danger" onclick="deleteItem(currentModalId)">
           <svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/><path d="M10,11v6M14,11v6"/><path d="M9,6V4h6v2"/></svg>
@@ -284,6 +288,24 @@ body{padding-bottom:60px}
 </div>
 
 <div id="toast"></div>
+
+<!-- Edit Modal -->
+<div id="editBg" style="display:none;position:fixed;inset:0;background:rgba(5,5,7,.90);z-index:600;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)closeEdit()">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:480px;max-height:88dvh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--acid);display:flex;align-items:center;gap:8px">
+        <span style="width:5px;height:5px;border-radius:50%;background:var(--acid);display:inline-block;box-shadow:var(--acid-glow-sm)"></span>
+        Edit Item
+      </div>
+      <button onclick="closeEdit()" style="width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--ink2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-family:var(--font)">×</button>
+    </div>
+    <div style="padding:20px;display:flex;flex-direction:column;gap:14px" id="editFields"></div>
+    <div style="padding:0 20px 20px;display:flex;gap:8px">
+      <button onclick="saveEdit()" style="flex:1;height:40px;background:var(--acid);color:var(--void);border:none;border-radius:var(--radius-md);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;box-shadow:var(--acid-glow-sm)">Save Changes</button>
+      <button onclick="closeEdit()" style="height:40px;padding:0 16px;background:var(--surface2);color:var(--ink2);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--mono);font-size:9px;letter-spacing:.10em;text-transform:uppercase;cursor:pointer">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <script>
 let allItems=[],priceData={},currentTab='all',currentView='grid',currentModalId=null,toastT;
@@ -413,9 +435,17 @@ function openModal(id){
   const fields=['item_type','condition','manufacturer','year','series','card_number','platform','genre','region','artist','label','format','pressing','kit_type','size','signed'].filter(k=>item[k]);
   document.getElementById('modalFields').innerHTML=fields.map(k=>`<div><div class="modal-field-label">${k.replace(/_/g,' ')}</div><div class="modal-field-val">${esc(item[k])}</div></div>`).join('');
   document.getElementById('modalBg').classList.add('open');
-  document.getElementById('modalImg').src='';
-  loadImg(id,buildQuery(item),item.category,item.name);
-  setTimeout(()=>{const src=document.getElementById('img-'+id);if(src&&src.tagName==='IMG')document.getElementById('modalImg').src=src.src;},800);
+  // Try existing loaded image first, then fetch
+  const existingImg = document.getElementById('img-'+id);
+  if (existingImg && existingImg.tagName === 'IMG' && existingImg.src) {
+    document.getElementById('modalImg').src = existingImg.src;
+  } else {
+    document.getElementById('modalImg').src = '';
+    fetch('/beta/api.php?'+new URLSearchParams({action:'getImage',id,query:buildQuery(item),cat:item.category}),{credentials:'same-origin'})
+      .then(r=>r.json())
+      .then(d=>{ if(d.url) document.getElementById('modalImg').src = d.url; })
+      .catch(()=>{});
+  }
 }
 
 function closeModal(){document.getElementById('modalBg').classList.remove('open');currentModalId=null;}
@@ -428,6 +458,92 @@ async function deleteItem(id){
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ── Edit item ─────────────────────────────────────────────────────────── */
+let editItemId = null;
+
+function openEdit(id) {
+  editItemId = id;
+  const item = allItems.find(i => i.id === id);
+  if (!item) return;
+
+  // Close view modal first
+  closeModal();
+
+  const fields = document.getElementById('editFields');
+  const editableKeys = ['name','subtitle','series','year','item_type','condition','manufacturer',
+    'card_number','platform','genre','region','artist','label','format','pressing',
+    'kit_type','size','signed','price_paid','ebay_query'];
+
+  const labelMap = {name:'Name',subtitle:'Subtitle / Set',series:'Series',year:'Year',
+    item_type:'Type',condition:'Condition',manufacturer:'Manufacturer',
+    card_number:'Card Number',platform:'Platform',genre:'Genre',region:'Region',
+    artist:'Artist',label:'Label',format:'Format',pressing:'Pressing',
+    kit_type:'Kit Type',size:'Size',signed:'Signed',price_paid:'Paid (£)',
+    ebay_query:'eBay Search Query'};
+
+  fields.innerHTML = editableKeys.map(k => {
+    const val = k === 'ebay_query'
+      ? (item.ebay_query || buildQuery(item))
+      : (item[k] || '');
+    const hint = k === 'ebay_query'
+      ? '<div style="font-family:var(--mono);font-size:8px;color:var(--ink3);margin-top:3px;letter-spacing:.04em">Override the search term used for eBay pricing</div>'
+      : '';
+    return `<div>
+      <label style="font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:4px">${labelMap[k]||k}</label>
+      <input id="ef_${k}" type="${k==='price_paid'?'number':'text'}" value="${esc(val)}"
+        style="width:100%;height:36px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--font);font-size:13px;color:var(--ink);outline:none;transition:border-color .15s"
+        onfocus="this.style.borderColor='rgba(200,255,0,.35)'"
+        onblur="this.style.borderColor=''"
+      >
+      ${hint}
+    </div>`;
+  }).join('');
+
+  const bg = document.getElementById('editBg');
+  bg.style.display = 'flex';
+}
+
+function closeEdit() {
+  document.getElementById('editBg').style.display = 'none';
+  editItemId = null;
+}
+
+async function saveEdit() {
+  if (!editItemId) return;
+  const item = allItems.find(i => i.id === editItemId);
+  if (!item) return;
+
+  const editableKeys = ['name','subtitle','series','year','item_type','condition','manufacturer',
+    'card_number','platform','genre','region','artist','label','format','pressing',
+    'kit_type','size','signed','price_paid','ebay_query'];
+
+  const updates = {};
+  editableKeys.forEach(k => {
+    const el = document.getElementById('ef_'+k);
+    if (el) updates[k] = el.value;
+  });
+
+  try {
+    const fd = new FormData();
+    fd.append('action', 'update');
+    fd.append('item_id', editItemId);
+    fd.append('updates', JSON.stringify(updates));
+    const resp = await fetch('/beta/api.php', {method:'POST', body:fd, credentials:'same-origin'});
+    const d = await resp.json();
+    if (d.ok) {
+      // Update local data
+      Object.assign(item, updates);
+      closeEdit();
+      filterItems();
+      showToast('Item updated');
+    } else {
+      showToast(d.error || 'Update failed');
+    }
+  } catch(e) {
+    showToast('Update failed');
+  }
+}
 function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2800);}
 </script>
 </body>

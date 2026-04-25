@@ -55,6 +55,7 @@ switch ($action) {
     case 'save':          doSave();         break;
     case 'collection':    doCollection();   break;
     case 'delete':        doDelete();       break;
+    case 'update':        doUpdate();       break;
     case 'stats':         doStats();        break;
     case 'getImage':      doGetImage();     break;
     case 'refreshPrices': doRefreshPrices();break;
@@ -463,6 +464,62 @@ function doDelete() {
     }
     json(['ok' => true]);
 }
+
+function doUpdate() {
+  requireAuth();
+  $item_id = trim($_POST['item_id'] ?? '');
+  $updates = json_decode($_POST['updates'] ?? '{}', true);
+  if (!$item_id || !is_array($updates)) json(['error' => 'Missing data'], 400);
+
+  $file = DATA_DIR . 'collection.csv';
+  if (!file_exists($file)) json(['error' => 'No collection'], 404);
+
+  $rows = array_map('str_getcsv', file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+  if (empty($rows)) json(['error' => 'Empty'], 404);
+
+  $headers = $rows[0];
+  $updated = false;
+
+  for ($i = 1; $i < count($rows); $i++) {
+    $row = array_combine($headers, array_pad($rows[$i], count($headers), ''));
+    if ($row['id'] === $item_id && $row['username'] === $_SESSION['user']) {
+      // Apply updates — only allowed fields
+      $allowed = ['name','subtitle','series','year','item_type','condition','manufacturer',
+        'card_number','platform','genre','region','artist','label','format','pressing',
+        'kit_type','size','signed','price_paid','ebay_query'];
+      foreach ($allowed as $key) {
+        if (isset($updates[$key])) {
+          // Add header if it doesn't exist
+          if (!in_array($key, $headers)) {
+            $headers[] = $key;
+            foreach ($rows as &$r) { $r[] = ''; }
+            unset($r);
+          }
+          $col = array_search($key, $headers);
+          if ($col !== false) {
+            while (count($rows[$i]) <= $col) $rows[$i][] = '';
+            $rows[$i][$col] = $updates[$key];
+          }
+        }
+      }
+      $updated = true;
+      break;
+    }
+  }
+
+  if (!$updated) json(['error' => 'Item not found'], 404);
+
+  // Re-write CSV
+  $rows[0] = $headers;
+  $out = fopen($file, 'w');
+  foreach ($rows as $row) {
+    fputcsv($out, $row);
+  }
+  fclose($out);
+
+  json(['ok' => true]);
+}
+
 
 function doStats() {
     requireAuth();
