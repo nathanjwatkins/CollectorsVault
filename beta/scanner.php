@@ -863,7 +863,7 @@ $username = htmlspecialchars($_SESSION['user']);
     </div>
 
     <!-- Mobile wordmark -->
-    <div class="cv-mobile-wordmark">Collector<em>Vault</em></div>
+    <div class="cv-mobile-wordmark" style="display:none">Collector<em>Vault</em></div>
 
     <!-- Nav items -->
     <nav class="cv-nav">
