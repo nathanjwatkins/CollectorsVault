@@ -1,117 +1,90 @@
 <?php
 /**
- * CollectorVault — GitHub Auto-Deploy Webhook v2
- * Uses curl instead of file_get_contents for better Hostinger compatibility
+ * CollectorVault — GitHub Webhook Deploy
+ * Fetches files from GitHub raw URLs using classic token (Authorization header)
  */
 
-define('DEPLOY_SECRET', 'cv_deploy_2025_nate');
-define('GITHUB_TOKEN',  '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');
-define('GITHUB_RAW',    'https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/');
+define('GITHUB_TOKEN', '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');
+define('GITHUB_RAW',   'https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/');
+define('WEBHOOK_SECRET', 'cv_deploy_2025_nate');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405); die('Method not allowed');
-}
-
+// Verify webhook signature
 $payload   = file_get_contents('php://input');
 $signature = $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '';
-$expected  = 'sha256=' . hash_hmac('sha256', $payload, DEPLOY_SECRET);
+$expected  = 'sha256=' . hash_hmac('sha256', $payload, WEBHOOK_SECRET);
 
 if (!hash_equals($expected, $signature)) {
-    http_response_code(403); die('Invalid signature');
+    http_response_code(403);
+    die('Signature mismatch');
 }
 
-$data = json_decode($payload, true);
-
-if (($data['ref'] ?? '') !== 'refs/heads/main') {
-    http_response_code(200); die('Not main branch — skipped');
-}
-
-$files = [
-    'api.php', 'categories.js.php', 'collection.php', 'index.php',
-    'logout.php', 'nav.php', 'scanner.php', 'shared.css',
-    'theme.php', 'toast.php', '.htaccess', 'beta_deploy.php'
-];
-
-$beta_files = [
-    'api.php', 'categories.js.php', 'collection.php', 'index.php',
-    'logout.php', 'nav.php', 'scanner.php', 'shared.css',
-    'theme.php', 'toast.php', '.htaccess', 'test.php', 'test2.php'
-];
-
+$data  = json_decode($payload, true);
 $log   = [];
 $log[] = date('Y-m-d H:i:s') . ' — Deploy triggered';
 $log[] = 'Commit: ' . ($data['after'] ?? 'unknown');
-$log[] = 'Message: ' . ($data['head_commit']['message'] ?? 'no message');
 
-function fetch_file($url, $token) {
-    // Convert raw.githubusercontent.com URL to GitHub API URL for private repo access
-    // raw.githubusercontent.com/USER/REPO/BRANCH/path -> api.github.com/repos/USER/REPO/contents/path?ref=BRANCH
-    if (strpos($url, 'raw.githubusercontent.com') !== false) {
-        $url = preg_replace(
-            '#https://raw\.githubusercontent\.com/([^/]+)/([^/]+)/([^/]+)/(.+)#',
-            'https://api.github.com/repos/$1/$2/contents/$4?ref=$3',
-            $url
-        );
-        $accept = 'application/vnd.github.v3.raw';
-    } else {
-        $accept = 'application/json';
-    }
-
-    $ch = curl_init($url);
+// Fetch file from GitHub raw URL using classic token
+function fetch_github($path) {
+    $url = GITHUB_RAW . $path;
+    $ch  = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_TIMEOUT        => 30,
         CURLOPT_HTTPHEADER     => [
-            'Authorization: token ' . $token,
-            'User-Agent: CollectorVault-Deploy/2.0',
-            'Accept: ' . $accept,
+            'Authorization: token ' . GITHUB_TOKEN,
+            'User-Agent: CollectorVault-Deploy/3.0',
         ],
         CURLOPT_SSL_VERIFYPEER => true,
     ]);
     $content  = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $error    = curl_error($ch);
     curl_close($ch);
-
-    if ($content === false || $httpCode !== 200) {
-        return ['ok' => false, 'error' => "HTTP {$httpCode} — {$error}"];
-    }
+    if ($httpCode !== 200) return ['ok' => false, 'error' => "HTTP $httpCode"];
     return ['ok' => true, 'content' => $content];
 }
 
 $deploy_dir = __DIR__;
+$beta_dir   = __DIR__ . '/beta';
 
-foreach ($files as $file) {
-    $url    = GITHUB_RAW . $file;
-    $result = fetch_file($url, GITHUB_TOKEN);
-    if ($result['ok']) {
-        file_put_contents($deploy_dir . '/' . $file, $result['content']);
-        $log[] = "  ✓ {$file}";
+// Root files
+$root_files = [
+    'deploy.php', 'beta_deploy.php',
+    'api.php', 'categories.js.php', 'collection.php', 'index.php',
+    'logout.php', 'nav.php', 'scanner.php', 'shared.css',
+    'theme.php', 'toast.php', '.htaccess'
+];
+
+// Beta-specific files (fetched from beta/ subfolder in repo)
+$beta_files = [
+    'scanner.php', 'collection.php', 'shared.css',
+    'api.php', 'categories.js.php', 'index.php',
+    'logout.php', 'nav.php', 'theme.php', 'toast.php', '.htaccess'
+];
+
+$log[] = '--- Root files ---';
+foreach ($root_files as $file) {
+    $r = fetch_github($file);
+    if ($r['ok']) {
+        file_put_contents($deploy_dir . '/' . $file, $r['content']);
+        $log[] = "  ✓ $file (" . strlen($r['content']) . " bytes)";
     } else {
-        $log[] = "  ✗ FAILED: {$file} — " . $result['error'];
+        $log[] = "  ✗ $file — " . $r['error'];
     }
 }
 
-// Deploy beta files
-$beta_dir = $deploy_dir . '/beta';
-if (is_dir($beta_dir)) {
-    $beta_raw = 'https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/beta/';
-    foreach ($beta_files as $file) {
-        $result = fetch_file($beta_raw . $file, GITHUB_TOKEN);
-        if ($result['ok']) {
-            file_put_contents($beta_dir . '/' . $file, $result['content']);
-            $log[] = "  ✓ beta/{$file}";
-        } else {
-            $log[] = "  ✗ FAILED: beta/{$file} — " . $result['error'];
-        }
+$log[] = '--- Beta files ---';
+foreach ($beta_files as $file) {
+    $r = fetch_github('beta/' . $file);
+    if ($r['ok']) {
+        file_put_contents($beta_dir . '/' . $file, $r['content']);
+        $log[] = "  ✓ beta/$file (" . strlen($r['content']) . " bytes)";
+    } else {
+        $log[] = "  ✗ beta/$file — " . $r['error'];
     }
 }
 
-file_put_contents($deploy_dir . '/deploy_time.txt', date('Y-m-d H:i:s') . ' commit:' . ($data['after'] ?? 'unknown'));
-$log[] = 'Deploy complete.';
-$log_text = implode("\n", $log) . "\n\n";
-file_put_contents($deploy_dir . '/deploy.log', $log_text, FILE_APPEND);
-
+$log[] = 'Done.';
+file_put_contents($deploy_dir . '/deploy.log', implode("\n", $log) . "\n\n", FILE_APPEND);
 http_response_code(200);
 echo implode("\n", $log);
