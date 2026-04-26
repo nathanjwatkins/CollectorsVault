@@ -29,7 +29,7 @@ if (($data['ref'] ?? '') !== 'refs/heads/main') {
 $files = [
     'api.php', 'categories.js.php', 'collection.php', 'index.php',
     'logout.php', 'nav.php', 'scanner.php', 'shared.css',
-    'theme.php', 'toast.php', '.htaccess'
+    'theme.php', 'toast.php', '.htaccess', 'beta_deploy.php'
 ];
 
 $beta_files = [
@@ -95,6 +95,7 @@ if (is_dir($beta_dir)) {
     }
 }
 
+file_put_contents($deploy_dir . '/deploy_time.txt', date('Y-m-d H:i:s') . ' commit:' . ($data['after'] ?? 'unknown'));
 $log[] = 'Deploy complete.';
 $log_text = implode("\n", $log) . "\n\n";
 file_put_contents($deploy_dir . '/deploy.log', $log_text, FILE_APPEND);
