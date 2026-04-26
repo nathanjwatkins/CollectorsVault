@@ -21,10 +21,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=cv3_1777149160">
-<style>@media(max-width:899px){.cv-mobile-wordmark{display:block!important}}</style>
-</head>
-<body>
+<link rel="stylesheet" href="shared.css?v=cv3_002">
 <style>
 /* COLLECTION PAGE */
 .stats-zone{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
@@ -38,14 +35,17 @@ $username = htmlspecialchars($_SESSION['user']);
 .stat-value{font-family:var(--font);font-size:clamp(26px,4vw,48px);font-weight:200;letter-spacing:-.04em;color:var(--ink);line-height:1}
 .stat-value.is-gain{color:var(--acid);text-shadow:0 0 40px rgba(200,255,0,.18)}
 .stat-value.is-loss{color:var(--red)}
+
 .coll-toolbar{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;background:var(--surface);position:sticky;top:56px;z-index:100;flex-shrink:0}
 .coll-toolbar::-webkit-scrollbar{display:none}
 @media(min-width:900px){.coll-toolbar{top:0}}
+
 .cat-tab{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);background:var(--surface2);border:1px solid var(--border);cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
 .cat-tab svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.5}
 .cat-tab:hover{color:var(--ink);border-color:var(--border2)}
 .cat-tab.active{background:var(--acid-dim);border-color:rgba(200,255,0,.25);color:var(--acid)}
 .cat-count{font-size:7px;opacity:.60}
+
 .toolbar-gap{flex:1;min-width:8px}
 .search-field{position:relative;flex-shrink:0;width:160px}
 @media(min-width:640px){.search-field{width:200px}}
@@ -59,7 +59,9 @@ $username = htmlspecialchars($_SESSION['user']);
 .view-btn:last-child{border-right:none}
 .view-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.5}
 .view-btn.active{background:var(--acid-dim);color:var(--acid)}
+
 .price-bar{display:flex;align-items:center;justify-content:space-between;padding:6px 20px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--ink3);text-transform:uppercase;flex-shrink:0}
+
 .coll-body{padding:16px 20px}
 .items-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 @media(min-width:480px){.items-grid{grid-template-columns:repeat(3,1fr)}}
@@ -67,6 +69,7 @@ $username = htmlspecialchars($_SESSION['user']);
 @media(min-width:1000px){.items-grid{grid-template-columns:repeat(5,1fr)}}
 @media(min-width:1300px){.items-grid{grid-template-columns:repeat(6,1fr)}}
 .items-list{display:flex;flex-direction:column;gap:1px}
+
 .item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s;position:relative;-webkit-tap-highlight-color:transparent}
 .item-card:hover{border-color:rgba(200,255,0,.25);transform:translateY(-2px)}
 .ic-index{position:absolute;top:8px;left:9px;font-family:var(--mono);font-size:8px;letter-spacing:.10em;color:var(--acid);opacity:.55;z-index:5;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,.60)}
@@ -84,6 +87,7 @@ $username = htmlspecialchars($_SESSION['user']);
 .ic-badge{font-family:var(--mono);font-size:7px;letter-spacing:.06em;padding:1px 5px;border-radius:var(--radius);border:1px solid rgba(200,255,0,.20);background:rgba(200,255,0,.08);color:var(--acid);text-transform:uppercase}
 .ic-change{font-family:var(--mono);font-size:8px;letter-spacing:.04em}
 .ic-change.up{color:var(--acid)}.ic-change.down{color:var(--red)}.ic-change.flat{color:var(--ink3)}
+
 .item-row{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:transparent}
 .item-row:hover{border-color:rgba(200,255,0,.20)}
 .ir-thumb{width:44px;height:44px;border-radius:var(--radius-md);overflow:hidden;background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center}
@@ -92,6 +96,8 @@ $username = htmlspecialchars($_SESSION['user']);
 .ir-name{font-family:var(--font);font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ir-sub{font-family:var(--mono);font-size:9px;color:var(--ink3);margin-top:2px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ir-price{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink);flex-shrink:0}
+
+/* Modal */
 #modalBg{display:none;position:fixed;inset:0;background:rgba(5,5,7,.85);z-index:500;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;padding:0}
 @media(min-width:640px){#modalBg{align-items:center;padding:16px}}
 #modalBg.open{display:flex}
@@ -122,10 +128,14 @@ $username = htmlspecialchars($_SESSION['user']);
 .modal-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.5}
 .modal-btn.danger{color:var(--red);border-color:rgba(255,68,68,.20);background:rgba(255,68,68,.05)}
 .modal-btn.danger:hover{background:rgba(255,68,68,.10)}
+
+/* FAB */
 .fab{position:fixed;right:20px;bottom:76px;width:48px;height:48px;background:var(--acid);color:var(--void);border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;box-shadow:var(--acid-glow);text-decoration:none;transition:box-shadow .2s,transform .15s;-webkit-tap-highlight-color:transparent}
 .fab:hover{box-shadow:0 0 40px rgba(200,255,0,.50),0 0 80px rgba(200,255,0,.20);transform:scale(1.06)}
 .fab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
 @media(min-width:900px){.fab{display:none}}
+
+/* Mobile bottom nav */
 .mobile-nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--surface);border-top:1px solid var(--border);display:flex;z-index:300;padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(min-width:900px){.mobile-nav{display:none}}
 .mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--ink3);text-decoration:none;font-family:var(--mono);font-size:8px;letter-spacing:.06em;text-transform:uppercase;transition:color .15s;-webkit-tap-highlight-color:transparent}
@@ -134,11 +144,15 @@ $username = htmlspecialchars($_SESSION['user']);
 .mobile-nav-item.active svg{stroke:var(--acid)}
 body{padding-bottom:60px}
 @media(min-width:900px){body{padding-bottom:0}}
+
 .empty-state{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:12px;padding:60px 20px;text-align:center}
 .empty-state svg{width:48px;height:48px;stroke:var(--ink4);fill:none;stroke-width:1}
 .empty-state h3{font-family:var(--font);font-size:18px;font-weight:600;color:var(--ink2);letter-spacing:-.02em}
 .empty-state p{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.04em}
 </style>
+<style>@media(max-width:899px){.cv-mobile-wordmark{display:block!important}}</style>
+</head>
+<body>
 <div class="cv-app">
   <aside class="cv-sidebar">
     <div class="cv-wordmark">
