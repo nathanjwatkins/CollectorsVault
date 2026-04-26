@@ -5,7 +5,7 @@
  */
 
 define('DEPLOY_SECRET', 'cv_deploy_2025_nate');
-define('GITHUB_TOKEN',  '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');
+define('GITHUB_TOKEN',  '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');
 define('GITHUB_RAW',    'https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
