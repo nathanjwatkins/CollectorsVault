@@ -44,6 +44,19 @@ $log[] = 'Commit: ' . ($data['after'] ?? 'unknown');
 $log[] = 'Message: ' . ($data['head_commit']['message'] ?? 'no message');
 
 function fetch_file($url, $token) {
+    // Convert raw.githubusercontent.com URL to GitHub API URL for private repo access
+    // raw.githubusercontent.com/USER/REPO/BRANCH/path -> api.github.com/repos/USER/REPO/contents/path?ref=BRANCH
+    if (strpos($url, 'raw.githubusercontent.com') !== false) {
+        $url = preg_replace(
+            '#https://raw\.githubusercontent\.com/([^/]+)/([^/]+)/([^/]+)/(.+)#',
+            'https://api.github.com/repos/$1/$2/contents/$4?ref=$3',
+            $url
+        );
+        $accept = 'application/vnd.github.v3.raw';
+    } else {
+        $accept = 'application/json';
+    }
+
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
@@ -52,7 +65,7 @@ function fetch_file($url, $token) {
         CURLOPT_HTTPHEADER     => [
             'Authorization: token ' . $token,
             'User-Agent: CollectorVault-Deploy/2.0',
-            'Accept: application/vnd.github.v3.raw',
+            'Accept: ' . $accept,
         ],
         CURLOPT_SSL_VERIFYPEER => true,
     ]);
