@@ -22,11 +22,373 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=cv3_fix001">
-<style>@media(max-width:899px){.cv-mobile-wordmark{display:block!important}}</style>
-</head>
-<body>
+<link rel="stylesheet" href="shared.css?v=cv3_001">
 <style>
+
+/* ══ SCANNER PAGE LAYOUT ════════════════════════════════════════════════════ */
+
+.scanner-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── PICKER VIEW — category selection grid ──────────────────────────────── */
+#pickerView {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-header {
+  padding: 28px 28px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.picker-overline {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--acid);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.picker-overline::before {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--acid);
+  box-shadow: var(--acid-glow-sm);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .4; }
+}
+
+.picker-headline {
+  font-family: var(--font);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  letter-spacing: -.04em;
+  color: var(--ink);
+  line-height: 1.0;
+}
+
+.picker-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+/* Category grid */
+.cat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-top: 1px solid var(--border);
+  margin-top: 24px;
+  flex: 1;
+}
+
+@media (min-width: 600px) {
+  .cat-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 900px) {
+  .cat-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+.cat-zone {
+  position: relative;
+  background: var(--surface);
+  cursor: pointer;
+  overflow: hidden;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  transition: background .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cat-zone:hover {
+  background: var(--surface2);
+}
+
+.cat-zone:hover .cat-zone-img {
+  opacity: .55;
+  transform: scale(1.04);
+}
+
+.cat-zone:hover .cat-zone-arrow {
+  border-color: rgba(200,255,0,.40);
+  color: var(--acid);
+  box-shadow: var(--acid-glow-sm);
+}
+
+/* Full bleed image */
+.cat-zone-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: .40;
+  transition: opacity .4s ease, transform .4s ease;
+}
+
+/* Dark gradient scrim */
+.cat-zone-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(5,5,7,.95) 0%,
+    rgba(5,5,7,.30) 60%,
+    transparent 100%
+  );
+}
+
+/* Zone number */
+.cat-zone-num {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  color: var(--acid);
+  opacity: .60;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cat-zone-num svg {
+  width: 12px; height: 12px;
+  stroke: var(--acid);
+  fill: none;
+  stroke-width: 1.5;
+  opacity: .60;
+}
+
+/* Zone arrow */
+.cat-zone-arrow {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink3);
+  z-index: 1;
+  transition: all .2s;
+}
+
+.cat-zone-arrow svg {
+  width: 12px; height: 12px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+}
+
+/* Zone content */
+.cat-zone-content {
+  position: relative;
+  z-index: 1;
+}
+
+.cat-zone-name {
+  font-family: var(--font);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.cat-zone-desc {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .06em;
+  color: var(--ink3);
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+/* ── SCAN VIEW — after category selected ─────────────────────────────────── */
+#scanView {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+}
+
+/* Scan header */
+.scan-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.scan-breadcrumb {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--acid);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scan-breadcrumb::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--acid);
+  box-shadow: var(--acid-glow-sm);
+}
+
+.scan-change-btn {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.scan-change-btn:hover { color: var(--ink); border-color: var(--border2); }
+
+.scan-change-btn svg {
+  width: 11px; height: 11px;
+  stroke: currentColor; fill: none; stroke-width: 1.8;
+}
+
+/* Cat pills */
+.cat-pills {
+  display: flex;
+  gap: 4px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.cat-pills::-webkit-scrollbar { display: none; }
+
+.cat-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cat-pill-btn svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+.cat-pill-btn:hover { color: var(--ink); border-color: var(--border2); }
+.cat-pill-btn.active {
+  background: var(--acid-dim);
+  border-color: rgba(200,255,0,.25);
+  color: var(--acid);
+}
+
+/* Scan body — left + right split */
+.scan-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (min-width: 700px) {
+  .scan-body { flex-direction: row; }
+}
+
+/* Left — dropzone + form */
+.scan-left {
+  padding: 20px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+@media (min-width: 700px) {
+  .scan-left {
+    width: 340px;
+    flex-shrink: 0;
+  }
+}
+
+@media (min-width: 1100px) {
+  .scan-left { width: 380px; }
+}
+
+/* Dropzone */
+.dropzone-area {
+  border: 1.5px dashed rgba(200,255,0,.25);
+  border-radius: var(--radius-md);
+  padding: 32px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+  background: rgba(200,255,0,.02);
+}
+
+.dropzone-area:hover,
+.dropzone-area.drag-over {
+  border-color: rgba(200,255,0,.55);
+  background: rgba(200,255,0,.04);
+  box-shadow: 0 0 24px rgba(200,255,0,.08);
+}
+
 .dropzone-area input[type="file"] { display: none; }
 
 .dropzone-icon {
@@ -486,6 +848,7 @@ $username = htmlspecialchars($_SESSION['user']);
 
 .modal-close:hover { background: rgba(5,5,7,.90); color: var(--ink); }
 </style>
+<style>@media(max-width:899px){.cv-mobile-wordmark{display:block!important}}</style>
 </head>
 
 <body>
