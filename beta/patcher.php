@@ -6,7 +6,7 @@
 if (($_GET['key'] ?? '') !== 'cv_fix_now') { http_response_code(403); die(); }
 header('Content-Type: text/plain');
 
-$token = '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';
+$token = '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';
 $raw   = 'https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/beta/';
 $root  = dirname(__DIR__);
 $beta  = __DIR__;
