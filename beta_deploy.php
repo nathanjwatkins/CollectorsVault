@@ -26,7 +26,7 @@ $log[] = "Done - " . count($files) . " files.";
 file_put_contents(__DIR__ . "/beta_deploy.log", implode("\n", $log) . "\n\n", FILE_APPEND);
 // Fetch and update deploy.php with new token
 $ch=curl_init('https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/deploy.php');
-curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_FOLLOWLOCATION=>true,CURLOPT_TIMEOUT=>30,CURLOPT_HTTPHEADER=>['Authorization: token ghp_8xHq6W90STUu34Oo0Oon813DaR1HA81Nzpqq','User-Agent: CV/1.0']]);
+curl_setopt_array($ch,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_FOLLOWLOCATION=>true,CURLOPT_TIMEOUT=>30,CURLOPT_HTTPHEADER=>['Authorization: token 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','User-Agent: CV/1.0']]);
 $db=curl_exec($ch);$dc=curl_getinfo($ch,CURLINFO_HTTP_CODE);curl_close($ch);
 if($dc===200&&$db){file_put_contents(__DIR__.'/deploy.php',$db);$log[]='OK deploy.php updated ('.strlen($db).'b)';}
 else{$log[]='FAIL deploy.php HTTP='.$dc;}

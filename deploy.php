@@ -1,5 +1,5 @@
 <?php
-define('GITHUB_TOKEN',   'ghp_8xHq6W90STUu34Oo0Oon813DaR1HA81Nzpqq');define('GITHUB_RAW',     'https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/');
+define('GITHUB_TOKEN',   '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');define('GITHUB_RAW',     'https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/');
 define('WEBHOOK_SECRET', 'cv_deploy_2025_nate');
 
 $payload   = file_get_contents('php://input');
