@@ -117,7 +117,9 @@ $username = htmlspecialchars($_SESSION['user']);
   background: var(--surface);
   cursor: pointer;
   overflow: hidden;
+  height: 220px;
   min-height: 180px;
+  max-height: 280px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -131,7 +133,7 @@ $username = htmlspecialchars($_SESSION['user']);
 }
 
 .cat-zone:hover .cat-zone-img {
-  opacity: .55;
+  opacity: .35;
   transform: scale(1.04);
 }
 
@@ -141,7 +143,7 @@ $username = htmlspecialchars($_SESSION['user']);
   box-shadow: var(--acid-glow-sm);
 }
 
-/* Full bleed image */
+/* Full bleed image — if present, takes priority over gradient art */
 .cat-zone-img {
   position: absolute;
   inset: 0;
@@ -150,6 +152,54 @@ $username = htmlspecialchars($_SESSION['user']);
   object-fit: cover;
   opacity: .40;
   transition: opacity .4s ease, transform .4s ease;
+  z-index: 1;
+}
+
+/* CSS gradient art — shows when image is absent or fails */
+.cat-zone-art {
+  position: absolute;
+  inset: 0;
+  opacity: .55;
+  transition: opacity .4s ease, transform .4s ease;
+  z-index: 0;
+}
+
+.cat-zone:hover .cat-zone-art { opacity: .35; transform: scale(1.04); }
+
+/* Per-category gradients */
+.cat-zone-art--cards {
+  background:
+    radial-gradient(ellipse 60% 80% at 80% 20%, rgba(200,255,0,.35) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 60% at 20% 80%, rgba(100,200,255,.20) 0%, transparent 60%),
+    linear-gradient(135deg, #0a0f05 0%, #111a08 100%);
+}
+
+.cat-zone-art--shirts {
+  background:
+    radial-gradient(ellipse 60% 80% at 75% 25%, rgba(255,120,80,.30) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 60% at 25% 75%, rgba(200,80,255,.15) 0%, transparent 60%),
+    linear-gradient(135deg, #0f0805 0%, #1a0c08 100%);
+}
+
+.cat-zone-art--games {
+  background:
+    radial-gradient(ellipse 60% 80% at 70% 30%, rgba(80,160,255,.35) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 60% at 30% 70%, rgba(200,255,0,.15) 0%, transparent 60%),
+    linear-gradient(135deg, #050810 0%, #080c1a 100%);
+}
+
+.cat-zone-art--vinyl {
+  background:
+    radial-gradient(ellipse 70% 70% at 50% 50%, rgba(180,100,255,.25) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 80% 20%, rgba(255,80,160,.20) 0%, transparent 55%),
+    linear-gradient(135deg, #08050f 0%, #10081a 100%);
+}
+
+.cat-zone-art--other {
+  background:
+    radial-gradient(ellipse 60% 80% at 65% 35%, rgba(255,200,50,.28) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 60% at 35% 65%, rgba(80,255,200,.12) 0%, transparent 60%),
+    linear-gradient(135deg, #0f0a03 0%, #1a1005 100%);
 }
 
 /* Dark gradient scrim */
@@ -921,7 +971,8 @@ $username = htmlspecialchars($_SESSION['user']);
         <div class="cat-grid">
           <!-- Cards -->
           <div class="cat-zone" onclick="selectCat('cards')">
-            <img class="cat-zone-img" src="/images/card-cards.jpg" alt="" loading="eager">
+            <img class="cat-zone-img" src="/images/card-cards.jpg" alt="" loading="eager" onerror="this.style.display='none'">
+            <div class="cat-zone-art cat-zone-art--cards"></div>
             <div class="cat-zone-scrim"></div>
             <div class="cat-zone-num">
               <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
@@ -938,7 +989,8 @@ $username = htmlspecialchars($_SESSION['user']);
 
           <!-- Shirts -->
           <div class="cat-zone" onclick="selectCat('shirts')">
-            <img class="cat-zone-img" src="/images/card-shirts.jpg" alt="" loading="lazy">
+            <img class="cat-zone-img" src="/images/card-shirts.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+            <div class="cat-zone-art cat-zone-art--shirts"></div>
             <div class="cat-zone-scrim"></div>
             <div class="cat-zone-num">
               <svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>
@@ -955,7 +1007,8 @@ $username = htmlspecialchars($_SESSION['user']);
 
           <!-- Games -->
           <div class="cat-zone" onclick="selectCat('games')">
-            <img class="cat-zone-img" src="/images/card-games.jpg" alt="" loading="lazy">
+            <img class="cat-zone-img" src="/images/card-games.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+            <div class="cat-zone-art cat-zone-art--games"></div>
             <div class="cat-zone-scrim"></div>
             <div class="cat-zone-num">
               <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01M7 12h.01M17 12h.01M12 7v10"/></svg>
@@ -972,7 +1025,8 @@ $username = htmlspecialchars($_SESSION['user']);
 
           <!-- Vinyl -->
           <div class="cat-zone" onclick="selectCat('vinyl')">
-            <img class="cat-zone-img" src="/images/card-vinyl.jpg" alt="" loading="lazy">
+            <img class="cat-zone-img" src="/images/card-vinyl.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+            <div class="cat-zone-art cat-zone-art--vinyl"></div>
             <div class="cat-zone-scrim"></div>
             <div class="cat-zone-num">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
@@ -989,7 +1043,8 @@ $username = htmlspecialchars($_SESSION['user']);
 
           <!-- Other -->
           <div class="cat-zone" onclick="selectCat('other')">
-            <img class="cat-zone-img" src="/images/card-other.jpg" alt="" loading="lazy">
+            <img class="cat-zone-img" src="/images/card-other.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+            <div class="cat-zone-art cat-zone-art--other"></div>
             <div class="cat-zone-scrim"></div>
             <div class="cat-zone-num">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
