@@ -6,7 +6,7 @@ ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.cookie_secure', '1');
 ini_set('session.cookie_httponly', '1');
 session_start();
-if (!isset($_SESSION['user'])) { header('Location: index.php'); exit; }
+if (!isset($_SESSION['user'])) { header('Location: /index.php'); exit; }
 $username = htmlspecialchars($_SESSION['user']);
 ?>
 <!DOCTYPE html>
@@ -19,7 +19,6 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=1777581959">
 <style>
 /* COLLECTION PAGE */
 .stats-zone{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
@@ -149,6 +148,647 @@ body{padding-bottom:60px}
 .empty-state p{font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:.04em}
 </style>
 <style>@media(max-width:899px){.cv-mobile-wordmark{display:block!important}}</style>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COLLECTORVAULT — COMPLETE REDESIGN
+   Aesthetic: Precision dark instrument. Brutalist data meets luxury finish.
+   Fonts: Outfit (display/UI) · JetBrains Mono (data/labels/prices)
+   Palette: #050507 void · #C8FF00 acid · #FAFAFA white · #111116 surface
+   Language: Zero-radius edges, 1px borders, zone-based layout, data density
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+img { display: block; }
+
+/* ── Design tokens ───────────────────────────────────────────────────────── */
+:root {
+  /* Base */
+  --void:      #050507;
+  --surface:   #0C0C10;
+  --surface2:  #111116;
+  --surface3:  #18181F;
+  --border:    rgba(255,255,255,.07);
+  --border2:   rgba(255,255,255,.12);
+
+  /* Type */
+  --ink:       #FAFAFA;
+  --ink2:      #888896;
+  --ink3:      #444452;
+  --ink4:      #2A2A35;
+
+  /* Accent */
+  --acid:      #C8FF00;
+  --acid-dim:  rgba(200,255,0,.12);
+  --acid-glow: 0 0 24px rgba(200,255,0,.30), 0 0 80px rgba(200,255,0,.10);
+  --acid-glow-sm: 0 0 12px rgba(200,255,0,.25);
+  --red:       #FF4444;
+  --green:     #C8FF00;
+
+  /* Type system */
+  --font:      'Outfit', system-ui, sans-serif;
+  --mono:      'JetBrains Mono', monospace;
+
+  /* Layout */
+  --nav-w:     220px;        /* sidebar width desktop */
+  --nav-h:     56px;         /* top bar height mobile */
+  --radius:    2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+html {
+  font-size: 16px;
+  background: var(--void);
+  color-scheme: dark;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--void);
+  color: var(--ink);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+/* ── Noise texture overlay ───────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.80' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 300px 300px;
+  opacity: 0.018;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LAYOUT SYSTEM — SIDEBAR + CONTENT
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── App shell ───────────────────────────────────────────────────────────── */
+.cv-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+@media (min-width: 900px) {
+  .cv-app {
+    flex-direction: row;
+  }
+}
+
+/* ── Sidebar nav ─────────────────────────────────────────────────────────── */
+.cv-sidebar {
+  width: 100%;
+  height: var(--nav-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  flex-shrink: 0;
+}
+
+@media (min-width: 900px) {
+  .cv-sidebar {
+    width: var(--nav-w);
+    height: 100dvh;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    gap: 0;
+  }
+}
+
+/* Sidebar wordmark */
+.cv-wordmark {
+  padding: 32px 22px 24px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+@media (min-width: 900px) {
+  .cv-wordmark { display: flex; }
+}
+
+.cv-wordmark-text {
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.cv-wordmark-text em {
+  font-style: normal;
+  color: var(--acid);
+}
+
+.cv-wordmark-tag {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .14em;
+  color: var(--ink3);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+/* Sidebar nav items */
+.cv-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+@media (min-width: 900px) {
+  .cv-nav {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px 12px;
+    gap: 2px;
+    margin-left: 0;
+    flex: 1;
+  }
+}
+
+.cv-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  text-decoration: none;
+  transition: color .15s, background .15s;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cv-nav-item svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  flex-shrink: 0;
+}
+
+.cv-nav-item:hover {
+  color: var(--ink);
+  background: var(--surface2);
+}
+
+.cv-nav-item.active {
+  color: var(--acid);
+  background: var(--acid-dim);
+  border-color: rgba(200,255,0,.18);
+}
+
+.cv-nav-item.active svg { stroke: var(--acid); }
+
+/* Sidebar label */
+.cv-nav-label {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .cv-nav-label {
+    display: block;
+  }
+}
+
+/* Mobile nav label */
+@media (max-width: 899px) {
+  .cv-nav-item {
+    padding: 8px 12px;
+    font-size: 8px;
+  }
+}
+
+/* Sidebar bottom — user + theme */
+.cv-sidebar-foot {
+  display: none;
+  flex-direction: column;
+  gap: 1px;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+@media (min-width: 900px) {
+  .cv-sidebar-foot { display: flex; }
+}
+
+/* Mobile right controls */
+.cv-mobile-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+@media (min-width: 900px) {
+  .cv-mobile-controls { display: none; }
+}
+
+/* Mobile wordmark — hidden on desktop where sidebar wordmark takes over */
+.cv-mobile-wordmark {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+  .cv-mobile-wordmark { display: none; }
+}
+
+.cv-mobile-wordmark em {
+  font-style: normal;
+  color: var(--acid);
+}
+
+/* ── Icon button ─────────────────────────────────────────────────────────── */
+.cv-icon-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--ink2);
+  transition: color .15s, border-color .15s;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cv-icon-btn:hover {
+  color: var(--ink);
+  border-color: var(--border2);
+}
+
+.cv-icon-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+/* ── User chip ───────────────────────────────────────────────────────────── */
+.cv-user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.cv-user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--acid-dim);
+  border: 1px solid rgba(200,255,0,.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--acid);
+  flex-shrink: 0;
+}
+
+.cv-user-name {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .06em;
+  color: var(--ink2);
+  text-transform: uppercase;
+}
+
+/* ── Main content area ───────────────────────────────────────────────────── */
+.cv-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SHARED UTILITY
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Mono label */
+.mono-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+/* Acid dot */
+.acid-dot::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--acid);
+  margin-right: 8px;
+  box-shadow: var(--acid-glow-sm);
+  vertical-align: middle;
+}
+
+/* Zone header */
+.zone-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.zone-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--acid);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zone-title::before {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--acid);
+  box-shadow: var(--acid-glow-sm);
+}
+
+/* Thin divider */
+.divider {
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  height: 32px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--ink2);
+  transition: all .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover { color: var(--ink); border-color: var(--border2); }
+
+.btn svg {
+  width: 12px; height: 12px;
+  stroke: currentColor; fill: none; stroke-width: 1.5;
+}
+
+.btn-acid {
+  background: var(--acid);
+  color: var(--void);
+  border-color: var(--acid);
+  font-weight: 700;
+  box-shadow: var(--acid-glow-sm);
+}
+
+.btn-acid:hover {
+  box-shadow: var(--acid-glow);
+  color: var(--void);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--ink3);
+}
+
+.btn-ghost:hover { color: var(--ink); border-color: var(--border2); background: var(--surface2); }
+
+/* ── Tag / badge ─────────────────────────────────────────────────────────── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 7px;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--ink3);
+}
+
+.tag-acid {
+  background: var(--acid-dim);
+  border-color: rgba(200,255,0,.20);
+  color: var(--acid);
+}
+
+/* ── Input ───────────────────────────────────────────────────────────────── */
+.cv-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  -webkit-appearance: none;
+}
+
+.cv-input::placeholder { color: var(--ink3); }
+
+.cv-input:focus {
+  border-color: rgba(200,255,0,.35);
+  box-shadow: 0 0 0 3px rgba(200,255,0,.07);
+}
+
+/* ── Select ──────────────────────────────────────────────────────────────── */
+.cv-select {
+  height: 32px;
+  padding: 0 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .06em;
+  color: var(--ink2);
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.cv-select:focus { border-color: rgba(200,255,0,.35); }
+
+/* ── Form group ──────────────────────────────────────────────────────────── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+#toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--surface);
+  border: 1px solid rgba(200,255,0,.30);
+  color: var(--acid);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 600;
+  transition: opacity .22s, transform .22s;
+  box-shadow: var(--acid-glow-sm);
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (min-width: 900px) {
+  #toast { bottom: 28px; }
+}
+
+/* ── Save success ────────────────────────────────────────────────────────── */
+@keyframes cv-check { to { stroke-dashoffset: 0; } }
+@keyframes cv-pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes cv-fade { 0%{opacity:0} 12%{opacity:1} 75%{opacity:1} 100%{opacity:0} }
+
+.save-success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,5,7,.70);
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: cv-fade 1.9s ease forwards;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
+.save-success-circle {
+  width: 88px;
+  height: 88px;
+  background: var(--acid);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: cv-pop .32s cubic-bezier(.34,1.56,.64,1) forwards;
+  box-shadow: var(--acid-glow);
+}
+
+.save-success-circle svg {
+  width: 44px;
+  height: 44px;
+  stroke: var(--void);
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: cv-check .38s ease .22s forwards;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ink4); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink3); }
+
+/* ── Selection ───────────────────────────────────────────────────────────── */
+::selection { background: rgba(200,255,0,.20); color: var(--void); }
+
+</style>
 </head>
 <body>
 <div class="cv-app">
@@ -159,11 +799,11 @@ body{padding-bottom:60px}
     </div>
     <div class="cv-mobile-wordmark" style="display:none">Collector<em>Vault</em></div>
     <nav class="cv-nav">
-      <a href="/beta/scanner.php" class="cv-nav-item">
+      <a href="/scanner.php" class="cv-nav-item">
         <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
         <span class="cv-nav-label">Scan</span>
       </a>
-      <a href="/beta/collection.php" class="cv-nav-item active">
+      <a href="/collection.php" class="cv-nav-item active">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         <span class="cv-nav-label">Collection</span>
       </a>
@@ -175,14 +815,14 @@ body{padding-bottom:60px}
       </div>
       <div style="display:flex;gap:6px;margin-top:6px">
         <button class="cv-icon-btn" onclick="toggleTheme()" id="themeToggle" style="flex:1"><span id="themeIconWrap"></span></button>
-        <a href="/beta/logout.php" class="cv-icon-btn" style="flex:1;text-decoration:none">
+        <a href="/logout.php" class="cv-icon-btn" style="flex:1;text-decoration:none">
           <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </a>
       </div>
     </div>
     <div class="cv-mobile-controls">
       <button class="cv-icon-btn" onclick="toggleTheme()" id="themeToggleMobile"><span id="themeIconWrapMobile"></span></button>
-      <a href="/beta/logout.php" class="cv-icon-btn" style="text-decoration:none">
+      <a href="/logout.php" class="cv-icon-btn" style="text-decoration:none">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </a>
     </div>
@@ -235,16 +875,16 @@ body{padding-bottom:60px}
   </main>
 </div>
 
-<a href="/beta/scanner.php" class="fab">
+<a href="/scanner.php" class="fab">
   <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
 </a>
 
 <nav class="mobile-nav">
-  <a href="/beta/scanner.php" class="mobile-nav-item">
+  <a href="/scanner.php" class="mobile-nav-item">
     <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
     Scan
   </a>
-  <a href="/beta/collection.php" class="mobile-nav-item active">
+  <a href="/collection.php" class="mobile-nav-item active">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     Collection
   </a>
@@ -321,7 +961,7 @@ document.addEventListener('DOMContentLoaded',()=>{const t=localStorage.getItem('
 
 async function loadAll(){
   try{
-    const[cr,pr]=await Promise.all([fetch('/beta/api.php?action=collection&category=all',{credentials:'same-origin'}),fetch('/beta/api.php?action=getPrices',{credentials:'same-origin'})]);
+    const[cr,pr]=await Promise.all([fetch('/api.php?action=collection&category=all',{credentials:'same-origin'}),fetch('/api.php?action=getPrices',{credentials:'same-origin'})]);
     const cd=await cr.json();const pd=await pr.json();
     allItems=cd.ok?(cd.items||[]):[];priceData=pd.ok?(pd.prices||{}):{};
     updateCounts();filterItems();loadStats();autoRefreshPrices();setTimeout(loadImagesForVisible,300);
@@ -329,7 +969,7 @@ async function loadAll(){
 }
 
 async function loadStats(){
-  try{const r=await fetch('/beta/api.php?action=stats',{credentials:'same-origin'});const d=await r.json();if(!d.ok)return;const s=d.stats;
+  try{const r=await fetch('/api.php?action=stats',{credentials:'same-origin'});const d=await r.json();if(!d.ok)return;const s=d.stats;
   document.getElementById('sTotal').textContent=s.total||0;
   document.getElementById('sValue').textContent=s.value?'£'+parseFloat(s.value).toFixed(0):'—';
   document.getElementById('sInvested').textContent=s.invested?'£'+parseFloat(s.invested).toFixed(0):'—';
@@ -392,7 +1032,7 @@ async function loadImagesForVisible(){
 }
 
 async function loadImg(id,query,cat,fallback){
-  try{const resp=await fetch('/beta/api.php?'+new URLSearchParams({action:'getImage',id,query,cat}),{credentials:'same-origin'});const d=await resp.json();if(d.url)setImgEl(id,d.url,fallback);}catch(e){}
+  try{const resp=await fetch('/api.php?'+new URLSearchParams({action:'getImage',id,query,cat}),{credentials:'same-origin'});const d=await resp.json();if(d.url)setImgEl(id,d.url,fallback);}catch(e){}
 }
 
 function setImgEl(id,src,alt){
@@ -407,7 +1047,7 @@ async function autoRefreshPrices(){
   const toRefresh=allItems.slice(0,30);let done=0;
   for(const item of toRefresh){
     try{const q=buildQuery(item);if(!q){done++;continue;}const fd=new FormData();fd.append('action','refreshPrices');fd.append('item_id',item.id);fd.append('query',q);
-    const resp=await fetch('/beta/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();if(d.ok)priceData[item.id]=d.price;done++;
+    const resp=await fetch('/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();if(d.ok)priceData[item.id]=d.price;done++;
     document.getElementById('priceStatus').textContent=`Updating prices… ${done}/${toRefresh.length}`;}catch(e){done++;}
   }
   filterItems();loadStats();document.getElementById('priceStatus').textContent=`Prices updated — ${new Date().toLocaleTimeString()}`;
@@ -418,7 +1058,7 @@ async function refreshAllPrices(){autoRefreshPrices();}
 async function refreshSinglePrice(id){
   if(!id)return;const item=allItems.find(i=>i.id===id);if(!item)return;showToast('Refreshing price…');
   try{const fd=new FormData();fd.append('action','refreshPrices');fd.append('item_id',id);fd.append('query',buildQuery(item));
-  const resp=await fetch('/beta/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();
+  const resp=await fetch('/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();
   if(d.ok){priceData[id]=d.price;filterItems();openModal(id);showToast('Price updated');}}catch(e){showToast('Price refresh failed');}
 }
 
@@ -440,7 +1080,7 @@ function openModal(id){
     document.getElementById('modalImg').src = existingImg.src;
   } else {
     document.getElementById('modalImg').src = '';
-    fetch('/beta/api.php?'+new URLSearchParams({action:'getImage',id,query:buildQuery(item),cat:item.category}),{credentials:'same-origin'})
+    fetch('/api.php?'+new URLSearchParams({action:'getImage',id,query:buildQuery(item),cat:item.category}),{credentials:'same-origin'})
       .then(r=>r.json())
       .then(d=>{ if(d.url) document.getElementById('modalImg').src = d.url; })
       .catch(()=>{});
@@ -452,7 +1092,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
 async function deleteItem(id){
   if(!id||!confirm('Delete this item from your vault?'))return;
-  try{const fd=new FormData();fd.append('action','delete');fd.append('item_id',id);const resp=await fetch('/beta/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();
+  try{const fd=new FormData();fd.append('action','delete');fd.append('item_id',id);const resp=await fetch('/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();
   if(d.ok){allItems=allItems.filter(i=>i.id!==id);delete priceData[id];closeModal();updateCounts();filterItems();loadStats();showToast('Item deleted');}}catch(e){showToast('Delete failed');}
 }
 
@@ -528,7 +1168,7 @@ async function saveEdit() {
     fd.append('action', 'update');
     fd.append('item_id', editItemId);
     fd.append('updates', JSON.stringify(updates));
-    const resp = await fetch('/beta/api.php', {method:'POST', body:fd, credentials:'same-origin'});
+    const resp = await fetch('/api.php', {method:'POST', body:fd, credentials:'same-origin'});
     const d = await resp.json();
     if (d.ok) {
       // Update local data
