@@ -1244,3 +1244,21 @@ html[data-theme="light"] nav:not(.bottom-nav) {
 .right-title { color: rgba(245,245,245,.80) !important; }
 [data-theme="light"] .right-hdr { border-bottom: 1px solid rgba(0,0,0,.08) !important; }
 [data-theme="light"] .right-title { color: #141414 !important; }
+
+/* ── Beta collection CSS token aliases ──────────────────────────────────────
+   Maps beta token names onto live values so collection.php renders correctly.
+   Live site stays unchanged; this is additive only.                         */
+:root {
+  --font:        var(--font-sans);
+  --mono:        var(--font-mono);
+  --void:        #0C0C10;
+  --surface3:    #18181F;
+  --border2:     rgba(255,255,255,.12);
+  --ink4:        #2A2A35;
+  --acid:        #C8FF00;
+  --acid-dim:    rgba(200,255,0,.12);
+  --acid-glow:   0 0 24px rgba(200,255,0,.30), 0 0 80px rgba(200,255,0,.10);
+  --acid-glow-sm:0 0 12px rgba(200,255,0,.25);
+  --radius-md:   4px;
+  --nav-w:       220px;
+}
