@@ -365,19 +365,53 @@ function fetchEbayPrice($query) {
         'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language: en-GB,en;q=0.9',
+        'Accept-Encoding: gzip, deflate, br',
         'Cache-Control: no-cache',
         'Pragma: no-cache',
     ]);
     if (!$resp['ok'] || $resp['code'] !== 200) return null;
-    // Match pound prices — handle both £ symbol and HTML entity &#163;
-    preg_match_all('/(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $resp['body'], $matches);
+    $body = $resp['body'];
     $prices = [];
-    foreach ($matches[1] as $p) {
-        $v = floatval(str_replace(',', '', $p));
-        if ($v >= 0.50 && $v <= 50000) $prices[] = $v;
+    // Pattern 1: £ symbol or HTML entity &#163;
+    preg_match_all('/(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m1);
+    foreach ($m1[1] as $p) { $v = floatval(str_replace(',','',$p)); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
+    // Pattern 2: data-price or itemprop price attributes (newer eBay markup)
+    preg_match_all('/data-price="([\d.]+)"/', $body, $m2);
+    foreach ($m2[1] as $p) { $v = floatval($p); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
+    // Pattern 3: JSON-LD price data
+    preg_match_all('/"price"\s*:\s*"?([\d.]+)"?/', $body, $m3);
+    foreach ($m3[1] as $p) { $v = floatval($p); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
+    // Pattern 4: s-item__price spans
+    preg_match_all('/class="s-item__price"[^>]*>[^£<]*(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m4);
+    foreach ($m4[1] as $p) { $v = floatval(str_replace(',','',$p)); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
+
+    $prices = array_values(array_unique($prices));
+    sort($prices);
+
+    // If still no prices, try a broader fallback search (shorter query)
+    if (empty($prices) && str_word_count($query) > 2) {
+        $words = explode(' ', $query);
+        $shortQuery = implode(' ', array_slice($words, 0, 3));
+        $url2 = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
+            '_nkw' => $shortQuery, 'LH_Sold' => '1', 'LH_Complete' => '1',
+            '_sacat' => '0', '_sop' => '13', '_ipg' => '60',
+        ]);
+        $resp2 = curlGet($url2, [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language: en-GB,en;q=0.9',
+        ]);
+        if ($resp2['ok'] && $resp2['code'] === 200) {
+            preg_match_all('/(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $resp2['body'], $fm);
+            foreach ($fm[1] as $p) { $v = floatval(str_replace(',','',$p)); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
+            preg_match_all('/data-price="([\d.]+)"/', $resp2['body'], $fm2);
+            foreach ($fm2[1] as $p) { $v = floatval($p); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
+        }
+        sort($prices);
     }
+
     if (empty($prices)) return null;
-    // Use up to 30 prices; if fewer exist gracefully use all available
+
     $prices  = array_slice($prices, 0, 30);
     $count   = count($prices);
     $last10  = array_slice($prices, 0, min(10, $count));
