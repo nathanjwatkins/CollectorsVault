@@ -18,7 +18,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <title>CollectorVault — Collection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
-<?php include 'theme.php'; ?>
+<script>document.documentElement.setAttribute('data-theme','dark');</script>
 <style>
 /* COLLECTION PAGE */
 .stats-zone{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
@@ -788,6 +788,9 @@ body::before {
 /* ── Selection ───────────────────────────────────────────────────────────── */
 ::selection { background: rgba(200,255,0,.20); color: var(--void); }
 
+
+/* Theme toggle hidden — these pages are dark-only */
+#themeToggle, #themeToggleMobile { display: none !important; }
 </style>
 </head>
 <body>
@@ -814,14 +817,14 @@ body::before {
         <div class="cv-user-name"><?= $username ?></div>
       </div>
       <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="cv-icon-btn" onclick="toggleTheme()" id="themeToggle" style="flex:1"><span id="themeIconWrap"></span></button>
+        <button class="cv-icon-btn" id="themeToggle" style="flex:1"><span id="themeIconWrap"></span></button>
         <a href="/logout.php" class="cv-icon-btn" style="flex:1;text-decoration:none">
           <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </a>
       </div>
     </div>
     <div class="cv-mobile-controls">
-      <button class="cv-icon-btn" onclick="toggleTheme()" id="themeToggleMobile"><span id="themeIconWrapMobile"></span></button>
+      <button class="cv-icon-btn" id="themeToggleMobile"><span id="themeIconWrapMobile"></span></button>
       <a href="/logout.php" class="cv-icon-btn" style="text-decoration:none">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </a>

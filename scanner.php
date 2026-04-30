@@ -20,7 +20,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <title>CollectorVault — Scanner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
-<?php include 'theme.php'; ?>
+<script>document.documentElement.setAttribute('data-theme','dark');</script>
 <style>
 
 /* ══ SCANNER PAGE LAYOUT ════════════════════════════════════════════════════ */
@@ -1537,6 +1537,12 @@ body::before {
 /* ── Selection ───────────────────────────────────────────────────────────── */
 ::selection { background: rgba(200,255,0,.20); color: var(--void); }
 
+
+/* Force cv- layout always dark regardless of theme toggle */
+.cv-app, .cv-sidebar, .cv-main { background: var(--void, #050507); }
+
+/* Theme toggle hidden — these pages are dark-only */
+#themeToggle, #themeToggleMobile { display: none !important; }
 </style>
 </head>
 
@@ -1573,7 +1579,7 @@ body::before {
         <div class="cv-user-name"><?= $username ?></div>
       </div>
       <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="cv-icon-btn" onclick="toggleTheme()" id="themeToggle" style="flex:1" aria-label="Toggle theme">
+        <button class="cv-icon-btn" id="themeToggle" style="flex:1" aria-label="Toggle theme">
           <span id="themeIconWrap"></span>
         </button>
         <a href="/logout.php" class="cv-icon-btn" style="flex:1;text-decoration:none" aria-label="Sign out">
@@ -1584,7 +1590,7 @@ body::before {
 
     <!-- Mobile controls -->
     <div class="cv-mobile-controls">
-      <button class="cv-icon-btn" onclick="toggleTheme()" id="themeToggleMobile" aria-label="Toggle theme">
+      <button class="cv-icon-btn" id="themeToggleMobile" aria-label="Toggle theme">
         <span id="themeIconWrapMobile"></span>
       </button>
       <a href="/logout.php" class="cv-icon-btn" aria-label="Sign out">
