@@ -27,7 +27,7 @@ html { color-scheme: dark; }
   --cat-h:     40px;
 }
 
-[data-theme="dark"] {
+:root, [data-theme="dark"] {
   --bg:        #0E0E0E;
   --surface:   #1A1A1A;
   --surface2:  #222222;
@@ -49,10 +49,10 @@ html {
   color-scheme: light;
 }
 [data-theme="dark"] html,
-html[data-theme="dark"] { color-scheme: dark; }
+html:root, [data-theme="dark"] { color-scheme: dark; }
 
 body {
-  background: var(--bg);
+  background: #0E0D0B;
   color: var(--ink);
   font-family: var(--font-sans);
   min-height: 100dvh;
@@ -268,7 +268,7 @@ nav:not(.bottom-nav) {
 
 /* ── CATEGORY BAR ──────────────────────────────────────────────────────────── */
 .cat-bar {
-  background: var(--surface);
+  background: #0E0D0B;
   border-bottom: 1px solid var(--border);
   padding: 0 12px;
   display: flex;
