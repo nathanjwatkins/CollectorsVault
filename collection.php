@@ -1,7 +1,9 @@
 <?php
 ob_start();
-header('Cache-Control: no-cache, must-revalidate, max-age=0');
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
 header('Pragma: no-cache');
+header('Expires: 0');
+header('X-LiteSpeed-Cache-Control: no-cache');
 ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.cookie_secure', '1');
 ini_set('session.cookie_httponly', '1');
