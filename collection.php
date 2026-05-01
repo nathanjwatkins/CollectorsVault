@@ -817,14 +817,14 @@ body::before {
         <div class="cv-user-name"><?= $username ?></div>
       </div>
       <div style="display:flex;gap:6px;margin-top:6px">
-        <button class="cv-icon-btn" id="themeToggle" style="flex:1"><span id="themeIconWrap"></span></button>
+        
         <a href="/logout.php" class="cv-icon-btn" style="flex:1;text-decoration:none">
           <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </a>
       </div>
     </div>
     <div class="cv-mobile-controls">
-      <button class="cv-icon-btn" id="themeToggleMobile"><span id="themeIconWrapMobile"></span></button>
+      
       <a href="/logout.php" class="cv-icon-btn" style="text-decoration:none">
         <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </a>
@@ -952,10 +952,7 @@ body::before {
 <script>
 let allItems=[],priceData={},currentTab='all',currentView='grid',currentModalId=null,toastT;
 
-function _renderThemeIcon(t){const s='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',m='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';document.querySelectorAll('#themeIconWrap,#themeIconWrapMobile').forEach(el=>{if(el)el.innerHTML=t==='dark'?s:m});}
-function toggleTheme(){const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);localStorage.setItem('cv_theme',t);_renderThemeIcon(t);}
 
-const CATS={all:{label:'All',icon:'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>'},cards:{label:'Cards',icon:'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>'},shirts:{label:'Shirts',icon:'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>'},games:{label:'Games',icon:'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01M7 12h.01M17 12h.01"/></svg>'},vinyl:{label:'Vinyl',icon:'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>'},other:{label:'Other',icon:'<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'}};
 
 function buildToolbarTabs(){const bar=document.getElementById('toolbar');const gap=bar.querySelector('.toolbar-gap');Object.entries(CATS).forEach(([k,v])=>{const btn=document.createElement('button');btn.className='cat-tab'+(k==='all'?' active':'');btn.dataset.cat=k;btn.innerHTML=`${v.icon} ${v.label} <span class="cat-count" id="cnt_${k}">0</span>`;btn.onclick=()=>setTab(k);bar.insertBefore(btn,gap);});}
 function setTab(t){currentTab=t;document.querySelectorAll('.cat-tab').forEach(b=>b.classList.toggle('active',b.dataset.cat===t));filterItems();setTimeout(loadImagesForVisible,100);}

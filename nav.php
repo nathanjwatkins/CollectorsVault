@@ -16,9 +16,6 @@ $page = basename($_SERVER['PHP_SELF'], '.php');
   </div>
   <div class="nav-right">
     <span class="nav-user"><?= htmlspecialchars($username) ?></span>
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">
-      <span id="themeIconWrap"></span>
-    </button>
     <a href="logout.php" class="sign-out-btn">
       <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       <span class="sign-out-label">Sign out</span>

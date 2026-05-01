@@ -8,7 +8,7 @@ if (!isset($_SESSION['user'])) { header('Location: index.php'); exit; }
 $username = htmlspecialchars($_SESSION['user']);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
 <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">

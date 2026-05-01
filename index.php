@@ -6,7 +6,7 @@ session_start();
 if (isset($_SESSION['user'])) { header('Location: scanner.php'); exit; }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
 <script>(function(){var t=localStorage.getItem('cv_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}());</script>
@@ -400,9 +400,7 @@ a, a:visited { color: inherit; text-decoration: none; }
   <div class="vignette"></div>
 
   <!-- Theme toggle -->
-  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-  </button>
+  
 
   <!-- Hero (desktop left) -->
   <div class="hero-side" id="heroSide">
