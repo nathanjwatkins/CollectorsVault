@@ -957,7 +957,7 @@ let allItems=[],priceData={},currentTab='all',currentView='grid',currentModalId=
 function buildToolbarTabs(){const bar=document.getElementById('toolbar');const gap=bar.querySelector('.toolbar-gap');Object.entries(CATS).forEach(([k,v])=>{const btn=document.createElement('button');btn.className='cat-tab'+(k==='all'?' active':'');btn.dataset.cat=k;btn.innerHTML=`${v.icon} ${v.label} <span class="cat-count" id="cnt_${k}">0</span>`;btn.onclick=()=>setTab(k);bar.insertBefore(btn,gap);});}
 function setTab(t){currentTab=t;document.querySelectorAll('.cat-tab').forEach(b=>b.classList.toggle('active',b.dataset.cat===t));filterItems();setTimeout(loadImagesForVisible,100);}
 
-document.addEventListener('DOMContentLoaded',()=>{const t=localStorage.getItem('cv_theme')||'dark';document.documentElement.setAttribute('data-theme',t);_renderThemeIcon(t);buildToolbarTabs();loadAll();});
+document.addEventListener('DOMContentLoaded',()=>{document.documentElement.setAttribute('data-theme','dark');buildToolbarTabs();loadAll();});
 
 async function loadAll(){
   try{
