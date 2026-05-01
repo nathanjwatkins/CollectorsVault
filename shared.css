@@ -4,6 +4,7 @@
 a { color: inherit; text-decoration: none; }
 
 /* ── TOKENS ─────────────────────────────────────────────────────────────── */
+html { color-scheme: dark; }
 :root {
   /* Reference palette: athletic charcoal + cool grey + off-white */
   --bg:        #F4F3F1;
@@ -155,24 +156,9 @@ nav:not(.bottom-nav) {
 }
 
 /* ── THEME TOGGLE ──────────────────────────────────────────────────────────── */
-.theme-toggle {
-  width: 30px; height: 30px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  color: var(--ink);
-  transition: background-color .2s, border-color .15s, color .2s;
-  -webkit-tap-highlight-color: transparent;
-}
-.theme-toggle:hover { border-color: var(--ink); }
-.theme-toggle svg {
-  width: 13px; height: 13px;
-  stroke: currentColor; fill: none; stroke-width: 1.5;
-  display: block; pointer-events: none;
-}
+
+
+
 
 /* ── SIGN OUT ──────────────────────────────────────────────────────────────── */
 .sign-out-btn {
@@ -455,7 +441,7 @@ nav:not(.bottom-nav) {
   .nav-divider { display: block; }
   .nav-user    { display: block; }
   .nav-link  { height: 32px; padding: 0 12px; }
-  .theme-toggle { width: 32px; height: 32px; }
+  
   .sign-out-btn { height: 32px; }
   .btn-sm   { height: 32px; }
   .cat-bar  { padding: 0 24px; }
@@ -607,22 +593,10 @@ html[data-theme="dark"] .glass-card {
 .glass-scene .picker-eyebrow-icon svg { stroke: rgba(245,245,245,.80); }
 
 /* Light mode: electric sky blue — pops against the pale photo background */
-html[data-theme="light"] .glass-scene .picker-eyebrow {
-  color: #38BEFF;
-  text-shadow: 0 1px 12px rgba(0,0,0,.45);
-}
-html[data-theme="light"] .glass-scene .picker-hero-right {
-  color: #38BEFF;
-  text-shadow: 0 1px 12px rgba(0,0,0,.45);
-}
-html[data-theme="light"] .glass-scene .picker-hero-right strong {
-  color: #69CFFF;
-  text-shadow: 0 1px 12px rgba(0,0,0,.45);
-}
-html[data-theme="light"] .glass-scene .picker-eyebrow-icon svg {
-  stroke: #38BEFF;
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,.35));
-}
+html
+html
+html
+html
 .glass-scene .picker-dot                { background: rgba(255,255,255,.30); }
 .glass-scene .picker-dot.active         { background: rgba(255,255,255,.85); }
 
@@ -977,10 +951,7 @@ body.cat-carousel-open {
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
   border: 1px solid rgba(255,255,255,.10);
 }
-[data-theme="light"] .glass-panel {
-  background: rgba(255,255,255,.62);
-  border: 1px solid rgba(255,255,255,.80);
-}
+
 
 /* ── Nav — simple theme-responsive glass ─────────────────────────────────── */
 /* Dark mode (includes carousel which is always forced to dark via JS) */
@@ -991,12 +962,7 @@ html[data-theme="dark"] nav:not(.bottom-nav) {
   border-bottom: 1px solid rgba(255,255,255,.08) !important;
 }
 /* Light mode */
-html[data-theme="light"] nav:not(.bottom-nav) {
-  background: rgba(255,255,255,.82) !important;
-  backdrop-filter: blur(20px) saturate(1.2) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
-  border-bottom: 1px solid rgba(0,0,0,.08) !important;
-}
+html
 
 /* ── Collection: hero ───────────────────────────────────────────────────── */
 .hero {
@@ -1005,19 +971,13 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
   border-bottom: 1px solid rgba(255,255,255,.08) !important;
 }
-[data-theme="light"] .hero {
-  background: rgba(255,255,255,.45) !important;
-  border-bottom: 1px solid rgba(255,255,255,.60) !important;
-}
+
 /* Ensure hero text is always readable */
-[data-theme="light"] .hero-label  { color: rgba(20,20,20,.50) !important; }
-[data-theme="light"] .hero-title  { color: #141414 !important; }
-[data-theme="light"] .stat-n      { color: #141414 !important; }
-[data-theme="light"] .stat-l      { color: rgba(20,20,20,.45) !important; }
-[data-theme="light"] .stat-card   {
-  background: rgba(255,255,255,.40) !important;
-  border-color: rgba(0,0,0,.10) !important;
-}
+
+
+
+
+
 
 /* ── Collection: category tabs ──────────────────────────────────────────── */
 .cat-tabs-wrap,
@@ -1027,11 +987,7 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   -webkit-backdrop-filter: blur(20px) !important;
   border-bottom: 1px solid rgba(255,255,255,.08) !important;
 }
-[data-theme="light"] .cat-tabs-wrap,
-[data-theme="light"] .cat-tabs {
-  background: rgba(255,255,255,.65) !important;
-  border-bottom: 1px solid rgba(0,0,0,.08) !important;
-}
+
 
 /* ── Collection: controls bar ───────────────────────────────────────────── */
 .controls-bar {
@@ -1040,10 +996,7 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   -webkit-backdrop-filter: blur(20px) !important;
   border-bottom: 1px solid rgba(255,255,255,.07) !important;
 }
-[data-theme="light"] .controls-bar {
-  background: rgba(255,255,255,.60) !important;
-  border-bottom: 1px solid rgba(0,0,0,.07) !important;
-}
+
 
 /* ── Search input ───────────────────────────────────────────────────────── */
 .search-wrap input {
@@ -1052,21 +1005,14 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   color: rgba(245,245,245,.90) !important;
 }
 .search-wrap input::placeholder { color: rgba(245,245,245,.30) !important; }
-[data-theme="light"] .search-wrap input {
-  background: rgba(0,0,0,.06) !important;
-  border: 1px solid rgba(0,0,0,.12) !important;
-  color: #141414 !important;
-}
-[data-theme="light"] .search-wrap input::placeholder { color: rgba(20,20,20,.35) !important; }
+
+
 .search-wrap input:focus {
   border-color: rgba(255,255,255,.35) !important;
   background: rgba(255,255,255,.12) !important;
   outline: none !important;
 }
-[data-theme="light"] .search-wrap input:focus {
-  border-color: rgba(0,0,0,.30) !important;
-  background: rgba(255,255,255,.85) !important;
-}
+
 
 /* ── Sort select ────────────────────────────────────────────────────────── */
 .sort-select {
@@ -1074,35 +1020,23 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   border: 1px solid rgba(255,255,255,.14) !important;
   color: rgba(245,245,245,.85) !important;
 }
-[data-theme="light"] .sort-select {
-  background: rgba(0,0,0,.06) !important;
-  border: 1px solid rgba(0,0,0,.12) !important;
-  color: #141414 !important;
-}
+
 
 /* ── View toggle ────────────────────────────────────────────────────────── */
 .view-toggle {
   border: 1px solid rgba(255,255,255,.14) !important;
 }
-[data-theme="light"] .view-toggle {
-  border: 1px solid rgba(0,0,0,.12) !important;
-}
+
 .vt-btn {
   background: rgba(255,255,255,.06) !important;
   color: rgba(245,245,245,.50) !important;
 }
-[data-theme="light"] .vt-btn {
-  background: rgba(0,0,0,.04) !important;
-  color: rgba(20,20,20,.50) !important;
-}
+
 .vt-btn.active {
   background: rgba(245,245,245,.90) !important;
   color: #111 !important;
 }
-[data-theme="light"] .vt-btn.active {
-  background: #141414 !important;
-  color: #fff !important;
-}
+
 
 /* ── Refresh bar ────────────────────────────────────────────────────────── */
 .refresh-bar {
@@ -1112,11 +1046,7 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   border-bottom: 1px solid rgba(255,255,255,.06) !important;
   color: rgba(245,245,245,.40) !important;
 }
-[data-theme="light"] .refresh-bar {
-  background: rgba(255,255,255,.55) !important;
-  border-bottom: 1px solid rgba(0,0,0,.06) !important;
-  color: rgba(20,20,20,.45) !important;
-}
+
 
 /* ── Scanner left panel ─────────────────────────────────────────────────── */
 .left {
@@ -1126,11 +1056,7 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   border-right: 1px solid rgba(255,255,255,.08) !important;
   border-bottom: 1px solid rgba(255,255,255,.08) !important;
 }
-[data-theme="light"] .left {
-  background: rgba(255,255,255,.65) !important;
-  border-right: 1px solid rgba(0,0,0,.08) !important;
-  border-bottom: 1px solid rgba(0,0,0,.08) !important;
-}
+
 
 /* ── Scanner form inputs ────────────────────────────────────────────────── */
 .fg input,
@@ -1140,46 +1066,31 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   border: 1px solid rgba(255,255,255,.14) !important;
   color: rgba(245,245,245,.90) !important;
 }
-[data-theme="light"] .fg input,
-[data-theme="light"] .fg select,
-[data-theme="light"] .pi-wrap input {
-  background: rgba(0,0,0,.05) !important;
-  border: 1px solid rgba(0,0,0,.12) !important;
-  color: #141414 !important;
-}
+
 .fg input:focus, .fg select:focus {
   border-color: rgba(255,255,255,.35) !important;
 }
-[data-theme="light"] .fg input:focus,
-[data-theme="light"] .fg select:focus {
-  border-color: rgba(0,0,0,.30) !important;
-}
+
 .fg label { color: rgba(245,245,245,.40) !important; }
-[data-theme="light"] .fg label { color: rgba(20,20,20,.45) !important; }
+
 .fg input::placeholder { color: rgba(245,245,245,.22) !important; }
-[data-theme="light"] .fg input::placeholder { color: rgba(20,20,20,.30) !important; }
+
 
 /* ── Dropzone ───────────────────────────────────────────────────────────── */
 .dropzone {
   background: rgba(255,255,255,.05) !important;
   border-color: rgba(255,255,255,.18) !important;
 }
-[data-theme="light"] .dropzone {
-  background: rgba(255,255,255,.35) !important;
-  border-color: rgba(0,0,0,.15) !important;
-}
+
 .dropzone:hover {
   background: rgba(255,255,255,.10) !important;
   border-color: rgba(255,255,255,.45) !important;
 }
-[data-theme="light"] .dropzone:hover {
-  background: rgba(255,255,255,.55) !important;
-  border-color: rgba(0,0,0,.30) !important;
-}
+
 .dz-title { color: rgba(245,245,245,.80) !important; }
 .dz-sub   { color: rgba(245,245,245,.35) !important; }
-[data-theme="light"] .dz-title { color: #141414 !important; }
-[data-theme="light"] .dz-sub   { color: rgba(20,20,20,.45) !important; }
+
+
 
 /* ── AI result / id-block ───────────────────────────────────────────────── */
 .id-block {
@@ -1188,14 +1099,11 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
 }
-[data-theme="light"] .id-block {
-  background: rgba(255,255,255,.50) !important;
-  border: 1px solid rgba(0,0,0,.10) !important;
-}
+
 .id-name { color: rgba(245,245,245,.92) !important; }
-[data-theme="light"] .id-name { color: #141414 !important; }
+
 .id-meta { color: rgba(245,245,245,.45) !important; }
-[data-theme="light"] .id-meta { color: rgba(20,20,20,.50) !important; }
+
 
 /* ── Recent cards (scanner right panel) ─────────────────────────────────── */
 .recent-card {
@@ -1204,14 +1112,11 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
 }
-[data-theme="light"] .recent-card {
-  background: rgba(255,255,255,.55) !important;
-  border: 1px solid rgba(255,255,255,.80) !important;
-}
+
 .rc-name { color: rgba(245,245,245,.90) !important; }
 .rc-meta { color: rgba(245,245,245,.40) !important; }
-[data-theme="light"] .rc-name { color: #141414 !important; }
-[data-theme="light"] .rc-meta { color: rgba(20,20,20,.50) !important; }
+
+
 
 /* ── Collection grid background ─────────────────────────────────────────── */
 .ic-grid-wrap, .col-body { background: transparent !important; }
@@ -1223,10 +1128,7 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   -webkit-backdrop-filter: blur(24px) !important;
   border-top: 1px solid rgba(255,255,255,.08) !important;
 }
-[data-theme="light"] .bottom-nav {
-  background: rgba(255,255,255,.85) !important;
-  border-top: 1px solid rgba(0,0,0,.08) !important;
-}
+
 
 /* ── Scan button + action buttons ───────────────────────────────────────── */
 .btn-save {
@@ -1234,16 +1136,13 @@ html[data-theme="light"] nav:not(.bottom-nav) {
   color: #111 !important;
 }
 .btn-save:hover { background: rgba(245,245,245,1) !important; }
-[data-theme="light"] .btn-save {
-  background: #141414 !important;
-  color: #fff !important;
-}
+
 
 /* ── Right panel header ─────────────────────────────────────────────────── */
 .right-hdr { border-bottom: 1px solid rgba(255,255,255,.10) !important; }
 .right-title { color: rgba(245,245,245,.80) !important; }
-[data-theme="light"] .right-hdr { border-bottom: 1px solid rgba(0,0,0,.08) !important; }
-[data-theme="light"] .right-title { color: #141414 !important; }
+
+
 
 /* ── Beta collection CSS token aliases ──────────────────────────────────────
    Maps beta token names onto live values so collection.php renders correctly.
