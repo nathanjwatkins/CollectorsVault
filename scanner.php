@@ -26,14 +26,13 @@ $username = htmlspecialchars($_SESSION['user']);
 
 /* ── LEFT: SCANNER ───────────────────────────────────────────────────────── */
 .left {
-  background: rgba(244,243,241,.55);
+  background: rgba(10,10,10,.85);
   backdrop-filter: blur(20px) saturate(1.2);
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  border-bottom: 1px solid rgba(255,255,255,.20);
+  border-bottom: 1px solid rgba(255,255,255,.08);
   padding:16px; display:flex; flex-direction:column; gap:14px;
 }
-[data-theme="dark"] .left,
-html[data-theme="dark"] .left {
+.left {
   background: rgba(10,10,10,.62);
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
