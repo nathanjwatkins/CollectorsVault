@@ -111,45 +111,55 @@ html[data-theme="dark"] .left {
 .btn-reset:hover { border-color:var(--ink); color:var(--ink); }
 
 /* ── RIGHT: RECENTS ──────────────────────────────────────────────────────── */
-.right { flex:1; padding:16px; padding-bottom:80px; background:transparent; }
-.right-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.15); }
-.right-title { font-family:var(--font-sans); font-size:16px; font-weight:500; color:var(--ink); }
+.right { flex:1; padding:16px; padding-bottom:80px; background:var(--bg,#0C0C10); }
+.right-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.08); }
+.right-title { font-family:var(--font-sans); font-size:13px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.4); }
 
+/* Recent grid — matches collection.php card style */
 .recent-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
-.recent-card { min-height:0; }
+.recent-card { min-height:0; position:relative; }
 .recent-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius-lg); overflow:hidden; cursor:pointer;
-  transition:transform .15s, box-shadow .15s, border-color .15s;
+  background:#111116; border:1px solid rgba(255,255,255,.07);
+  border-radius:6px; overflow:hidden; cursor:pointer;
+  transition:transform .15s, border-color .15s;
   -webkit-tap-highlight-color:transparent;
 }
-.recent-card:hover { transform:translateY(-1px); box-shadow:var(--shadow); border-color:var(--ink2); }
+.recent-card:hover { transform:translateY(-1px); border-color:rgba(255,255,255,.15); }
 .recent-card:active { transform:scale(.98); }
+
+/* Index number top-left */
+.rc-index { position:absolute; top:8px; left:9px; font-family:var(--font-mono); font-size:8px; letter-spacing:.10em; color:#C8FF00; opacity:.55; z-index:5; pointer-events:none; }
+
+/* Image area with overlay */
 .rc-thumb {
-  width:100%; height:120px; background:var(--surface2);
+  width:100%; aspect-ratio:3/4; background:#18181F;
   display:flex; align-items:center; justify-content:center; overflow:hidden;
-  flex-shrink:0;
+  position:relative;
 }
-.rc-thumb img { width:100%; height:100%; object-fit:cover; }
-.rc-thumb .rc-icon { width:32px; height:32px; opacity:.3; }
-.rc-thumb .rc-icon svg { width:100%; height:100%; stroke:var(--ink); fill:none; stroke-width:1; }
-.rc-body { padding:8px 10px; }
-.rc-name { font-weight:500; font-size:11px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.rc-meta { font-size:10px; color:var(--ink3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.rc-foot { display:flex; justify-content:space-between; align-items:center; margin-top:5px; }
-.rc-tag { background:var(--surface2); border:1px solid var(--border); border-radius:3px; padding:1px 5px; font-family:var(--font-mono); font-size:8px; color:var(--ink2); }
-.rc-val { font-family:var(--font-mono); font-size:10px; font-weight:500; color:var(--gold); }
+.rc-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s ease; }
+.recent-card:hover .rc-thumb img { transform:scale(1.04); }
+.rc-thumb .rc-icon { width:28px; height:28px; }
+.rc-thumb .rc-icon svg { width:100%; height:100%; stroke:rgba(255,255,255,.15); fill:none; stroke-width:1.2; }
+.rc-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(5,5,7,.90) 0%,rgba(5,5,7,.20) 45%,transparent 70%); pointer-events:none; }
+
+/* Card footer overlaid on image */
+.rc-foot { position:absolute; bottom:0; left:0; right:0; padding:10px 10px 8px; z-index:2; }
+.rc-cat { font-family:var(--font-mono); font-size:7px; letter-spacing:.10em; text-transform:uppercase; color:#C8FF00; opacity:.70; margin-bottom:3px; }
+.rc-name { font-weight:600; font-size:12px; color:#FAFAFA; letter-spacing:-.01em; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rc-price-row { display:flex; align-items:center; justify-content:space-between; margin-top:5px; }
+.rc-val { font-family:var(--font-mono); font-size:12px; font-weight:700; color:#FAFAFA; }
+.rc-tag { font-family:var(--font-mono); font-size:7px; letter-spacing:.06em; padding:1px 5px; border-radius:3px; border:1px solid rgba(200,255,0,.20); background:rgba(200,255,0,.08); color:#C8FF00; text-transform:uppercase; }
 
 .empty-scan { padding:40px 20px; text-align:center; }
-.empty-scan svg { width:36px; height:36px; stroke:var(--border); fill:none; stroke-width:1; margin-bottom:10px; }
-.empty-scan p { font-size:12px; color:var(--ink3); font-family:var(--font-mono); }
+.empty-scan svg { width:36px; height:36px; stroke:rgba(255,255,255,.15); fill:none; stroke-width:1; margin-bottom:10px; }
+.empty-scan p { font-size:12px; color:rgba(255,255,255,.3); font-family:var(--font-mono); }
 
 /* ── DESKTOP ──────────────────────────────────────────────────────────────── */
 @media (min-width:768px) {
   .app { flex-direction:row; min-height:calc(100dvh - var(--nav-h) - var(--cat-h, 40px)); }
   .left { width:360px; flex-shrink:0; border-bottom:none; border-right:1px solid var(--border); position:sticky; top:0; height:calc(100dvh - var(--nav-h) - var(--cat-h, 40px)); overflow-y:auto; padding:20px; }
-  .right { padding:20px 28px; }
-  .recent-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; }
+  .right { padding:20px 28px; background:var(--bg,#0C0C10); }
+  .recent-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; }
 }
 @media (min-width:960px) {
   .left { width:380px; padding:24px; }
@@ -536,7 +546,7 @@ html[data-theme="dark"] .left {
     </div>
   </div>
 
-  <div class="right">
+  <div class="right" style="background:#0C0C10">
     <div class="right-hdr">
       <div class="right-title">Recent Scans</div>
       <a href="collection.php" class="btn-sm btn-outline">View All →</a>
@@ -798,20 +808,26 @@ function renderRecent(items){
     grid.innerHTML='<div class="empty-scan"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg><p>Scan your first item</p></div>';
     return;
   }
-  grid.innerHTML=items.map(item=>{
+  grid.innerHTML=items.map((item,i)=>{
     const icon=CAT_ICONS_SVG[item.category]||CAT_ICONS_SVG.other;
     const thumb=item.thumbnail
       ?`<img src="${item.thumbnail}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">`
       :`<div class="rc-icon">${icon}</div>`;
-    const val=item.value?'£'+parseFloat(item.value).toFixed(2):'';
+    const val=item.value?'£'+parseFloat(item.value).toFixed(2):'—';
+    const badge=item.item_type||item.series?`<span class="rc-tag">${item.item_type||item.series}</span>`:'';
+    const idx=String(i+1).padStart(2,'0');
     return `<div class="recent-card" onclick="openRecentModal(${JSON.stringify(item).replace(/"/g,'&quot;')})">
-      <div class="rc-thumb">${thumb}</div>
-      <div class="rc-body">
+      <div class="rc-index">${idx}</div>
+      <div class="rc-thumb">
+        ${thumb}
+        <div class="rc-overlay"></div>
+      </div>
+      <div class="rc-foot">
+        <div class="rc-cat">${CAT_LABELS[item.category]||item.category||''}</div>
         <div class="rc-name">${item.name}</div>
-        <div class="rc-meta">${item.subtitle||CAT_LABELS[item.category]||'—'}</div>
-        <div class="rc-foot">
-          <span class="rc-tag">${item.item_type||item.series||item.category}</span>
-          ${val?`<span class="rc-val">${val}</span>`:''}
+        <div class="rc-price-row">
+          <span class="rc-val">${val}</span>
+          ${badge}
         </div>
       </div>
     </div>`;
