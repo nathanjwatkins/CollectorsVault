@@ -57,6 +57,13 @@ switch ($action) {
     case 'delete':        doDelete();       break;
     case 'stats':         doStats();        break;
     case 'getImage':      doGetImage();     break;
+    case 'testEbay':
+        requireAuth();
+        $q = $_GET['q'] ?? 'Pokemon Charizard card';
+        $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query(['_nkw'=>$q,'LH_Sold'=>'1','LH_Complete'=>'1','_ipg'=>'10']);
+        $r = curlGet($url);
+        json(['code'=>$r['code'],'len'=>strlen($r['body']),'has_price'=>strpos($r['body'],'£')!==false,'has_robot'=>strpos($r['body'],'robot')!==false,'snippet'=>substr(strip_tags($r['body']),0,300)]);
+        break;
     case 'refreshPrices': doRefreshPrices();break;
     case 'getPrices':     doGetPrices();    break;
     case 'searchEbay':    doSearchEbay();   break;
@@ -262,6 +269,7 @@ function fetchEbayListingImage($query) {
         'Cache-Control: no-cache',
     ]);
     if (!$resp['ok'] || $resp['code'] !== 200 || empty($resp['body'])) return null;
+    if (strpos($resp['body'], 'robot') !== false || strlen($resp['body']) < 1000) return null;
     preg_match_all('/https:\/\/i\.ebayimg\.com\/[^"\'\\s>]+/i', $resp['body'], $m);
     foreach ($m[0] ?? [] as $imgUrl) {
         if (strpos($imgUrl, 'spinner') !== false) continue;
@@ -369,8 +377,17 @@ function fetchEbayPrice($query) {
         'Cache-Control: no-cache',
         'Pragma: no-cache',
     ]);
-    if (!$resp['ok'] || $resp['code'] !== 200) return null;
+    if (!$resp['ok'] || $resp['code'] !== 200) {
+        // eBay may redirect to CAPTCHA (200 on redirect) or return 429/503
+        error_log('CV eBay price fetch failed: code=' . $resp['code'] . ' err=' . $resp['error'] . ' url=' . $url);
+        return null;
+    }
     $body = $resp['body'];
+    // Check if eBay returned a CAPTCHA/bot-detection page
+    if (strpos($body, 'robot') !== false || strpos($body, 'captcha') !== false || strlen($body) < 1000) {
+        error_log('CV eBay bot-detected, body length=' . strlen($body));
+        return null;
+    }
     $prices = [];
     // Pattern 1: £ symbol or HTML entity &#163;
     preg_match_all('/(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m1);
@@ -634,8 +651,40 @@ function writeCSV($file, $rows, $headers) {
 }
 function curlGet($url, $headers = []) {
     $ch = curl_init($url);
-    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER=>true,CURLOPT_FOLLOWLOCATION=>true,CURLOPT_TIMEOUT=>15,CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_ENCODING=>'',CURLOPT_HTTPHEADER=>$headers]);
-    $body = curl_exec($ch); $code = curl_getinfo($ch, CURLINFO_HTTP_CODE); $err = curl_error($ch); curl_close($ch);
+    $defaultHeaders = [
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language: en-GB,en;q=0.9',
+        'Accept-Encoding: gzip, deflate, br',
+        'Cache-Control: no-cache',
+        'Pragma: no-cache',
+        'Sec-Fetch-Dest: document',
+        'Sec-Fetch-Mode: navigate',
+        'Sec-Fetch-Site: none',
+        'Sec-Fetch-User: ?1',
+        'Upgrade-Insecure-Requests: 1',
+    ];
+    // Merge: caller headers override defaults
+    $merged = $defaultHeaders;
+    foreach ($headers as $h) {
+        $key = strtolower(explode(':', $h)[0]);
+        $merged = array_filter($merged, fn($d) => strtolower(explode(':', $d)[0]) !== $key);
+        $merged[] = $h;
+    }
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT        => 20,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_ENCODING       => '',
+        CURLOPT_HTTPHEADER     => array_values($merged),
+        CURLOPT_COOKIEJAR      => '/tmp/cv_ebay_cookie.txt',
+        CURLOPT_COOKIEFILE     => '/tmp/cv_ebay_cookie.txt',
+    ]);
+    $body = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err  = curl_error($ch);
+    curl_close($ch);
     return ['ok' => !$err, 'body' => $body, 'code' => $code, 'error' => $err];
 }
 function curlPost($url, $payload, $headers = []) {
