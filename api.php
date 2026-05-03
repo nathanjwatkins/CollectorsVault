@@ -370,9 +370,10 @@ function doGetPrices() {
 
 function doRefreshPrices() {
     requireAuth();
-    $userId = $_SESSION['user_id'];
-    $itemId = $_POST['item_id'] ?? '';
-    $query  = $_POST['query']   ?? '';
+    $userId   = $_SESSION['user_id'];
+    $itemId   = $_POST['item_id']  ?? '';
+    $query    = $_POST['query']    ?? '';
+    $category = $_POST['category'] ?? '';
     if (!$itemId || !$query) json(['error' => 'Missing item_id or query'], 400);
 
     // Use pinned eBay query if one has been approved by the user
@@ -385,14 +386,14 @@ function doRefreshPrices() {
     }
     $searchQuery = $pinnedQuery ?: $query;
 
-    $priceData = fetchEbayPrice($searchQuery);
+    $priceData = fetchEbayPrice($searchQuery, $category);
 
-    // If eBay returned nothing and we weren't using a pinned query,
-    // retry with first 3 words
+    // If nothing and we weren't using a pinned query, retry with first 3 words
     if (!$priceData && !$pinnedQuery) {
         $words = explode(' ', trim($query));
         if (count($words) > 3) {
-            $priceData = fetchEbayPrice(implode(' ', array_slice($words, 0, 3)));
+            $priceData = fetchEbayPrice(implode(' ', array_slice($words, 0, 3)), $category);
+        }
         }
     }
 
@@ -408,11 +409,17 @@ function doRefreshPrices() {
     json(['ok' => true, 'price' => $priceData]);
 }
 
-function fetchEbayPrice($query) {
-    // Try sold/completed listings first — may be blocked by IP
+function fetchEbayPrice($query, $category = '') {
+    // For games and cards: try PriceCharting first (more accurate, dedicated pricing)
+    if (in_array($category, ['games', 'cards'])) {
+        $pc = fetchPriceCharting($query, $category);
+        if ($pc) return $pc;
+    }
+
+    // Try eBay sold/completed listings
     $prices = fetchEbayPriceFromUrl($query, true);
 
-    // Fallback: active listings (always accessible from Hostinger)
+    // Fallback: active listings
     if ($prices === null) {
         $prices = fetchEbayPriceFromUrl($query, false);
     }
@@ -468,6 +475,56 @@ function fetchEbayPriceFromUrl($query, $soldOnly) {
         'source' => $soldOnly ? 'sold' : 'active',
     ];
 }
+
+function fetchPriceCharting($query, $category = '') {
+    // PriceCharting has a JSON search endpoint
+    $url = 'https://www.pricecharting.com/api/products?' . http_build_query([
+        'q'      => $query,
+        'status' => 'price-guide',
+    ]);
+    $resp = curlGet($url);
+    if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 10) return null;
+
+    $data = json_decode($resp['body'], true);
+    if (!isset($data['products']) || empty($data['products'])) return null;
+
+    // Get the first matching product
+    $product = $data['products'][0];
+    $id = $product['id'] ?? null;
+    if (!$id) return null;
+
+    // Fetch the product price page
+    $priceUrl = 'https://www.pricecharting.com/api/product?' . http_build_query(['id' => $id]);
+    $priceResp = curlGet($priceUrl);
+    if (!$priceResp['ok'] || $priceResp['code'] !== 200) return null;
+
+    $priceData = json_decode($priceResp['body'], true);
+    if (!$priceData) return null;
+
+    // PriceCharting prices are in cents
+    $loose   = isset($priceData['loose-price'])    ? round($priceData['loose-price'] / 100, 2)    : null;
+    $complete= isset($priceData['complete-price'])  ? round($priceData['complete-price'] / 100, 2)  : null;
+    $graded  = isset($priceData['graded-price'])    ? round($priceData['graded-price'] / 100, 2)    : null;
+    $new     = isset($priceData['new-price'])       ? round($priceData['new-price'] / 100, 2)       : null;
+
+    // Use the most relevant price depending on category
+    $price = $loose ?? $complete ?? $new ?? $graded ?? null;
+    if (!$price || $price < 0.01 || $price > 50000) return null;
+
+    return [
+        'avg_10' => $price,
+        'avg_30' => $price,
+        'min'    => $price,
+        'max'    => $graded ?? $price,
+        'count'  => 1,
+        'source' => 'pricecharting',
+        'name'   => $priceData['product-name'] ?? $product['name'] ?? $query,
+        'loose'  => $loose,
+        'complete'=> $complete,
+        'graded' => $graded,
+    ];
+}
+
 
 function savePriceData($userId, $itemId, $data, $ebayQuery = '') {
     $existing = [];

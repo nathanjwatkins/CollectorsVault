@@ -1048,7 +1048,7 @@ async function autoRefreshPrices(){
   document.getElementById('priceStatus').textContent='Updating eBay prices…';
   const toRefresh=allItems.slice(0,30);let done=0;
   for(const item of toRefresh){
-    try{const q=buildQuery(item);if(!q){done++;continue;}const fd=new FormData();fd.append('action','refreshPrices');fd.append('item_id',item.id);fd.append('query',q);
+    try{const q=buildQuery(item);if(!q){done++;continue;}const fd=new FormData();fd.append('action','refreshPrices');fd.append('item_id',item.id);fd.append('query',q);fd.append('category',item.category||'');
     const resp=await fetch('/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();if(d.ok)priceData[item.id]=d.price;done++;
     document.getElementById('priceStatus').textContent=`Updating prices… ${done}/${toRefresh.length}`;}catch(e){done++;}
   }
@@ -1059,7 +1059,7 @@ async function refreshAllPrices(){autoRefreshPrices();}
 
 async function refreshSinglePrice(id){
   if(!id)return;const item=allItems.find(i=>i.id===id);if(!item)return;showToast('Refreshing price…');
-  try{const fd=new FormData();fd.append('action','refreshPrices');fd.append('item_id',id);fd.append('query',buildQuery(item));
+  try{const fd=new FormData();fd.append('action','refreshPrices');fd.append('item_id',id);fd.append('query',buildQuery(item));fd.append('category',item.category||'');
   const resp=await fetch('/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();
   if(d.ok){priceData[id]=d.price;filterItems();openModal(id);showToast('Price updated');}}catch(e){showToast('Price refresh failed');}
 }
