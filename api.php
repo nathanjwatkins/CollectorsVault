@@ -67,28 +67,44 @@ switch ($action) {
 
     case 'testSources':
         requireAuth();
-        $q = $_GET['q'] ?? 'charizard';
+        $q = $_GET['q'] ?? 'charizard pokemon';
         $results = [];
 
-        // 1. PriceCharting - video games
+        // PriceCharting — check game + card pricing
         $r = curlGet('https://www.pricecharting.com/search-products?q=' . urlencode($q) . '&type=prices');
-        $results['pricecharting'] = ['code'=>$r['code'],'len'=>strlen($r['body']),'snippet'=>substr(strip_tags($r['body']),0,200)];
+        $body = $r['body'];
+        // Extract price data from HTML
+        preg_match_all('/\$([\d]+\.[\d]{2})/', $body, $pm);
+        preg_match_all('/<td[^>]*class="[^"]*price[^"]*"[^>]*>\s*\$?([\d,]+\.\d{2})/', $body, $pm2);
+        preg_match_all('/used_price[^>]*>\s*\$?([\d.]+)/', $body, $pm3);
+        $results['pricecharting'] = [
+            'code' => $r['code'],
+            'len'  => strlen($body),
+            'dollar_prices' => array_slice($pm[1] ?? [], 0, 10),
+            'td_prices' => array_slice($pm2[1] ?? [], 0, 10),
+            'used_prices' => $pm3[1] ?? [],
+            'html_snippet' => substr($body, strpos($body, 'price') ?: 0, 500),
+        ];
 
-        // 2. Discogs - vinyl
-        $r = curlGet('https://www.discogs.com/search/?' . http_build_query(['q'=>$q,'type'=>'release','format'=>'Vinyl']));
-        $results['discogs'] = ['code'=>$r['code'],'len'=>strlen($r['body']),'snippet'=>substr(strip_tags($r['body']),0,200)];
+        // Discogs — vinyl prices
+        $r2 = curlGet('https://www.discogs.com/search/?' . http_build_query(['q'=>$q,'type'=>'release','format'=>'Vinyl']));
+        preg_match_all('/\$([\d]+\.[\d]{2})/', $r2['body'], $dm);
+        preg_match_all('/"price"[^>]*>\s*\$?([\d.]+)/', $r2['body'], $dm2);
+        $results['discogs'] = [
+            'code'   => $r2['code'],
+            'len'    => strlen($r2['body']),
+            'prices' => array_slice($dm[1] ?? [], 0, 5),
+        ];
 
-        // 3. CardMarket - trading cards
-        $r = curlGet('https://www.cardmarket.com/en/Pokemon/Products/Search?searchString=' . urlencode($q));
-        $results['cardmarket'] = ['code'=>$r['code'],'len'=>strlen($r['body']),'snippet'=>substr(strip_tags($r['body']),0,200)];
-
-        // 4. PriceCharting pokemon cards
-        $r = curlGet('https://www.pricecharting.com/search-products?q=' . urlencode($q) . '+pokemon&type=prices');
-        $results['pricecharting_cards'] = ['code'=>$r['code'],'len'=>strlen($r['body']),'snippet'=>substr(strip_tags($r['body']),0,200)];
-
-        // 5. Football shirt
-        $r = curlGet('https://www.classicfootballshirts.co.uk/search?q=' . urlencode($q));
-        $results['classicfootballshirts'] = ['code'=>$r['code'],'len'=>strlen($r['body']),'snippet'=>substr(strip_tags($r['body']),0,200)];
+        // CardMarket — trading card prices (EUR)
+        $r3 = curlGet('https://www.cardmarket.com/en/Pokemon/Products/Search?searchString=' . urlencode($q));
+        preg_match_all('/([\d]+,[\d]{2})\s*€/', $r3['body'], $cm);
+        preg_match_all('/€\s*([\d]+[.,][\d]{2})/', $r3['body'], $cm2);
+        $results['cardmarket'] = [
+            'code'   => $r3['code'],
+            'len'    => strlen($r3['body']),
+            'prices' => array_slice(array_merge($cm[1] ?? [], $cm2[1] ?? []), 0, 5),
+        ];
 
         json($results);
         break;
