@@ -394,7 +394,6 @@ function doRefreshPrices() {
         if (count($words) > 3) {
             $priceData = fetchEbayPrice(implode(' ', array_slice($words, 0, 3)), $category);
         }
-        }
     }
 
     // Still nothing — save a zero-count placeholder so the UI stops retrying
