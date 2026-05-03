@@ -64,6 +64,34 @@ switch ($action) {
         $r = curlGet($url);
         json(['code'=>$r['code'],'len'=>strlen($r['body']),'has_price'=>strpos($r['body'],'£')!==false,'has_robot'=>strpos($r['body'],'robot')!==false,'snippet'=>substr(strip_tags($r['body']),0,300)]);
         break;
+
+    case 'testSources':
+        requireAuth();
+        $q = $_GET['q'] ?? 'charizard';
+        $results = [];
+
+        // 1. PriceCharting - video games
+        $r = curlGet('https://www.pricecharting.com/search-products?q=' . urlencode($q) . '&type=prices');
+        $results['pricecharting'] = ['code'=>$r['code'],'len'=>strlen($r['body']),'snippet'=>substr(strip_tags($r['body']),0,200)];
+
+        // 2. Discogs - vinyl
+        $r = curlGet('https://www.discogs.com/search/?' . http_build_query(['q'=>$q,'type'=>'release','format'=>'Vinyl']));
+        $results['discogs'] = ['code'=>$r['code'],'len'=>strlen($r['body']),'snippet'=>substr(strip_tags($r['body']),0,200)];
+
+        // 3. CardMarket - trading cards
+        $r = curlGet('https://www.cardmarket.com/en/Pokemon/Products/Search?searchString=' . urlencode($q));
+        $results['cardmarket'] = ['code'=>$r['code'],'len'=>strlen($r['body']),'snippet'=>substr(strip_tags($r['body']),0,200)];
+
+        // 4. PriceCharting pokemon cards
+        $r = curlGet('https://www.pricecharting.com/search-products?q=' . urlencode($q) . '+pokemon&type=prices');
+        $results['pricecharting_cards'] = ['code'=>$r['code'],'len'=>strlen($r['body']),'snippet'=>substr(strip_tags($r['body']),0,200)];
+
+        // 5. Football shirt
+        $r = curlGet('https://www.classicfootballshirts.co.uk/search?q=' . urlencode($q));
+        $results['classicfootballshirts'] = ['code'=>$r['code'],'len'=>strlen($r['body']),'snippet'=>substr(strip_tags($r['body']),0,200)];
+
+        json($results);
+        break;
     case 'refreshPrices': doRefreshPrices();break;
     case 'getPrices':     doGetPrices();    break;
     case 'searchEbay':    doSearchEbay();   break;
