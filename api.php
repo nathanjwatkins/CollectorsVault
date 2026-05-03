@@ -365,79 +365,63 @@ function doRefreshPrices() {
 }
 
 function fetchEbayPrice($query) {
-    $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
-        '_nkw' => $query, 'LH_Sold' => '1', 'LH_Complete' => '1',
-        '_sacat' => '0', '_sop' => '13', '_ipg' => '60',
-    ]);
-    $resp = curlGet($url, [
-        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language: en-GB,en;q=0.9',
-        'Accept-Encoding: gzip, deflate, br',
-        'Cache-Control: no-cache',
-        'Pragma: no-cache',
-    ]);
-    if (!$resp['ok'] || $resp['code'] !== 200) {
-        // eBay may redirect to CAPTCHA (200 on redirect) or return 429/503
-        error_log('CV eBay price fetch failed: code=' . $resp['code'] . ' err=' . $resp['error'] . ' url=' . $url);
-        return null;
+    // Try sold/completed listings first — may be blocked by IP
+    $prices = fetchEbayPriceFromUrl($query, true);
+
+    // Fallback: active listings (always accessible from Hostinger)
+    if ($prices === null) {
+        $prices = fetchEbayPriceFromUrl($query, false);
     }
+
+    // Fallback: shorter query on active listings
+    if ($prices === null && str_word_count($query) > 2) {
+        $shortQuery = implode(' ', array_slice(explode(' ', $query), 0, 3));
+        $prices = fetchEbayPriceFromUrl($shortQuery, false);
+    }
+
+    return $prices;
+}
+
+function fetchEbayPriceFromUrl($query, $soldOnly) {
+    $params = ['_nkw' => $query, '_sacat' => '0', '_sop' => '13', '_ipg' => '60'];
+    if ($soldOnly) {
+        $params['LH_Sold'] = '1';
+        $params['LH_Complete'] = '1';
+    }
+    $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query($params);
+    $resp = curlGet($url);
+    if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 1000) return null;
     $body = $resp['body'];
-    // Check if eBay returned a CAPTCHA/bot-detection page
-    if (strpos($body, 'robot') !== false || strpos($body, 'captcha') !== false || strlen($body) < 1000) {
-        error_log('CV eBay bot-detected, body length=' . strlen($body));
-        return null;
-    }
+    if (strpos($body, 'robot') !== false || strpos($body, 'captcha') !== false) return null;
+
     $prices = [];
-    // Pattern 1: £ symbol or HTML entity &#163;
+    // Pattern 1: £ symbol or HTML entity
     preg_match_all('/(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m1);
     foreach ($m1[1] as $p) { $v = floatval(str_replace(',','',$p)); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
-    // Pattern 2: data-price or itemprop price attributes (newer eBay markup)
+    // Pattern 2: data-price attributes
     preg_match_all('/data-price="([\d.]+)"/', $body, $m2);
     foreach ($m2[1] as $p) { $v = floatval($p); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
-    // Pattern 3: JSON-LD price data
+    // Pattern 3: JSON-LD
     preg_match_all('/"price"\s*:\s*"?([\d.]+)"?/', $body, $m3);
     foreach ($m3[1] as $p) { $v = floatval($p); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
-    // Pattern 4: s-item__price spans
+    // Pattern 4: s-item__price class
     preg_match_all('/class="s-item__price"[^>]*>[^£<]*(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m4);
     foreach ($m4[1] as $p) { $v = floatval(str_replace(',','',$p)); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
 
     $prices = array_values(array_unique($prices));
     sort($prices);
-
-    // If still no prices, try a broader fallback search (shorter query)
-    if (empty($prices) && str_word_count($query) > 2) {
-        $words = explode(' ', $query);
-        $shortQuery = implode(' ', array_slice($words, 0, 3));
-        $url2 = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
-            '_nkw' => $shortQuery, 'LH_Sold' => '1', 'LH_Complete' => '1',
-            '_sacat' => '0', '_sop' => '13', '_ipg' => '60',
-        ]);
-        $resp2 = curlGet($url2, [
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language: en-GB,en;q=0.9',
-        ]);
-        if ($resp2['ok'] && $resp2['code'] === 200) {
-            preg_match_all('/(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $resp2['body'], $fm);
-            foreach ($fm[1] as $p) { $v = floatval(str_replace(',','',$p)); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
-            preg_match_all('/data-price="([\d.]+)"/', $resp2['body'], $fm2);
-            foreach ($fm2[1] as $p) { $v = floatval($p); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
-        }
-        sort($prices);
-    }
-
     if (empty($prices)) return null;
 
-    $prices  = array_slice($prices, 0, 30);
-    $count   = count($prices);
-    $last10  = array_slice($prices, 0, min(10, $count));
+    $prices = array_slice($prices, 0, 30);
+    $count  = count($prices);
+    $last10 = array_slice($prices, 0, min(10, $count));
     return [
         'avg_30' => round(array_sum($prices) / $count, 2),
         'avg_10' => round(array_sum($last10) / count($last10), 2),
         'min'    => round(min($prices), 2),
         'max'    => round(max($prices), 2),
         'count'  => $count,
+        'source' => $soldOnly ? 'sold' : 'active',
     ];
 }
 
