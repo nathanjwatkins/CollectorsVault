@@ -623,7 +623,7 @@ function doUpdate() {
 
     if (!$found) json(['error' => 'Item not found'], 404);
 
-    writeCSV(COLLECTION_FILE, $updated);
+    writeCSV(COLLECTION_FILE, $updated, array_keys(csvHeaders()));
 
     // If ebay_query was updated, save it to prices CSV too so next refresh uses it
     if (isset($updates['ebay_query']) && trim($updates['ebay_query'])) {
@@ -635,7 +635,7 @@ function doUpdate() {
                 $priceFound = true;
             }
         }
-        if ($priceFound) writeCSV(PRICES_FILE, $priceRows);
+        if ($priceFound) writeCSV(PRICES_FILE, $priceRows, ['item_id','user_id','avg_30','avg_10','min','max','count','prev_avg','change_pct','direction','updated_at','ebay_query']);
     }
 
     json(['ok' => true]);
