@@ -55,6 +55,7 @@ switch ($action) {
     case 'save':          doSave();         break;
     case 'collection':    doCollection();   break;
     case 'delete':        doDelete();       break;
+    case 'update':        doUpdate();       break;
     case 'stats':         doStats();        break;
     case 'getImage':      doGetImage();     break;
     case 'testEbay':
@@ -590,6 +591,54 @@ function doCollection() {
     }
     usort($items, fn($a,$b) => strcmp($b['saved_at'], $a['saved_at']));
     json(['ok' => true, 'items' => $items, 'count' => count($items)]);
+}
+
+function doUpdate() {
+    requireAuth();
+    $userId  = $_SESSION['user_id'];
+    $itemId  = $_POST['item_id'] ?? '';
+    $updates = json_decode($_POST['updates'] ?? '{}', true);
+    if (!$itemId || !$updates) json(['error' => 'Missing item_id or updates'], 400);
+
+    $rows    = readCSV(COLLECTION_FILE);
+    $found   = false;
+    $updated = [];
+
+    // Allowed fields that can be updated
+    $allowed = ['name','subtitle','series','year','item_type','condition','manufacturer',
+                'card_number','platform','genre','region','artist','label','format',
+                'pressing','kit_type','size','signed','price_paid','ebay_query','notes'];
+
+    foreach ($rows as $row) {
+        if ($row['id'] === $itemId && $row['user_id'] === $userId) {
+            foreach ($updates as $k => $v) {
+                if (in_array($k, $allowed)) {
+                    $row[$k] = trim((string)$v);
+                }
+            }
+            $found = true;
+        }
+        $updated[] = $row;
+    }
+
+    if (!$found) json(['error' => 'Item not found'], 404);
+
+    writeCSV(COLLECTION_FILE, $updated);
+
+    // If ebay_query was updated, save it to prices CSV too so next refresh uses it
+    if (isset($updates['ebay_query']) && trim($updates['ebay_query'])) {
+        $priceRows = readCSV(PRICES_FILE);
+        $priceFound = false;
+        foreach ($priceRows as &$pr) {
+            if ($pr['item_id'] === $itemId && $pr['user_id'] === $userId) {
+                $pr['ebay_query'] = trim($updates['ebay_query']);
+                $priceFound = true;
+            }
+        }
+        if ($priceFound) writeCSV(PRICES_FILE, $priceRows);
+    }
+
+    json(['ok' => true]);
 }
 
 function doDelete() {
