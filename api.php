@@ -481,7 +481,23 @@ function fetchPriceCharting($query, $category = '') {
         'q'      => $query,
         'status' => 'price-guide',
     ]);
-    $resp = curlGet($url);
+    // PriceCharting needs explicit Accept header for JSON
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_ENCODING       => 'gzip, deflate',
+        CURLOPT_HTTPHEADER     => [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept: application/json, text/plain, */*',
+            'Accept-Language: en-GB,en;q=0.9',
+        ],
+    ]);
+    $body2 = curl_exec($ch);
+    $code2 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    $resp = ['ok' => true, 'body' => $body2 ?: '', 'code' => $code2];
     if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 10) return null;
 
     $data = json_decode($resp['body'], true);
@@ -760,7 +776,7 @@ function curlGet($url, $headers = []) {
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_TIMEOUT        => 20,
         CURLOPT_SSL_VERIFYPEER => true,
-        CURLOPT_ENCODING       => '',
+        CURLOPT_ENCODING       => 'gzip, deflate',
         CURLOPT_HTTPHEADER     => array_values($merged),
         CURLOPT_COOKIEJAR      => '/tmp/cv_ebay_cookie.txt',
         CURLOPT_COOKIEFILE     => '/tmp/cv_ebay_cookie.txt',
