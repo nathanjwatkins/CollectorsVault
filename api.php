@@ -600,32 +600,42 @@ function doUpdate() {
     $updates = json_decode($_POST['updates'] ?? '{}', true);
     if (!$itemId || !$updates) json(['error' => 'Missing item_id or updates'], 400);
 
-    $rows    = readCSV(COLLECTION_FILE);
-    $found   = false;
-    $updated = [];
+    // Read the actual headers from the CSV file first
+    $headers = null;
+    if (file_exists(COLLECTION_FILE)) {
+        $h = fopen(COLLECTION_FILE, 'r');
+        $headers = fgetcsv($h);
+        fclose($h);
+    }
+    if (!$headers) json(['error' => 'Collection file not found'], 500);
+
+    $rows  = readCSV(COLLECTION_FILE);
+    $found = false;
 
     // Allowed fields that can be updated
     $allowed = ['name','subtitle','series','year','item_type','condition','manufacturer',
                 'card_number','platform','genre','region','artist','label','format',
-                'pressing','kit_type','size','signed','price_paid','ebay_query','notes'];
+                'pressing','kit_type','size','signed','price_paid','ebay_query','notes',
+                'value','bought','extra1','extra2','extra3','extra4'];
 
-    foreach ($rows as $row) {
+    foreach ($rows as &$row) {
         if ($row['id'] === $itemId && $row['user_id'] === $userId) {
             foreach ($updates as $k => $v) {
-                if (in_array($k, $allowed)) {
+                if (in_array($k, $allowed) && array_key_exists($k, $row)) {
                     $row[$k] = trim((string)$v);
                 }
             }
             $found = true;
         }
-        $updated[] = $row;
     }
+    unset($row);
 
     if (!$found) json(['error' => 'Item not found'], 404);
 
-    writeCSV(COLLECTION_FILE, $updated, array_keys(csvHeaders()));
+    // Write back using the original file headers — never change the structure
+    writeCSV(COLLECTION_FILE, $rows, $headers);
 
-    // If ebay_query was updated, save it to prices CSV too so next refresh uses it
+    // If ebay_query was updated, save it to prices CSV too
     if (isset($updates['ebay_query']) && trim($updates['ebay_query'])) {
         $priceRows = readCSV(PRICES_FILE);
         $priceFound = false;
@@ -635,7 +645,12 @@ function doUpdate() {
                 $priceFound = true;
             }
         }
-        if ($priceFound) writeCSV(PRICES_FILE, $priceRows, ['item_id','user_id','avg_30','avg_10','min','max','count','prev_avg','change_pct','direction','updated_at','ebay_query']);
+        unset($pr);
+        if ($priceFound) {
+            $ph = null;
+            if (file_exists(PRICES_FILE)) { $ph2 = fopen(PRICES_FILE,'r'); $ph = fgetcsv($ph2); fclose($ph2); }
+            if ($ph) writeCSV(PRICES_FILE, $priceRows, $ph);
+        }
     }
 
     json(['ok' => true]);
