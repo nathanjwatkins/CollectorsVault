@@ -60,10 +60,57 @@ switch ($action) {
     case 'getImage':      doGetImage();     break;
     case 'testEbay':
         requireAuth();
-        $q = $_GET['q'] ?? 'Pokemon Charizard card';
-        $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query(['_nkw'=>$q,'LH_Sold'=>'1','LH_Complete'=>'1','_ipg'=>'10']);
-        $r = curlGet($url);
-        json(['code'=>$r['code'],'len'=>strlen($r['body']),'has_price'=>strpos($r['body'],'£')!==false,'has_robot'=>strpos($r['body'],'robot')!==false,'snippet'=>substr(strip_tags($r['body']),0,300)]);
+        $q       = $_GET['q']    ?? 'Pokemon Charizard card';
+        $mode    = $_GET['mode'] ?? 'sold';   // sold | active | image
+        $params  = ['_nkw'=>$q,'_ipg'=>'10'];
+        if ($mode === 'sold')   { $params['LH_Sold'] = '1'; $params['LH_Complete'] = '1'; }
+        if ($mode === 'image')  { $params['_sop']    = '12'; }
+        $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query($params);
+        $r   = curlGet($url);
+        $body = $r['body'] ?? '';
+        // Pattern probes — count hits for each price/image regex used elsewhere
+        $hits = [];
+        preg_match_all('/(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m1);
+        $hits['p_pound']    = count($m1[1] ?? []);
+        preg_match_all('/data-price="([\d.]+)"/', $body, $m2);
+        $hits['p_dataprice'] = count($m2[1] ?? []);
+        preg_match_all('/"price"\s*:\s*"?([\d.]+)"?/', $body, $m3);
+        $hits['p_jsonld']    = count($m3[1] ?? []);
+        preg_match_all('/class="s-item__price"[^>]*>[^£<]*(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m4);
+        $hits['p_sitemprice']= count($m4[1] ?? []);
+        preg_match_all('/https:\/\/i\.ebayimg\.com\/[^"\'\s>]+/i', $body, $mi);
+        $hits['p_ebayimg']   = count($mi[0] ?? []);
+        // Block/throttle indicators
+        $titleMatch = '';
+        if (preg_match('/<title>([^<]+)<\/title>/i', $body, $tm)) $titleMatch = trim($tm[1]);
+        $indicators = [
+            'has_pleasewait'  => stripos($body, 'Pardon our interruption') !== false || stripos($body, 'Please wait') !== false,
+            'has_robot'       => stripos($body, 'robot') !== false,
+            'has_captcha'     => stripos($body, 'captcha') !== false,
+            'has_blocked'     => stripos($body, 'blocked') !== false || stripos($body, 'access denied') !== false,
+            'has_signin'      => stripos($body, 'signin') !== false && stripos($body, 'redirect') !== false,
+            'has_s_item'      => stripos($body, 's-item') !== false,
+            'has_srp'         => stripos($body, 'srp-') !== false,
+            'has_results'     => stripos($body, 'srp-river-results') !== false,
+        ];
+        // Optionally dump full body to a writable temp file for inspection
+        $dumpPath = '';
+        if (!empty($_GET['dump'])) {
+            $dumpPath = '/tmp/cv_ebay_dump_' . substr(md5($url . microtime(true)), 0, 8) . '.html';
+            @file_put_contents($dumpPath, $body);
+        }
+        json([
+            'url'         => $url,
+            'code'        => $r['code'],
+            'curl_err'    => $r['error'] ?? '',
+            'len'         => strlen($body),
+            'title'       => $titleMatch,
+            'indicators'  => $indicators,
+            'pattern_hits'=> $hits,
+            'first_chars' => substr($body, 0, 400),
+            'last_chars'  => substr($body, -400),
+            'dump'        => $dumpPath,
+        ]);
         break;
 
     case 'testSources':
