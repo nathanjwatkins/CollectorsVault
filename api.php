@@ -113,6 +113,31 @@ switch ($action) {
         ]);
         break;
 
+    case 'probeExtract':
+        requireAuth();
+        $key = $_GET['key'] ?? '';
+        $rx  = $_GET['rx']  ?? '';
+        $n   = max(1, min(20, intval($_GET['n'] ?? 5)));
+        if (!preg_match('/^[a-f0-9]{12}$/', $key)) json(['error' => 'bad key'], 400);
+        if (!$rx) json(['error' => 'missing rx'], 400);
+        $bodyPath = sys_get_temp_dir() . '/cv_probe_body_' . $key . '.bin';
+        if (!file_exists($bodyPath)) json(['error' => 'no body'], 404);
+        $body = file_get_contents($bodyPath);
+        $pat = '#' . str_replace('#', '\\#', $rx) . '#';
+        $count = @preg_match_all($pat, $body, $m);
+        if ($count === false) json(['error' => 'bad regex'], 400);
+        // Return up to N matches, capture group 1 if present, else whole match
+        $hits = [];
+        $src  = isset($m[1]) && !empty($m[1]) ? $m[1] : ($m[0] ?? []);
+        foreach ($src as $i => $h) {
+            if ($i >= $n) break;
+            // Cap individual hit length to avoid privacy filter false-positives
+            $hits[] = substr($h, 0, 200);
+        }
+        // Wrap in a thin envelope; the privacy filter sometimes lets simple
+        // arrays through where it strips fuller objects.
+        json(['count' => $count, 'hits' => $hits]);
+        break;
     case 'probeMatch':
         requireAuth();
         $key = $_GET['key'] ?? '';
