@@ -635,7 +635,15 @@ function doUpdate() {
     // Write back using the original file headers — never change the structure
     writeCSV(COLLECTION_FILE, $rows, $headers);
 
-    // If ebay_query was updated, save it to prices CSV too
+    // If ebay_query was updated, save it to prices CSV too. We have to be
+    // careful: if the existing prices.csv was last written by an old code
+    // path that didn't include the ebay_query column, the file's header
+    // line will have N columns but the in-memory rows we're about to write
+    // will have N+1 keys (because we just added $pr['ebay_query']). That
+    // mismatch makes readCSV() skip every row on the next read — which
+    // shows up to the user as all prices going to "—" after an edit.
+    // Fix: always normalise the header list to include ebay_query and
+    // ensure every row has exactly that set of keys.
     if (isset($updates['ebay_query']) && trim($updates['ebay_query'])) {
         $priceRows = readCSV(PRICES_FILE);
         $priceFound = false;
@@ -647,9 +655,20 @@ function doUpdate() {
         }
         unset($pr);
         if ($priceFound) {
+            // Read existing header, then ensure ebay_query is present.
             $ph = null;
             if (file_exists(PRICES_FILE)) { $ph2 = fopen(PRICES_FILE,'r'); $ph = fgetcsv($ph2); fclose($ph2); }
-            if ($ph) writeCSV(PRICES_FILE, $priceRows, $ph);
+            if (!$ph) $ph = ['item_id','user_id','avg_30','avg_10','min','max','count','prev_avg','change_pct','direction','updated_at','ebay_query'];
+            if (!in_array('ebay_query', $ph, true)) $ph[] = 'ebay_query';
+            // Reorder every row to match the header exactly so writeCSV's
+            // array_values() produces aligned columns. Missing keys → ''.
+            $aligned = [];
+            foreach ($priceRows as $pr) {
+                $row = [];
+                foreach ($ph as $col) { $row[$col] = $pr[$col] ?? ''; }
+                $aligned[] = $row;
+            }
+            writeCSV(PRICES_FILE, $aligned, $ph);
         }
     }
 
@@ -661,6 +680,19 @@ function doDelete() {
     $id = $_POST['id'] ?? '';
     $userId = $_SESSION['user_id'];
     if (!$id) json(['error' => 'Missing id'], 400);
+
+    // Read the actual headers from collection.csv — never use csvHeaders()
+    // here because the live CSV has many more columns (price_paid,
+    // ebay_query, card_number, etc.) than csvHeaders() declares. Writing
+    // with the truncated header list silently drops every extra column.
+    $collHeaders = null;
+    if (file_exists(COLLECTION_FILE)) {
+        $h = fopen(COLLECTION_FILE, 'r');
+        $collHeaders = fgetcsv($h);
+        fclose($h);
+    }
+    if (!$collHeaders) json(['error' => 'Collection file not found'], 500);
+
     $rows = readCSV(COLLECTION_FILE);
     $updated = []; $deleted = false;
     foreach ($rows as $row) {
@@ -668,12 +700,18 @@ function doDelete() {
         else $updated[] = $row;
     }
     if (!$deleted) json(['error' => 'Not found'], 404);
-    writeCSV(COLLECTION_FILE, $updated, array_keys(csvHeaders()));
-    // Clean up caches
-    foreach ([IMAGES_FILE => 'item_id', PRICES_FILE => 'item_id'] as $file => $key) {
+    writeCSV(COLLECTION_FILE, $updated, $collHeaders);
+
+    // Clean up caches — read each file's actual headers rather than using
+    // hard-coded ones that may drift (e.g. prices.csv now has ebay_query
+    // appended; the old hard-coded header list dropped that column).
+    foreach ([IMAGES_FILE, PRICES_FILE] as $file) {
         if (!file_exists($file)) continue;
-        $rows = array_values(array_filter(readCSV($file), fn($r) => $r[$key] !== $id));
-        $hdrs = $file === IMAGES_FILE ? ['item_id','image_url','fetched_at'] : ['item_id','user_id','avg_30','avg_10','min','max','count','prev_avg','change_pct','direction','updated_at'];
+        $fh = fopen($file, 'r');
+        $hdrs = fgetcsv($fh);
+        fclose($fh);
+        if (!$hdrs) continue;
+        $rows = array_values(array_filter(readCSV($file), fn($r) => ($r['item_id'] ?? '') !== $id));
         writeCSV($file, $rows, $hdrs);
     }
     json(['ok' => true]);

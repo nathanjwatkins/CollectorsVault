@@ -952,7 +952,7 @@ body::before {
 </div>
 
 <script>
-let allItems=[],priceData={},currentTab='all',currentView='grid',currentModalId=null,toastT;
+let allItems=[],priceData={},imageCache={},currentTab='all',currentView='grid',currentModalId=null,editItemId=null,toastT;
 
 
 
@@ -996,16 +996,22 @@ function renderItems(items){
   const g=document.getElementById('itemsGrid');
   if(!items.length){g.innerHTML='<div class="empty-state"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg><h3>No items found</h3><p>Try a different filter or scan something new</p></div>';return;}
   g.innerHTML=items.map((item,idx)=>currentView==='grid'?renderGrid(item,idx):renderList(item)).join('');
+  // Fetch any images that are still missing from cache
+  loadImagesForVisible();
 }
 
 function renderGrid(item,idx){
   const p=priceData[item.id];const price=p?.avg_10?'£'+parseFloat(p.avg_10).toFixed(2):'—';
   const badge=p?.change_pct?`<span class="ic-change ${p.direction||'flat'}">${p.direction==='up'?'▲':p.direction==='down'?'▼':'—'}${Math.abs(p.change_pct).toFixed(0)}%</span>`:'';
   const idxLabel=String(idx+1).padStart(2,'0');
+  const cachedUrl=imageCache[item.id];
+  const imgHtml=cachedUrl
+    ? `<img class="ic-image" id="img-${esc(item.id)}" src="${esc(cachedUrl)}" alt="${esc(item.name||'')}" loading="lazy" decoding="async" onerror="this.onerror=null;this.outerHTML='&lt;div class=&quot;ic-image-placeholder&quot; id=&quot;img-${esc(item.id)}&quot;&gt;&lt;svg viewBox=&quot;0 0 24 24&quot;&gt;&lt;rect x=&quot;3&quot; y=&quot;3&quot; width=&quot;18&quot; height=&quot;18&quot; rx=&quot;2&quot;/&gt;&lt;circle cx=&quot;8.5&quot; cy=&quot;8.5&quot; r=&quot;1.5&quot;/&gt;&lt;polyline points=&quot;21,15 16,10 5,21&quot;/&gt;&lt;/svg&gt;&lt;/div&gt;'">`
+    : `<div class="ic-image-placeholder" id="img-${esc(item.id)}"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div>`;
   return`<div class="item-card" id="card-${esc(item.id)}" onclick="openModal('${esc(item.id)}')">
     <div class="ic-index">${idxLabel}</div>
     <div class="ic-image-wrap">
-      <div class="ic-image-placeholder" id="img-${esc(item.id)}"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg></div>
+      ${imgHtml}
       <div class="ic-overlay"></div>
       <div class="ic-foot">
         <div class="ic-cat">${esc(item.category||'')}</div>
@@ -1018,8 +1024,12 @@ function renderGrid(item,idx){
 
 function renderList(item){
   const p=priceData[item.id];const price=p?.avg_10?'£'+parseFloat(p.avg_10).toFixed(2):'—';
+  const cachedUrl=imageCache[item.id];
+  const thumbHtml=cachedUrl
+    ? `<div class="ir-thumb" id="limg-${esc(item.id)}"><img src="${esc(cachedUrl)}" alt="${esc(item.name||'')}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover"></div>`
+    : `<div class="ir-thumb" id="limg-${esc(item.id)}"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--ink4);fill:none;stroke-width:1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div>`;
   return`<div class="item-row" onclick="openModal('${esc(item.id)}')">
-    <div class="ir-thumb" id="limg-${esc(item.id)}"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--ink4);fill:none;stroke-width:1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div>
+    ${thumbHtml}
     <div class="ir-info"><div class="ir-name">${esc(item.name)}</div><div class="ir-sub">${esc([item.subtitle,item.series,item.year].filter(Boolean).join(' · '))}</div></div>
     ${item.item_type?`<span class="ic-badge">${esc(item.item_type)}</span>`:''}
     <div class="ir-price">${price}</div>
@@ -1029,19 +1039,19 @@ function renderList(item){
 function buildQuery(item){return[item.name,item.subtitle,item.series,item.year].filter(Boolean).join(' ').replace(/['"]/g,'');}
 
 async function loadImagesForVisible(){
-  const visible=allItems.filter(i=>document.getElementById('img-'+i.id)||document.getElementById('limg-'+i.id));
+  const visible=allItems.filter(i=>!imageCache[i.id]&&(document.getElementById('img-'+i.id)||document.getElementById('limg-'+i.id)));
   for(const item of visible.slice(0,20)){loadImg(item.id,buildQuery(item),item.category,item.name);}
 }
 
 async function loadImg(id,query,cat,fallback){
-  try{const resp=await fetch('/api.php?'+new URLSearchParams({action:'getImage',id,query,cat}),{credentials:'same-origin'});const d=await resp.json();if(d.url)setImgEl(id,d.url,fallback);}catch(e){}
+  try{const resp=await fetch('/api.php?'+new URLSearchParams({action:'getImage',id,query,cat}),{credentials:'same-origin'});const d=await resp.json();if(d.url){imageCache[id]=d.url;setImgEl(id,d.url,fallback);}}catch(e){}
 }
 
 function setImgEl(id,src,alt){
   const gEl=document.getElementById('img-'+id);
-  if(gEl){const img=document.createElement('img');img.className='ic-image';img.src=src;img.alt=alt||'';img.onerror=()=>{};gEl.replaceWith(img);}
+  if(gEl&&gEl.tagName!=='IMG'){const img=document.createElement('img');img.className='ic-image';img.id='img-'+id;img.src=src;img.alt=alt||'';img.loading='lazy';img.decoding='async';img.onerror=()=>{};gEl.replaceWith(img);}
   const lEl=document.getElementById('limg-'+id);
-  if(lEl){lEl.innerHTML=`<img src="${src}" alt="${alt||''}" style="width:100%;height:100%;object-fit:cover">`;}
+  if(lEl&&!lEl.querySelector('img')){lEl.innerHTML=`<img src="${src}" alt="${alt||''}" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover">`;}
 }
 
 async function autoRefreshPrices(){
@@ -1076,16 +1086,23 @@ function openModal(id){
   const fields=['item_type','condition','manufacturer','year','series','card_number','platform','genre','region','artist','label','format','pressing','kit_type','size','signed'].filter(k=>item[k]);
   document.getElementById('modalFields').innerHTML=fields.map(k=>`<div><div class="modal-field-label">${k.replace(/_/g,' ')}</div><div class="modal-field-val">${esc(item[k])}</div></div>`).join('');
   document.getElementById('modalBg').classList.add('open');
-  // Try existing loaded image first, then fetch
-  const existingImg = document.getElementById('img-'+id);
-  if (existingImg && existingImg.tagName === 'IMG' && existingImg.src) {
-    document.getElementById('modalImg').src = existingImg.src;
+  // Prefer imageCache (set on first successful fetch) over DOM lookup —
+  // re-renders may have replaced the IMG tag but the URL is still in JS state.
+  const cachedSrc = imageCache[id];
+  if (cachedSrc) {
+    document.getElementById('modalImg').src = cachedSrc;
   } else {
-    document.getElementById('modalImg').src = '';
-    fetch('/api.php?'+new URLSearchParams({action:'getImage',id,query:buildQuery(item),cat:item.category}),{credentials:'same-origin'})
-      .then(r=>r.json())
-      .then(d=>{ if(d.url) document.getElementById('modalImg').src = d.url; })
-      .catch(()=>{});
+    const existingImg = document.getElementById('img-'+id);
+    if (existingImg && existingImg.tagName === 'IMG' && existingImg.src) {
+      document.getElementById('modalImg').src = existingImg.src;
+      imageCache[id] = existingImg.src;
+    } else {
+      document.getElementById('modalImg').src = '';
+      fetch('/api.php?'+new URLSearchParams({action:'getImage',id,query:buildQuery(item),cat:item.category}),{credentials:'same-origin'})
+        .then(r=>r.json())
+        .then(d=>{ if(d.url){ imageCache[id]=d.url; document.getElementById('modalImg').src = d.url; } })
+        .catch(()=>{});
+    }
   }
 }
 
@@ -1095,13 +1112,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 async function deleteItem(id){
   if(!id||!confirm('Delete this item from your vault?'))return;
   try{const fd=new FormData();fd.append('action','delete');fd.append('item_id',id);const resp=await fetch('/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();
-  if(d.ok){allItems=allItems.filter(i=>i.id!==id);delete priceData[id];closeModal();updateCounts();filterItems();loadStats();showToast('Item deleted');}}catch(e){showToast('Delete failed');}
+  if(d.ok){allItems=allItems.filter(i=>i.id!==id);delete priceData[id];delete imageCache[id];closeModal();updateCounts();filterItems();loadStats();showToast('Item deleted');}}catch(e){showToast('Delete failed');}
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 /* ── Edit item ─────────────────────────────────────────────────────────── */
-let editItemId = null;
 
 function openEdit(id) {
   editItemId = id;
@@ -1154,30 +1170,52 @@ async function saveEdit() {
   if (!editItemId) return;
   const item = allItems.find(i => i.id === editItemId);
   if (!item) return;
+  const savedId = editItemId;
 
   const editableKeys = ['name','subtitle','series','year','item_type','condition','manufacturer',
     'card_number','platform','genre','region','artist','label','format','pressing',
     'kit_type','size','signed','price_paid','ebay_query'];
 
+  // Only send fields the user actually changed or non-empty fields,
+  // and only assign back values that are present so we never clobber
+  // an existing value (e.g. price_paid) with an empty string from a
+  // pre-populated input the user didn't touch.
   const updates = {};
   editableKeys.forEach(k => {
     const el = document.getElementById('ef_'+k);
-    if (el) updates[k] = el.value;
+    if (!el) return;
+    const newVal = el.value;
+    const oldVal = (item[k] == null ? '' : String(item[k]));
+    // If the input is empty and there was an existing value, skip it
+    // (don't overwrite). If user genuinely wants to clear a field they
+    // can use the edit endpoint directly — common UX pattern.
+    if (newVal === '' && oldVal !== '') return;
+    if (newVal !== oldVal) updates[k] = newVal;
   });
+
+  // If nothing changed, just close edit and reopen view modal
+  if (Object.keys(updates).length === 0) {
+    closeEdit();
+    openModal(savedId);
+    return;
+  }
 
   try {
     const fd = new FormData();
     fd.append('action', 'update');
-    fd.append('item_id', editItemId);
+    fd.append('item_id', savedId);
     fd.append('updates', JSON.stringify(updates));
     const resp = await fetch('/api.php', {method:'POST', body:fd, credentials:'same-origin'});
     const d = await resp.json();
     if (d.ok) {
-      // Update local data
+      // Apply local updates
       Object.assign(item, updates);
       closeEdit();
       filterItems();
       showToast('Item updated');
+      // Re-open the view modal so the user sees the updated card
+      // (including unchanged price data which lives in priceData[])
+      openModal(savedId);
     } else {
       showToast(d.error || 'Update failed');
     }
