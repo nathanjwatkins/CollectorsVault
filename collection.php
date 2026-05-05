@@ -1037,10 +1037,14 @@ function renderList(item){
 }
 
 function buildQuery(item){return[item.name,item.subtitle,item.series,item.year].filter(Boolean).join(' ').replace(/['"]/g,'');}
+// Use the user-pinned ebay_query if set, otherwise the auto-built one.
+// All server lookups (image + price) should use this so a custom query
+// drives both the image and the price.
+function searchQuery(item){return (item.ebay_query && item.ebay_query.trim()) ? item.ebay_query.trim() : buildQuery(item);}
 
 async function loadImagesForVisible(){
   const visible=allItems.filter(i=>!imageCache[i.id]&&(document.getElementById('img-'+i.id)||document.getElementById('limg-'+i.id)));
-  for(const item of visible.slice(0,20)){loadImg(item.id,buildQuery(item),item.category,item.name);}
+  for(const item of visible.slice(0,20)){loadImg(item.id,searchQuery(item),item.category,item.name);}
 }
 
 async function loadImg(id,query,cat,fallback){
@@ -1058,7 +1062,7 @@ async function autoRefreshPrices(){
   document.getElementById('priceStatus').textContent='Updating eBay prices…';
   const toRefresh=allItems.slice(0,30);let done=0;
   for(const item of toRefresh){
-    try{const q=buildQuery(item);if(!q){done++;continue;}const fd=new FormData();fd.append('action','refreshPrices');fd.append('item_id',item.id);fd.append('query',q);fd.append('category',item.category||'');
+    try{const q=searchQuery(item);if(!q){done++;continue;}const fd=new FormData();fd.append('action','refreshPrices');fd.append('item_id',item.id);fd.append('query',q);fd.append('category',item.category||'');
     const resp=await fetch('/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();if(d.ok)priceData[item.id]=d.price;done++;
     document.getElementById('priceStatus').textContent=`Updating prices… ${done}/${toRefresh.length}`;}catch(e){done++;}
   }
@@ -1069,7 +1073,7 @@ async function refreshAllPrices(){autoRefreshPrices();}
 
 async function refreshSinglePrice(id){
   if(!id)return;const item=allItems.find(i=>i.id===id);if(!item)return;showToast('Refreshing price…');
-  try{const fd=new FormData();fd.append('action','refreshPrices');fd.append('item_id',id);fd.append('query',buildQuery(item));fd.append('category',item.category||'');
+  try{const fd=new FormData();fd.append('action','refreshPrices');fd.append('item_id',id);fd.append('query',searchQuery(item));fd.append('category',item.category||'');
   const resp=await fetch('/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();
   if(d.ok){priceData[id]=d.price;filterItems();openModal(id);showToast('Price updated');}}catch(e){showToast('Price refresh failed');}
 }
@@ -1098,7 +1102,7 @@ function openModal(id){
       imageCache[id] = existingImg.src;
     } else {
       document.getElementById('modalImg').src = '';
-      fetch('/api.php?'+new URLSearchParams({action:'getImage',id,query:buildQuery(item),cat:item.category}),{credentials:'same-origin'})
+      fetch('/api.php?'+new URLSearchParams({action:'getImage',id,query:searchQuery(item),cat:item.category}),{credentials:'same-origin'})
         .then(r=>r.json())
         .then(d=>{ if(d.url){ imageCache[id]=d.url; document.getElementById('modalImg').src = d.url; } })
         .catch(()=>{});
@@ -1208,20 +1212,57 @@ async function saveEdit() {
     const resp = await fetch('/api.php', {method:'POST', body:fd, credentials:'same-origin'});
     const d = await resp.json();
     if (d.ok) {
-      // Apply local updates
+      // Detect whether the effective eBay search query changed. This is
+      // either a direct edit to ebay_query, or — if no custom ebay_query
+      // is in use — any change to the fields buildQuery() relies on.
+      const oldSearch = searchQuery(item);
       Object.assign(item, updates);
+      const newSearch = searchQuery(item);
+      const searchChanged = oldSearch !== newSearch;
+
       closeEdit();
       filterItems();
       showToast('Item updated');
       // Re-open the view modal so the user sees the updated card
       // (including unchanged price data which lives in priceData[])
       openModal(savedId);
+
+      // Search query changed → invalidate the cached image and refetch
+      // with refresh=1 so the server re-scrapes eBay using the new
+      // query. Also refresh the price for the same reason.
+      if (searchChanged) {
+        delete imageCache[savedId];
+        refreshItemImage(savedId, newSearch, item.category, item.name);
+        refreshSinglePrice(savedId);
+      }
     } else {
       showToast(d.error || 'Update failed');
     }
   } catch(e) {
     showToast('Update failed');
   }
+}
+
+// Force-refetch the image for a single item, bypassing the server cache.
+async function refreshItemImage(id, query, cat, alt) {
+  if (!id || !query) return;
+  try {
+    const resp = await fetch('/api.php?' + new URLSearchParams({
+      action: 'getImage', id, query, cat: cat || '', refresh: '1'
+    }), { credentials: 'same-origin' });
+    const d = await resp.json();
+    if (d.url) {
+      imageCache[id] = d.url;
+      // Update the modal hero if it's currently showing this item
+      if (currentModalId === id) {
+        document.getElementById('modalImg').src = d.url;
+      }
+      // Re-render the grid so cards pick up the new cached URL inline.
+      // imageCache is consulted by renderGrid/renderList, so this swaps
+      // the placeholder (or the old image) for the new one.
+      filterItems();
+    }
+  } catch (e) {}
 }
 function showToast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2800);}
 </script>
