@@ -58,6 +58,16 @@ switch ($action) {
     case 'update':        doUpdate();       break;
     case 'stats':         doStats();        break;
     case 'getImage':      doGetImage();     break;
+    case 'testPC':
+        requireAuth();
+        $q = $_GET['q'] ?? 'charizard pokemon';
+        $r = fetchPriceCharting($q, $_GET['cat'] ?? 'cards');
+        json([
+            'query'  => $q,
+            'result' => $r,
+            'isNull' => $r === null,
+        ]);
+        break;
     case 'testEbay':
         requireAuth();
         $q       = $_GET['q']    ?? 'Pokemon Charizard card';
