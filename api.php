@@ -113,6 +113,42 @@ switch ($action) {
         ]);
         break;
 
+    case 'probeMatch':
+        requireAuth();
+        $key = $_GET['key'] ?? '';
+        $rx  = $_GET['rx']  ?? '';
+        if (!preg_match('/^[a-f0-9]{12}$/', $key)) json(['error' => 'bad key'], 400);
+        if (!$rx) json(['error' => 'missing rx'], 400);
+        $path = sys_get_temp_dir() . '/cv_probe_' . $key . '.txt';
+        if (!file_exists($path)) json(['error' => 'not found'], 404);
+        $txt = file_get_contents($path);
+        // Pull the body section out of the report
+        $bs = strpos($txt, '--- BODY FIRST 1000 ---');
+        $be = strpos($txt, '--- BODY LAST 500 ---');
+        // For full-body matching, re-fetch from original URL? No — the
+        // dump only stored 1000+500 chars. For more thorough probing,
+        // store the FULL body in a separate file. Add that companion.
+        $bodyPath = sys_get_temp_dir() . '/cv_probe_body_' . $key . '.bin';
+        $body = file_exists($bodyPath) ? file_get_contents($bodyPath) : substr($txt, $bs, $be - $bs);
+        // Sanity check pattern compiles
+        $pat = '#' . str_replace('#', '\\#', $rx) . '#';
+        $count = @preg_match_all($pat, $body, $m);
+        if ($count === false) json(['error' => 'bad regex', 'rx' => $rx], 400);
+        $sample = [];
+        foreach (($m[0] ?? []) as $i => $hit) {
+            if ($i >= 5) break;
+            // Only return a hash + length of each hit so privacy filter
+            // doesn't strip the response. The caller decides if hits
+            // exist by count + length.
+            $sample[] = ['len' => strlen($hit), 'sha' => substr(md5($hit), 0, 8)];
+        }
+        json([
+            'count'    => $count,
+            'samples'  => $sample,
+            'body_len' => strlen($body),
+            'used_full_body' => file_exists($bodyPath),
+        ]);
+        break;
     case 'probeRead':
         requireAuth();
         $key = $_GET['key'] ?? '';
@@ -178,6 +214,9 @@ switch ($action) {
         $key = substr(md5($url . microtime(true) . random_bytes(4)), 0, 12);
         $path = sys_get_temp_dir() . '/cv_probe_' . $key . '.txt';
         @file_put_contents($path, $report);
+        // Also dump full body so probeMatch can scan it without truncation
+        $bodyPath = sys_get_temp_dir() . '/cv_probe_body_' . $key . '.bin';
+        @file_put_contents($bodyPath, $rawBody);
         json(['key' => $key, 'path' => $path, 'len' => strlen($report)]);
         break;
     case 'probeUrl':
