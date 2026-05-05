@@ -113,6 +113,62 @@ switch ($action) {
         ]);
         break;
 
+    case 'probeUrl':
+        requireAuth();
+        $url   = $_GET['url'] ?? 'https://www.pricecharting.com/';
+        $force = $_GET['enc'] ?? '';   // empty | gzip | none
+        $ch    = curl_init($url);
+        $headers = [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language: en-GB,en;q=0.9',
+        ];
+        $opts = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 20,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_HTTPHEADER     => $headers,
+            CURLOPT_HEADER         => true,   // capture response headers
+        ];
+        if ($force === 'none')      { /* no encoding */ }
+        elseif ($force === 'gzip')  { $opts[CURLOPT_ENCODING] = 'gzip, deflate'; }
+        else                        { $opts[CURLOPT_ENCODING] = ''; } // auto
+        curl_setopt_array($ch, $opts);
+        $resp     = curl_exec($ch);
+        $code     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $hsize    = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $err      = curl_error($ch);
+        $effUrl   = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+        $cType    = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        $primIp   = curl_getinfo($ch, CURLINFO_PRIMARY_IP);
+        curl_close($ch);
+        $rawHdr   = $resp ? substr($resp, 0, $hsize) : '';
+        $rawBody  = $resp ? substr($resp, $hsize)    : '';
+        // libcurl version info — does this build support brotli?
+        $cv = curl_version();
+        json([
+            'url'           => $url,
+            'effective_url' => $effUrl,
+            'enc_mode'      => $force ?: 'auto',
+            'code'          => $code,
+            'curl_err'      => $err,
+            'content_type'  => $cType,
+            'remote_ip'     => $primIp,
+            'header_size'   => $hsize,
+            'body_size'     => strlen($rawBody),
+            'response_headers' => $rawHdr,
+            'body_first_200'   => substr($rawBody, 0, 200),
+            'body_hex_first_50'=> bin2hex(substr($rawBody, 0, 50)),
+            'libcurl_features' => [
+                'version'  => $cv['version'] ?? '',
+                'ssl'      => $cv['ssl_version'] ?? '',
+                'libz'     => $cv['libz_version'] ?? '',
+                'brotli'   => $cv['brotli_version'] ?? '(none)',
+                'protocols'=> $cv['protocols'] ?? [],
+            ],
+        ]);
+        break;
     case 'testSources':
         requireAuth();
         $q = $_GET['q'] ?? 'charizard pokemon';
