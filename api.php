@@ -900,11 +900,18 @@ function writeCSV($file, $rows, $headers) {
 }
 function curlGet($url, $headers = []) {
     $ch = curl_init($url);
+    // Note on Accept-Encoding: we DON'T set it as an explicit header here.
+    // Setting CURLOPT_ENCODING to '' lets curl advertise (in the request)
+    // exactly the encodings it can decode (e.g. gzip, deflate, and br if
+    // libcurl was built with brotli support) and auto-decode the response.
+    // Previously the explicit header advertised 'gzip, deflate, br' but
+    // CURLOPT_ENCODING said only 'gzip, deflate' — so servers would send
+    // brotli-encoded bytes that curl couldn't decode, leaving us with
+    // empty or garbled bodies on every site (eBay, PriceCharting, etc.).
     $defaultHeaders = [
         'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Accept-Language: en-GB,en;q=0.9',
-        'Accept-Encoding: gzip, deflate, br',
         'Cache-Control: no-cache',
         'Pragma: no-cache',
         'Sec-Fetch-Dest: document',
@@ -917,6 +924,9 @@ function curlGet($url, $headers = []) {
     $merged = $defaultHeaders;
     foreach ($headers as $h) {
         $key = strtolower(explode(':', $h)[0]);
+        // Strip any caller-supplied Accept-Encoding too — let CURLOPT_ENCODING
+        // handle it so we never have a header/decoder mismatch.
+        if ($key === 'accept-encoding') continue;
         $merged = array_filter($merged, fn($d) => strtolower(explode(':', $d)[0]) !== $key);
         $merged[] = $h;
     }
@@ -925,7 +935,7 @@ function curlGet($url, $headers = []) {
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_TIMEOUT        => 20,
         CURLOPT_SSL_VERIFYPEER => true,
-        CURLOPT_ENCODING       => 'gzip, deflate',
+        CURLOPT_ENCODING       => '', // empty string = "all encodings curl supports"
         CURLOPT_HTTPHEADER     => array_values($merged),
         CURLOPT_COOKIEJAR      => '/tmp/cv_ebay_cookie.txt',
         CURLOPT_COOKIEFILE     => '/tmp/cv_ebay_cookie.txt',
