@@ -62,11 +62,12 @@ switch ($action) {
         requireAuth();
         $q = $_GET['q'] ?? 'charizard pokemon';
         $r = fetchPriceCharting($q, $_GET['cat'] ?? 'cards');
-        json([
-            'query'  => $q,
-            'result' => $r,
-            'isNull' => $r === null,
-        ]);
+        $out = "TESTPC q=$q\n"
+            . "isNull=" . ($r === null ? 'true' : 'false') . "\n"
+            . "result=" . json_encode($r, JSON_PRETTY_PRINT) . "\n";
+        $key = substr(md5($q . microtime(true)), 0, 12);
+        @file_put_contents(sys_get_temp_dir() . '/cv_probe_' . $key . '.txt', $out);
+        json(['outKey' => $key, 'isNull' => $r === null, 'avg10' => $r['avg_10'] ?? null, 'count' => $r['count'] ?? null]);
         break;
     case 'testEbay':
         requireAuth();
