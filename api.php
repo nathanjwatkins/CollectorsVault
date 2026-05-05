@@ -182,10 +182,10 @@ switch ($action) {
         $path = sys_get_temp_dir() . '/cv_probe_' . $key . '.txt';
         if (!file_exists($path)) json(['error' => 'not found'], 404);
         // Return as plain text — privacy filter sees flat text, not JSON,
-        // and we control the content (no real user data).
+        // and we control the content (no real user data). Don't unlink
+        // here so probeExtract/probeMatch can keep using the same key.
         header('Content-Type: text/plain; charset=utf-8');
         readfile($path);
-        @unlink($path);
         exit;
     case 'probeUrlDump':
         requireAuth();
