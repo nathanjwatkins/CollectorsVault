@@ -680,7 +680,19 @@ function fetchEbayPriceFromUrl($query, $soldOnly) {
     $resp = curlGet($url);
     if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 1000) return null;
     $body = $resp['body'];
-    if (strpos($body, 'robot') !== false || strpos($body, 'captcha') !== false) return null;
+    // Bot-detection: eBay's PerimeterX challenge page is titled "Pardon
+    // our interruption..." and contains neither the word "robot" nor
+    // "captcha". Without this check we'd happily run the price regex
+    // against the challenge page, find 0 hits, and silently "succeed"
+    // with no_data — exactly the symptom we hit on Hostinger's IP.
+    if (stripos($body, 'Pardon our interruption') !== false ||
+        stripos($body, 'Please verify you are a human') !== false ||
+        stripos($body, 'robot') !== false ||
+        stripos($body, 'captcha') !== false) return null;
+    // Sanity: real eBay search-results pages contain 's-item' / 'srp-'
+    // markers. If neither is present, the scrape landed on something
+    // else (challenge, error page, redirect).
+    if (stripos($body, 's-item') === false && stripos($body, 'srp-') === false) return null;
 
     $prices = [];
     // Pattern 1: £ symbol or HTML entity
@@ -713,69 +725,112 @@ function fetchEbayPriceFromUrl($query, $soldOnly) {
     ];
 }
 
+/**
+ * Scrape PriceCharting's public HTML search-results page for a query.
+ *
+ * The previous implementation hit /api/products which is the commercial
+ * JSON API — it returns HTTP 400 + a 104-byte error body without an API
+ * key. That meant fetchPriceCharting() silently returned null for every
+ * call and the system fell through to eBay (now PerimeterX-blocked from
+ * Hostinger's IP). Result: zero prices for everyone.
+ *
+ * The /search-products?q=…&type=prices URL returns ~480kb of HTML with
+ * a results table where each <tr id="product-NNN"> row exposes the
+ * product's title and used_price (the loose / "ungraded" price). We
+ * pull the first row's used_price as the headline number, plus min/max
+ * across the first ten ranked rows so the UI's avg_10 / avg_30 / min /
+ * max all populate sensibly. PriceCharting also redirects single-result
+ * queries straight to the product detail page, where individual price
+ * cells (used_price, complete_price, graded_price, new_price) live in
+ * <td id="..."> elements — handled below as the secondary code path.
+ *
+ * Prices on PriceCharting are USD. Converted to GBP via a static rate
+ * so the UI's £ formatting stays correct. Move to a daily cached fx
+ * fetch later if accuracy matters.
+ */
 function fetchPriceCharting($query, $category = '') {
-    // PriceCharting has a JSON search endpoint
-    $url = 'https://www.pricecharting.com/api/products?' . http_build_query([
-        'q'      => $query,
-        'status' => 'price-guide',
+    // USD → GBP rate. Update periodically or replace with a daily fx fetch.
+    $usdToGbp = 0.79;
+
+    $url = 'https://www.pricecharting.com/search-products?' . http_build_query([
+        'q'    => $query,
+        'type' => 'prices',
     ]);
-    // PriceCharting needs explicit Accept header for JSON
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_TIMEOUT        => 15,
-        CURLOPT_ENCODING       => 'gzip, deflate',
-        CURLOPT_HTTPHEADER     => [
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept: application/json, text/plain, */*',
-            'Accept-Language: en-GB,en;q=0.9',
-        ],
-    ]);
-    $body2 = curl_exec($ch);
-    $code2 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-    $resp = ['ok' => true, 'body' => $body2 ?: '', 'code' => $code2];
-    if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 10) return null;
+    $resp = curlGet($url);
+    if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 5000) return null;
+    $body = $resp['body'];
 
-    $data = json_decode($resp['body'], true);
-    if (!isset($data['products']) || empty($data['products'])) return null;
+    // (a) Product detail page path — PriceCharting redirects single-hit
+    //     queries straight here, so handle it before the search-table case.
+    if (preg_match('/id="used_price"[^>]*>([\s\S]{0,400}?)<\/td/i', $body, $m)) {
+        $name = '';
+        if (preg_match('/<h1[^>]*id="product_name"[^>]*>([\s\S]{0,200}?)<\/h1>/i', $body, $hn)) {
+            $name = trim(strip_tags($hn[1]));
+        }
+        $loose    = pcParsePriceCell($m[1]);
+        $complete = null; $graded = null; $new = null;
+        if (preg_match('/id="complete_price"[^>]*>([\s\S]{0,400}?)<\/td/i', $body, $cm)) $complete = pcParsePriceCell($cm[1]);
+        if (preg_match('/id="graded_price"[^>]*>([\s\S]{0,400}?)<\/td/i',   $body, $gm)) $graded   = pcParsePriceCell($gm[1]);
+        if (preg_match('/id="new_price"[^>]*>([\s\S]{0,400}?)<\/td/i',      $body, $nm)) $new      = pcParsePriceCell($nm[1]);
+        $headlineUsd = $loose ?? $complete ?? $new ?? $graded;
+        if (!$headlineUsd) return null;
+        $values = array_values(array_filter([$loose, $complete, $graded, $new], fn($v) => $v !== null && $v > 0));
+        return [
+            'avg_10' => round($headlineUsd * $usdToGbp, 2),
+            'avg_30' => round($headlineUsd * $usdToGbp, 2),
+            'min'    => round(min($values) * $usdToGbp, 2),
+            'max'    => round(max($values) * $usdToGbp, 2),
+            'count'  => count($values),
+            'source' => 'pricecharting',
+            'name'   => $name ?: $query,
+            'loose'    => $loose    !== null ? round($loose    * $usdToGbp, 2) : null,
+            'complete' => $complete !== null ? round($complete * $usdToGbp, 2) : null,
+            'graded'   => $graded   !== null ? round($graded   * $usdToGbp, 2) : null,
+        ];
+    }
 
-    // Get the first matching product
-    $product = $data['products'][0];
-    $id = $product['id'] ?? null;
-    if (!$id) return null;
-
-    // Fetch the product price page
-    $priceUrl = 'https://www.pricecharting.com/api/product?' . http_build_query(['id' => $id]);
-    $priceResp = curlGet($priceUrl);
-    if (!$priceResp['ok'] || $priceResp['code'] !== 200) return null;
-
-    $priceData = json_decode($priceResp['body'], true);
-    if (!$priceData) return null;
-
-    // PriceCharting prices are in cents
-    $loose   = isset($priceData['loose-price'])    ? round($priceData['loose-price'] / 100, 2)    : null;
-    $complete= isset($priceData['complete-price'])  ? round($priceData['complete-price'] / 100, 2)  : null;
-    $graded  = isset($priceData['graded-price'])    ? round($priceData['graded-price'] / 100, 2)    : null;
-    $new     = isset($priceData['new-price'])       ? round($priceData['new-price'] / 100, 2)       : null;
-
-    // Use the most relevant price depending on category
-    $price = $loose ?? $complete ?? $new ?? $graded ?? null;
-    if (!$price || $price < 0.01 || $price > 50000) return null;
-
+    // (b) Search results path — pull the used_price from the first ten
+    //     <tr id="product-NNN"> rows. Anchor on the row tag so title and
+    //     price stay grouped per product.
+    if (!preg_match_all('/<tr[^>]+id="product-\d+"[\s\S]{0,3000}?<\/tr>/i', $body, $rows)) return null;
+    $usdPrices    = [];
+    $headlineName = '';
+    foreach ($rows[0] as $row) {
+        if (!preg_match('/<td[^>]*class="[^"]*used_price[^"]*"[^>]*>([\s\S]{0,400}?)<\/td/i', $row, $pm)) continue;
+        $usd = pcParsePriceCell($pm[1]);
+        if ($usd === null || $usd < 0.10 || $usd > 50000) continue;
+        $usdPrices[] = $usd;
+        if (!$headlineName && preg_match('/<a[^>]*>([\s\S]{1,120}?)<\/a>/i', $row, $am)) {
+            $headlineName = trim(strip_tags($am[1]));
+        }
+        if (count($usdPrices) >= 10) break;
+    }
+    if (empty($usdPrices)) return null;
+    $headlineUsd = $usdPrices[0];   // first row = top-ranked match
+    sort($usdPrices);
+    $count = count($usdPrices);
+    $avg   = array_sum($usdPrices) / $count;
     return [
-        'avg_10' => $price,
-        'avg_30' => $price,
-        'min'    => $price,
-        'max'    => $graded ?? $price,
-        'count'  => 1,
+        'avg_10' => round($headlineUsd      * $usdToGbp, 2),
+        'avg_30' => round($avg              * $usdToGbp, 2),
+        'min'    => round(min($usdPrices)   * $usdToGbp, 2),
+        'max'    => round(max($usdPrices)   * $usdToGbp, 2),
+        'count'  => $count,
         'source' => 'pricecharting',
-        'name'   => $priceData['product-name'] ?? $product['name'] ?? $query,
-        'loose'  => $loose,
-        'complete'=> $complete,
-        'graded' => $graded,
+        'name'   => $headlineName ?: $query,
     ];
+}
+
+/**
+ * Parse a price cell from PriceCharting HTML. Cells look like
+ *   <td id="used_price" class="...">$12.34</td>
+ * but sometimes include badges, multiple spans, or "—" / "N/A" for
+ * missing prices. Returns the first dollar amount as a float, or null.
+ */
+function pcParsePriceCell($cellInner) {
+    if (!preg_match('/\$\s*([\d,]+\.\d{2})/', $cellInner, $m)) return null;
+    $v = floatval(str_replace(',', '', $m[1]));
+    return $v > 0 ? $v : null;
 }
 
 
