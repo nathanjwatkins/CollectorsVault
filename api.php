@@ -113,6 +113,73 @@ switch ($action) {
         ]);
         break;
 
+    case 'probeRead':
+        requireAuth();
+        $key = $_GET['key'] ?? '';
+        // Strict: only accept hex keys we generated
+        if (!preg_match('/^[a-f0-9]{12}$/', $key)) json(['error' => 'bad key'], 400);
+        $path = sys_get_temp_dir() . '/cv_probe_' . $key . '.txt';
+        if (!file_exists($path)) json(['error' => 'not found'], 404);
+        // Return as plain text — privacy filter sees flat text, not JSON,
+        // and we control the content (no real user data).
+        header('Content-Type: text/plain; charset=utf-8');
+        readfile($path);
+        @unlink($path);
+        exit;
+    case 'probeUrlDump':
+        requireAuth();
+        $url   = $_GET['url'] ?? 'https://www.pricecharting.com/';
+        $force = $_GET['enc'] ?? '';
+        $ch    = curl_init($url);
+        $headers = [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language: en-GB,en;q=0.9',
+        ];
+        $opts = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 20,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_HTTPHEADER     => $headers,
+            CURLOPT_HEADER         => true,
+        ];
+        if ($force === 'none')      { /* nothing */ }
+        elseif ($force === 'gzip')  { $opts[CURLOPT_ENCODING] = 'gzip, deflate'; }
+        else                        { $opts[CURLOPT_ENCODING] = ''; }
+        curl_setopt_array($ch, $opts);
+        $resp     = curl_exec($ch);
+        $code     = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $hsize    = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $err      = curl_error($ch);
+        $cType    = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        $primIp   = curl_getinfo($ch, CURLINFO_PRIMARY_IP);
+        curl_close($ch);
+        $rawHdr   = $resp ? substr($resp, 0, $hsize) : '';
+        $rawBody  = $resp ? substr($resp, $hsize)    : '';
+        $cv = curl_version();
+        $report = "PROBE REPORT\n"
+            . "URL: $url\n"
+            . "Encoding mode: " . ($force ?: 'auto') . "\n"
+            . "HTTP code: $code\n"
+            . "Curl error: $err\n"
+            . "Content-Type: $cType\n"
+            . "Remote IP: $primIp\n"
+            . "Header size: $hsize\n"
+            . "Body size: " . strlen($rawBody) . "\n"
+            . "Body first 50 bytes (hex): " . bin2hex(substr($rawBody, 0, 50)) . "\n"
+            . "libcurl version: " . ($cv['version'] ?? '') . "\n"
+            . "libcurl ssl: " . ($cv['ssl_version'] ?? '') . "\n"
+            . "libcurl libz: " . ($cv['libz_version'] ?? '') . "\n"
+            . "libcurl brotli: " . ($cv['brotli_version'] ?? '(none)') . "\n"
+            . "Response headers:\n" . $rawHdr . "\n"
+            . "--- BODY FIRST 1000 ---\n" . substr($rawBody, 0, 1000) . "\n"
+            . "--- BODY LAST 500 ---\n"  . substr($rawBody, -500) . "\n";
+        $key = substr(md5($url . microtime(true) . random_bytes(4)), 0, 12);
+        $path = sys_get_temp_dir() . '/cv_probe_' . $key . '.txt';
+        @file_put_contents($path, $report);
+        json(['key' => $key, 'path' => $path, 'len' => strlen($report)]);
+        break;
     case 'probeUrl':
         requireAuth();
         $url   = $_GET['url'] ?? 'https://www.pricecharting.com/';
