@@ -1049,6 +1049,7 @@ async function fetchRecentImageInto(item, prefix){
     const d=await r.json();
     if(d&&d.ok&&d.url) img.src=d.url;
   }catch(_){}
+}
 
 async function loadPills(){
   try{
