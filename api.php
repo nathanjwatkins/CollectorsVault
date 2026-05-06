@@ -70,6 +70,40 @@ switch ($action) {
     case 'update':        doUpdate();       break;
     case 'stats':         doStats();        break;
     case 'getImage':      doGetImage();     break;
+    case 'keyStatus':
+        requireAuth();
+        $keyLen = strlen(GEMINI_KEY);
+        $keyTail = $keyLen >= 4 ? substr(GEMINI_KEY, -4) : '';
+        $keyHead = $keyLen >= 6 ? substr(GEMINI_KEY, 0, 6) : '';
+        $serverFile = dirname(__DIR__) . '/cv_gemini_key.txt';
+        $fileExists = file_exists($serverFile);
+        $fileReadable = is_readable($serverFile);
+        $fileSize = $fileExists ? filesize($serverFile) : 0;
+        $pingUrl = 'https://generativelanguage.googleapis.com/v1beta/models?key=' . GEMINI_KEY;
+        $ping = curlGet($pingUrl);
+        $pingData = json_decode($ping['body'] ?? '', true) ?? [];
+        json([
+            'ok' => true,
+            'key' => [
+                'loaded' => $keyLen > 0,
+                'length' => $keyLen,
+                'head' => $keyHead,
+                'tail' => $keyTail,
+            ],
+            'file' => [
+                'path' => $serverFile,
+                'exists' => $fileExists,
+                'readable' => $fileReadable,
+                'size_bytes' => $fileSize,
+            ],
+            'gemini_ping' => [
+                'http_code' => $ping['code'] ?? 0,
+                'ok' => ($ping['code'] ?? 0) === 200,
+                'error_message' => $pingData['error']['message'] ?? null,
+                'error_status' => $pingData['error']['status'] ?? null,
+            ],
+        ]);
+        break;
     case 'testPC':
         requireAuth();
         $q = $_GET['q'] ?? 'charizard pokemon';
