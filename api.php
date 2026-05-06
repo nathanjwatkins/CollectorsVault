@@ -107,6 +107,45 @@ switch ($action) {
             'orphan_samples' => array_slice($orphanedRows, -5),
         ]);
         break;
+    case 'csvRecover':
+        requireAuth();
+        // Pad short rows in collection.csv to match the file's header column
+        // count. Only pads rows belonging to the current user. Returns count
+        // of repairs made. Run once per user after deploying the column fix.
+        if (!file_exists(COLLECTION_FILE)) json(['error' => 'No CSV'], 404);
+        $userId = $_SESSION['user_id'];
+        $fh = fopen(COLLECTION_FILE, 'r');
+        $diskHeaders = fgetcsv($fh);
+        $hdrCount = count($diskHeaders);
+        $allRows = []; // each entry: ['line' => raw array, 'repaired' => bool]
+        $repaired = 0;
+        while (($line = fgetcsv($fh)) !== false) {
+            if (count($line) === $hdrCount) {
+                $allRows[] = $line;
+                continue;
+            }
+            // Short row. Only repair if it looks like it belongs to this user.
+            $userIdIdx = array_search('user_id', $diskHeaders, true);
+            $rowUser = ($userIdIdx !== false && isset($line[$userIdIdx])) ? $line[$userIdIdx] : '';
+            if ($rowUser !== $userId) {
+                // Leave other users' orphans alone.
+                $allRows[] = array_pad($line, $hdrCount, '');
+                continue;
+            }
+            // Pad to header width with empty strings.
+            $padded = array_pad($line, $hdrCount, '');
+            $allRows[] = $padded;
+            $repaired++;
+        }
+        fclose($fh);
+        if ($repaired > 0) {
+            $w = fopen(COLLECTION_FILE, 'w');
+            fputcsv($w, $diskHeaders);
+            foreach ($allRows as $r) fputcsv($w, $r);
+            fclose($w);
+        }
+        json(['ok' => true, 'repaired' => $repaired, 'total_rows' => count($allRows)]);
+        break;
     case 'keyStatus':
         requireAuth();
         $keyLen = strlen(GEMINI_KEY);
