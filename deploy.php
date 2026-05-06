@@ -8,7 +8,7 @@
  * The actual file fetching happens after the response is closed.
  */
 
-$tokenFile = '/home/u133725179/cv_token.txt';
+$tokenFile = dirname(__DIR__) . '/cv_token.txt';
 $token = file_exists($tokenFile) ? trim(file_get_contents($tokenFile)) : '';
 if (!$token) { http_response_code(500); die('Token file missing'); }
 
