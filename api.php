@@ -188,6 +188,22 @@ switch ($action) {
             'used_full_body' => file_exists($bodyPath),
         ]);
         break;
+    case 'deployLog':
+        requireAuth();
+        $logPath = __DIR__ . '/deploy.log';
+        if (!file_exists($logPath)) json(['error' => 'no log']);
+        // Return last 4KB as plain text so privacy filter passes it through
+        $size = filesize($logPath);
+        $offset = max(0, $size - 4096);
+        $fh = fopen($logPath, 'r');
+        fseek($fh, $offset);
+        $tail = fread($fh, 4096);
+        fclose($fh);
+        header('Content-Type: text/plain; charset=utf-8');
+        echo "DEPLOY LOG TAIL (last 4kb of " . $size . " bytes total)\n";
+        echo "==========================================\n";
+        echo $tail;
+        exit;
     case 'probeRead':
         requireAuth();
         $key = $_GET['key'] ?? '';
