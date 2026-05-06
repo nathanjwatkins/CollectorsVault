@@ -44,9 +44,16 @@ collection is separate — they only see their own items.
 
 ## API Keys
 
-The Gemini API key (REDACTED_GEMINI_KEY)
-is stored in api.php. To update it, open api.php and change
-the GEMINI_KEY constant at the top of the file.
+API keys are NOT stored in this repo. They live on the server
+outside the web root, one file per key:
+
+  /home/u133725179/cv_gemini_key.txt   — Gemini API key
+  /home/u133725179/cv_openai_key.txt   — Optional OpenAI fallback key
+
+api.php reads them at runtime via cv_read_secret(). To rotate a
+key, edit the file on the server (FTP or hPanel File Manager).
+Never commit a key to this repo — GitHub secret scanning will
+flag it and Google will auto-revoke the key.
 
 ## Data Files (auto-created)
 

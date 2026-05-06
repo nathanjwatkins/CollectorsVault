@@ -19,9 +19,21 @@ header('X-Content-Type-Options: nosniff');
 
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 define('CV_VER', '1776877263'); // Cache-bust version — update on each deploy
-define('GEMINI_KEY',     'REDACTED_GEMINI_KEY');
-define('GOOGLE_API_KEY', 'REDACTED_GEMINI_KEY');
-define('OPENAI_KEY',     ''); // ← paste your OpenAI key here to enable GPT-4o fallback
+
+/**
+ * Read a secret from a file outside the web root.
+ * Keeps API keys out of the git repo so GitHub secret scanning doesn't flag them.
+ * Server path: /home/u133725179/<filename>  (one level above public_html/)
+ */
+function cv_read_secret($filename) {
+    $path = dirname(__DIR__) . '/' . $filename;
+    if (!is_readable($path)) return '';
+    return trim(file_get_contents($path));
+}
+
+define('GEMINI_KEY',     cv_read_secret('cv_gemini_key.txt'));
+define('GOOGLE_API_KEY', GEMINI_KEY); // same key, same project
+define('OPENAI_KEY',     cv_read_secret('cv_openai_key.txt')); // optional GPT-4o fallback
 
 // Gemini models tried in order — separate capacity pools, same free key
 // Note: gemini-1.5-x models are shut down. gemini-2.0-flash shuts down June 1 2026.
