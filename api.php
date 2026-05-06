@@ -818,8 +818,10 @@ function fetchPriceCharting($query, $category = '') {
 
     // (b) Search results path — pull the used_price from the first ten
     //     <tr id="product-NNN"> rows. Anchor on the row tag so title and
-    //     price stay grouped per product.
-    if (!preg_match_all('/<tr[^>]+id="product-\d+"[\s\S]{0,3000}?<\/tr>/i', $body, $rows)) return null;
+    //     price stay grouped per product. Rows on PriceCharting are
+    //     typically 3-5KB each (lots of inline data attributes), so cap
+    //     at 6000 chars per row to stay well clear of truncating any.
+    if (!preg_match_all('/<tr[^>]+id="product-\d+"[\s\S]{0,6000}?<\/tr>/i', $body, $rows)) return null;
     $usdPrices    = [];
     $headlineName = '';
     foreach ($rows[0] as $row) {
