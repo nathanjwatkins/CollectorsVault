@@ -935,9 +935,17 @@ function renderRecent(items){
   }
   grid.innerHTML=items.map((item,i)=>{
     const icon=CAT_ICONS_SVG[item.category]||CAT_ICONS_SVG.other;
-    const thumb=item.thumbnail
-      ?`<img src="${item.thumbnail}" alt="${item.name}" loading="lazy" onerror="this.style.display='none'">`
-      :`<div class="rc-icon">${icon}</div>`;
+    // Always render an <img> placeholder + a fallback icon. The img stays
+    // hidden (via empty src) until fetchRecentImage() resolves a URL from
+    // /api.php?action=getImage. If the lookup fails or eBay returns nothing
+    // the icon stays visible.
+    const safeId=String(item.id||'').replace(/[^a-zA-Z0-9_.\-]/g,'');
+    const thumb=`
+      <img id="rc-img-${safeId}" alt="${item.name}" loading="lazy"
+           style="width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0"
+           onload="this.style.display='block';this.parentElement.querySelector('.rc-icon').style.display='none'"
+           onerror="this.style.display='none'">
+      <div class="rc-icon">${icon}</div>`;
     const val=item.value?'£'+parseFloat(item.value).toFixed(2):'—';
     const badge=item.item_type||item.series?`<span class="rc-tag">${item.item_type||item.series}</span>`:'';
     const idx=String(i+1).padStart(2,'0');
@@ -957,14 +965,27 @@ function renderRecent(items){
       </div>
     </div>`;
   }).join('');
+  // Kick off image lookups in parallel — non-blocking, results trickle in.
+  items.forEach(item => fetchRecentImage(item));
+}
+
+async function fetchRecentImage(item){
+  return fetchRecentImageInto(item, 'rc-img-');
 }
 
 function openRecentModal(item){
   const existing=document.getElementById('recentModal');if(existing)existing.remove();
   const icon=CAT_ICONS_SVG[item.category]||CAT_ICONS_SVG.other;
-  const thumb=item.thumbnail
-    ?`<img src="${item.thumbnail}" style="width:100%;height:160px;object-fit:cover;display:block" onerror="this.style.display='none'">`
-    :`<div style="height:100px;display:flex;align-items:center;justify-content:center;opacity:.2">${icon.replace('width="1.5"','width="1"').replace('stroke-width="1.5"','stroke-width="1"')}</div>`;
+  // Always render an <img> with a fallback icon underneath. fetchRecentImage
+  // populates the src in the same way as for the grid cards.
+  const safeId=String(item.id||'').replace(/[^a-zA-Z0-9_.\-]/g,'');
+  const thumb=`
+    <div style="position:relative;width:100%;height:200px;background:rgba(0,0,0,.15);overflow:hidden">
+      <img id="rcm-img-${safeId}" alt="${item.name}"
+           style="width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0"
+           onload="this.style.display='block';this.parentElement.querySelector('.rcm-icon').style.display='none'">
+      <div class="rcm-icon" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.25">${icon}</div>
+    </div>`;
 
   const fields=[
     ['Category',CAT_LABELS[item.category]||item.category],
@@ -997,7 +1018,37 @@ function openRecentModal(item){
   overlay.appendChild(sheet);
   document.body.appendChild(overlay);
   document.body.style.overflow='hidden';
+  // Populate the modal's image the same way the grid cards do, but write to
+  // the rcm-img-<id> element. Reuses fetchRecentImage's query-building by
+  // temporarily redirecting it to the modal img id.
+  fetchRecentImageInto(item, 'rcm-img-');
 }
+
+async function fetchRecentImageInto(item, prefix){
+  const safeId=String(item.id||'').replace(/[^a-zA-Z0-9_.\-]/g,'');
+  const img=document.getElementById(prefix+safeId);
+  if(!img) return;
+  const parts=[item.name];
+  if(item.category==='shirts'){
+    if(item.series) parts.push(item.series);
+    if(item.kit_type) parts.push(item.kit_type);
+    parts.push('shirt');
+  } else if(item.category==='cards'){
+    if(item.series) parts.push(item.series);
+    if(item.year) parts.push(item.year);
+    parts.push('card');
+  } else if(item.category==='games'){
+    if(item.platform) parts.push(item.platform);
+  } else if(item.category==='vinyl'){
+    if(item.artist) parts.push(item.artist);
+    parts.push('vinyl');
+  }
+  const query=parts.filter(Boolean).join(' ').trim();
+  try{
+    const r=await fetch(`api.php?action=getImage&id=${encodeURIComponent(item.id)}&query=${encodeURIComponent(query)}&cat=${encodeURIComponent(item.category||'')}`,{credentials:'same-origin'});
+    const d=await r.json();
+    if(d&&d.ok&&d.url) img.src=d.url;
+  }catch(_){}
 
 async function loadPills(){
   try{
