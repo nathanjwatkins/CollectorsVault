@@ -1017,7 +1017,26 @@ function doSave() {
     $item['username'] = $_SESSION['user'];
     $item['saved_at'] = date('Y-m-d H:i:s');
     $item['thumbnail'] = '';
-    appendCSV(COLLECTION_FILE, flattenItem($item), array_keys(csvHeaders()));
+
+    // Align the row to the file's actual header — `csvHeaders()` is a fallback
+    // for first-write only; once columns have been added (manufacturer,
+    // card_number, platform, kit_type, etc.) the file's real header is the
+    // single source of truth. Writing 19 values into a 33-column file produces
+    // a row that readCSV() silently skips on the next read.
+    $headers = null;
+    if (file_exists(COLLECTION_FILE) && filesize(COLLECTION_FILE) > 0) {
+        $h = fopen(COLLECTION_FILE, 'r');
+        $headers = fgetcsv($h);
+        fclose($h);
+    }
+    if (!$headers) $headers = array_keys(csvHeaders());
+
+    $row = [];
+    foreach ($headers as $col) {
+        $v = $item[$col] ?? '';
+        $row[$col] = is_string($v) ? str_replace(["\n","\r"], ' ', $v) : $v;
+    }
+    appendCSV(COLLECTION_FILE, $row, $headers);
     json(['ok' => true, 'id' => $item['id']]);
 }
 
