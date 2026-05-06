@@ -19,7 +19,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=1776987593">
+<link rel="stylesheet" href="shared.css?v=1778000000">
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
@@ -64,6 +64,38 @@ $username = htmlspecialchars($_SESSION['user']);
 
 /* Error */
 #errorBox { display:none; background:rgba(193,53,40,.08); border:1px solid rgba(193,53,40,.2); border-radius:var(--radius); padding:10px 12px; font-size:12px; color:var(--red); font-family:var(--font-sans); }
+
+/* ── Bulk mode toggle ──────────────────────────────────────────────────── */
+.bulk-toggle { display:flex; align-items:center; gap:6px; cursor:pointer; -webkit-tap-highlight-color:transparent; user-select:none; padding:4px 0; }
+.bulk-toggle-label { font-family:var(--font-mono); font-size:9px; color:var(--ink3); letter-spacing:.06em; text-transform:uppercase; transition:color .15s; }
+.bulk-toggle:hover .bulk-toggle-label { color:var(--ink); }
+.bulk-switch { position:relative; width:26px; height:14px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.22); border-radius:8px; transition:background .18s, border-color .18s; flex-shrink:0; }
+.bulk-switch::after { content:''; position:absolute; top:1px; left:1px; width:10px; height:10px; background:var(--ink3); border-radius:50%; transition:transform .18s, background .18s; }
+.bulk-toggle.on .bulk-switch { background:rgba(200,255,0,.22); border-color:rgba(200,255,0,.45); }
+.bulk-toggle.on .bulk-switch::after { transform:translateX(12px); background:#C8FF00; }
+.bulk-toggle.on .bulk-toggle-label { color:#C8FF00; }
+.bulk-banner { display:none; align-items:center; gap:6px; padding:6px 10px; background:rgba(200,255,0,.08); border:1px solid rgba(200,255,0,.20); border-radius:var(--radius); font-family:var(--font-mono); font-size:9px; color:#C8FF00; letter-spacing:.04em; margin-bottom:8px; }
+.bulk-banner.on { display:flex; }
+.bulk-banner svg { width:11px; height:11px; stroke:#C8FF00; fill:none; stroke-width:1.5; flex-shrink:0; }
+
+/* ── Verify modal overlay ──────────────────────────────────────────────── */
+#verifyOverlay { display:none; position:fixed; inset:0; background:rgba(5,5,7,.72); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); z-index:9999; align-items:flex-end; justify-content:center; padding:0; -webkit-tap-highlight-color:transparent; }
+#verifyOverlay.show { display:flex; animation:vfade .2s ease; }
+@keyframes vfade { from { opacity:0 } to { opacity:1 } }
+.verify-sheet { width:100%; max-width:520px; max-height:92dvh; background:#171513; border:1px solid rgba(255,255,255,.08); border-radius:14px 14px 0 0; padding:14px 16px 18px; display:flex; flex-direction:column; overflow-y:auto; animation:vslide .25s cubic-bezier(.2,.8,.2,1); }
+@keyframes vslide { from { transform:translateY(40px); opacity:0 } to { transform:translateY(0); opacity:1 } }
+.verify-grabber { width:36px; height:3px; background:rgba(255,255,255,.18); border-radius:2px; margin:2px auto 12px; }
+.verify-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.08); }
+.verify-title { font-family:var(--font-sans); font-size:13px; font-weight:500; color:var(--ink); letter-spacing:.02em; }
+.verify-sub { font-family:var(--font-mono); font-size:9px; color:var(--ink3); letter-spacing:.06em; text-transform:uppercase; margin-top:2px; }
+.verify-close { background:none; border:none; cursor:pointer; padding:4px; color:var(--ink3); transition:color .15s; -webkit-tap-highlight-color:transparent; }
+.verify-close:hover { color:var(--ink); }
+.verify-close svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.5; }
+@media (min-width:768px) {
+  #verifyOverlay { align-items:center; padding:20px; }
+  .verify-sheet { border-radius:14px; max-height:88dvh; }
+  .verify-grabber { display:none; }
+}
 
 /* Result form */
 #resultForm { display:none; }
@@ -502,9 +534,20 @@ $username = htmlspecialchars($_SESSION['user']);
 
 <div class="app" id="scannerApp" style="display:none">
   <div class="left">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px">
       <div class="panel-label" id="panelLabel">Scan — Trading Cards</div>
-      <button onclick="showPicker()" style="background:none;border:none;cursor:pointer;font-family:var(--font-mono);font-size:9px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;padding:4px 0;transition:color .15s" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink3)'">← Change</button>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="bulk-toggle" id="bulkToggle" onclick="toggleBulkMode()" role="switch" aria-checked="false" tabindex="0" title="Bulk mode auto-saves scans without verification">
+          <span class="bulk-toggle-label">Bulk</span>
+          <span class="bulk-switch" aria-hidden="true"></span>
+        </div>
+        <button onclick="showPicker()" style="background:none;border:none;cursor:pointer;font-family:var(--font-mono);font-size:9px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;padding:4px 0;transition:color .15s" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--ink3)'">← Change</button>
+      </div>
+    </div>
+
+    <div class="bulk-banner" id="bulkBanner">
+      <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      <span>Bulk mode on — scans auto-save without verification</span>
     </div>
 
     <div class="dropzone" id="dropzone"
@@ -525,6 +568,35 @@ $username = htmlspecialchars($_SESSION['user']);
       <div class="progress"><div class="progress-bar"></div></div>
     </div>
     <div id="errorBox"></div>
+  </div>
+
+  <div class="right" style="background:#0C0C10">
+    <div class="right-hdr">
+      <div class="right-title">Recent Scans</div>
+      <a href="collection.php" class="btn-sm btn-outline">View All →</a>
+    </div>
+    <div id="recentGrid" class="recent-grid">
+      <div class="empty-scan">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+        <p>Scan your first item</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Verify Modal ──────────────────────────────────────────────────────── -->
+<div id="verifyOverlay" onclick="onVerifyOverlayClick(event)" role="dialog" aria-modal="true" aria-labelledby="verifyTitle">
+  <div class="verify-sheet" onclick="event.stopPropagation()">
+    <div class="verify-grabber"></div>
+    <div class="verify-head">
+      <div>
+        <div class="verify-title" id="verifyTitle">Verify item details</div>
+        <div class="verify-sub">Check before saving</div>
+      </div>
+      <button class="verify-close" onclick="cancelVerify()" aria-label="Cancel">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
 
     <div id="resultForm">
       <div class="id-block">
@@ -537,21 +609,8 @@ $username = htmlspecialchars($_SESSION['user']);
         <div class="pg"><label>Value</label><div class="pi-wrap"><input id="rValue" type="number" step="0.01" min="0" placeholder="0.00"/></div></div>
       </div>
       <div class="form-actions">
-        <button class="btn-reset" onclick="resetScan()">↩</button>
+        <button class="btn-reset" onclick="cancelVerify()">↩</button>
         <button class="btn-save" id="saveBtn" onclick="saveItem()">Save to Collection →</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="right" style="background:#0C0C10">
-    <div class="right-hdr">
-      <div class="right-title">Recent Scans</div>
-      <a href="collection.php" class="btn-sm btn-outline">View All →</a>
-    </div>
-    <div id="recentGrid" class="recent-grid">
-      <div class="empty-scan">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
-        <p>Scan your first item</p>
       </div>
     </div>
   </div>
@@ -578,8 +637,55 @@ const CAT_ICONS_SVG = {
 const CAT_LABELS = {cards:'Trading Cards',shirts:'Football Shirts',games:'Video Games',vinyl:'Vinyl & Music',other:'Other'};
 
 let currentCat='cards', currentAI=null, currentB64=null, currentMime=null;
+let bulkMode = localStorage.getItem('cv_bulk_mode') === '1';
 
-loadRecent(); loadPills();
+loadRecent(); loadPills(); applyBulkModeUI();
+
+function toggleBulkMode() {
+  bulkMode = !bulkMode;
+  localStorage.setItem('cv_bulk_mode', bulkMode ? '1' : '0');
+  applyBulkModeUI();
+  showToast(bulkMode ? 'Bulk mode on — auto-saving scans' : 'Bulk mode off — verify before save');
+}
+
+function applyBulkModeUI() {
+  const t = document.getElementById('bulkToggle');
+  const b = document.getElementById('bulkBanner');
+  if (!t) return;
+  t.classList.toggle('on', bulkMode);
+  t.setAttribute('aria-checked', bulkMode ? 'true' : 'false');
+  if (b) b.classList.toggle('on', bulkMode);
+}
+
+// Allow keyboard activation of the bulk toggle
+document.addEventListener('keydown', (e) => {
+  if (e.target && e.target.id === 'bulkToggle' && (e.key === ' ' || e.key === 'Enter')) {
+    e.preventDefault(); toggleBulkMode();
+  }
+  if (e.key === 'Escape') {
+    const v = document.getElementById('verifyOverlay');
+    if (v && v.classList.contains('show')) cancelVerify();
+  }
+});
+
+function openVerifyModal() {
+  const v = document.getElementById('verifyOverlay');
+  v.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+function closeVerifyModal() {
+  const v = document.getElementById('verifyOverlay');
+  v.classList.remove('show');
+  document.body.style.overflow = '';
+}
+function cancelVerify() {
+  closeVerifyModal();
+  resetScan();
+}
+function onVerifyOverlayClick(e) {
+  // Click on backdrop (not the sheet) cancels
+  if (e.target.id === 'verifyOverlay') cancelVerify();
+}
 
 function setCat(cat) {
   currentCat=cat;
@@ -692,7 +798,6 @@ function handleFile(e){const f=e.target.files[0];if(f)processFile(f);e.target.va
 async function processFile(file) {
   document.getElementById('previewImg').src=URL.createObjectURL(file);
   document.getElementById('previewWrap').style.display='block';
-  document.getElementById('resultForm').style.display='none';
   document.getElementById('errorBox').style.display='none';
   document.getElementById('scanningState').style.display='block';
   try {
@@ -705,6 +810,12 @@ async function processFile(file) {
     const data=await resp.json();
     if(!data.ok)throw new Error(data.error||'Scan failed');
     buildForm(parseGemini(data.text));
+    if (bulkMode) {
+      // Auto-save without showing the verify modal
+      saveItem();
+    } else {
+      openVerifyModal();
+    }
   } catch(e){showError(e.message);}
   finally{document.getElementById('scanningState').style.display='none';}
 }
@@ -777,8 +888,8 @@ async function saveItem(){
     const resp=await fetch('api.php',{method:'POST',body:fd,credentials:'same-origin'});
     const data=await resp.json();
     if(!data.ok)throw new Error(data.error||'Save failed');
+    closeVerifyModal();
     showSaveSuccess(item.name); resetScan(); loadRecent(); loadPills();
-document.body.classList.add('picker-open');
   }catch(e){showError(e.message);}
   finally{btn.classList.remove('loading');btn.textContent='Save to Collection →';}
 }
