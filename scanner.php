@@ -19,7 +19,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=1778000000">
+<link rel="stylesheet" href="shared.css?v=1778100000">
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
@@ -99,6 +99,9 @@ $username = htmlspecialchars($_SESSION['user']);
 
 /* Result form */
 #resultForm { display:none; }
+
+/* Toast must appear above the verify modal */
+#toast { z-index: 10001 !important; }
 .id-block { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.22); border-radius:var(--radius); padding:12px 14px; margin-bottom:12px; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
 .id-name { font-family:var(--font-sans); font-size:18px; font-weight:500; color:var(--ink); margin-bottom:3px; }
 .id-meta { font-family:var(--font-mono); font-size:10px; color:var(--ink3); display:flex; align-items:center; gap:8px; flex-wrap:wrap; letter-spacing:.03em; }
@@ -608,6 +611,7 @@ $username = htmlspecialchars($_SESSION['user']);
         <div class="pg"><label>Paid</label><div class="pi-wrap"><input id="rBought" type="number" step="0.01" min="0" placeholder="0.00"/></div></div>
         <div class="pg"><label>Value</label><div class="pi-wrap"><input id="rValue" type="number" step="0.01" min="0" placeholder="0.00"/></div></div>
       </div>
+      <div id="modalErrorBox" style="display:none;background:rgba(193,53,40,.10);border:1px solid rgba(193,53,40,.30);border-radius:var(--radius);padding:10px 12px;margin-bottom:10px;font-family:var(--font-sans);font-size:12px;color:var(--red);word-break:break-word"></div>
       <div class="form-actions">
         <button class="btn-reset" onclick="cancelVerify()">↩</button>
         <button class="btn-save" id="saveBtn" onclick="saveItem()">Save to Collection →</button>
@@ -670,6 +674,8 @@ document.addEventListener('keydown', (e) => {
 
 function openVerifyModal() {
   const v = document.getElementById('verifyOverlay');
+  const err = document.getElementById('modalErrorBox');
+  if (err) { err.style.display = 'none'; err.textContent = ''; }
   v.classList.add('show');
   document.body.style.overflow = 'hidden';
 }
@@ -883,14 +889,25 @@ async function saveItem(){
   item.item_type=item[ids[1]]||'';item.series=item[ids[0]]||item.series||'';
   item.year=item.year||item.season||'';item.condition=item.condition||'';
   item.extra1=item[ids[2]]||'';item.extra2=item[ids[3]]||'';item.extra3=item[ids[4]]||'';item.extra4=item[ids[5]]||'';
+  console.log('[saveItem] sending item:', item);
   try{
     const fd=new FormData();fd.append('action','save');fd.append('item',JSON.stringify(item));fd.append('thumbnail','');
     const resp=await fetch('api.php',{method:'POST',body:fd,credentials:'same-origin'});
-    const data=await resp.json();
-    if(!data.ok)throw new Error(data.error||'Save failed');
+    const rawText=await resp.text();
+    console.log('[saveItem] HTTP', resp.status, 'body:', rawText);
+    let data;
+    try { data = JSON.parse(rawText); }
+    catch (parseErr) { throw new Error('Server returned non-JSON (HTTP '+resp.status+'): '+rawText.slice(0,200)); }
+    if(!data.ok)throw new Error(data.error||('Save failed (HTTP '+resp.status+')'));
     closeVerifyModal();
     showSaveSuccess(item.name); resetScan(); loadRecent(); loadPills();
-  }catch(e){showError(e.message);}
+  }catch(e){
+    console.error('[saveItem] error:', e);
+    showToast('Save failed: '+e.message);
+    showError(e.message);
+    const me = document.getElementById('modalErrorBox');
+    if (me) { me.textContent = '⚠ '+e.message; me.style.display = 'block'; }
+  }
   finally{btn.classList.remove('loading');btn.textContent='Save to Collection →';}
 }
 
