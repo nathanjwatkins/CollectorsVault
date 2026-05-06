@@ -70,6 +70,43 @@ switch ($action) {
     case 'update':        doUpdate();       break;
     case 'stats':         doStats();        break;
     case 'getImage':      doGetImage();     break;
+    case 'csvDebug':
+        requireAuth();
+        $userId = $_SESSION['user_id'];
+        $diskHeaders = [];
+        $totalLines = 0;
+        $orphanedRows = []; // rows whose column count != header count
+        $userOrphans = [];
+        $matchedRows = 0;
+        if (file_exists(COLLECTION_FILE)) {
+            $fh = fopen(COLLECTION_FILE, 'r');
+            $diskHeaders = fgetcsv($fh) ?: [];
+            $hdrCount = count($diskHeaders);
+            while (($line = fgetcsv($fh)) !== false) {
+                $totalLines++;
+                if (count($line) !== $hdrCount) {
+                    $orphan = ['col_count' => count($line), 'first_5' => array_slice($line, 0, 5)];
+                    $orphanedRows[] = $orphan;
+                    // Try to spot user-id-like value in any column
+                    if (in_array($userId, $line, true)) $userOrphans[] = $orphan;
+                } else {
+                    $combined = array_combine($diskHeaders, $line);
+                    if (($combined['user_id'] ?? '') === $userId) $matchedRows++;
+                }
+            }
+            fclose($fh);
+        }
+        json([
+            'ok' => true,
+            'header_count' => count($diskHeaders),
+            'expected_header_count' => count(csvHeaders()),
+            'total_data_lines' => $totalLines,
+            'matched_user_rows' => $matchedRows,
+            'orphaned_rows_total' => count($orphanedRows),
+            'orphaned_rows_for_this_user' => count($userOrphans),
+            'orphan_samples' => array_slice($orphanedRows, -5),
+        ]);
+        break;
     case 'keyStatus':
         requireAuth();
         $keyLen = strlen(GEMINI_KEY);
@@ -1184,7 +1221,10 @@ function doLinkEbayQuery() {
 function csvHeaders() {
     return ['id'=>'','user_id'=>'','username'=>'','category'=>'','name'=>'','subtitle'=>'',
             'series'=>'','item_type'=>'','year'=>'','condition'=>'','bought'=>'','value'=>'',
-            'extra1'=>'','extra2'=>'','extra3'=>'','extra4'=>'','notes'=>'','thumbnail'=>'','saved_at'=>''];
+            'extra1'=>'','extra2'=>'','extra3'=>'','extra4'=>'','notes'=>'','thumbnail'=>'','saved_at'=>'',
+            'manufacturer'=>'','card_number'=>'','platform'=>'','genre'=>'','region'=>'',
+            'artist'=>'','label'=>'','format'=>'','pressing'=>'','kit_type'=>'','size'=>'',
+            'signed'=>'','price_paid'=>'','ebay_query'=>''];
 }
 function flattenItem($item) {
     $flat = [];
@@ -1207,9 +1247,26 @@ function readCSV($file) {
 }
 function appendCSV($file, $row, $headers) {
     $new = !file_exists($file) || filesize($file) === 0;
-    $h   = fopen($file, 'a');
-    if ($new) fputcsv($h, $headers);
-    fputcsv($h, array_values($row));
+    if ($new) {
+        $h = fopen($file, 'a');
+        fputcsv($h, $headers);
+        fputcsv($h, array_values($row));
+        fclose($h);
+        return;
+    }
+    // File already has a header line — read it and align the row to it so
+    // we never write a row whose column count drifts from the file's header.
+    // Without this, readCSV() silently drops the appended row on every read.
+    $fh = fopen($file, 'r');
+    $diskHeaders = fgetcsv($fh);
+    fclose($fh);
+    if (!$diskHeaders) $diskHeaders = $headers;
+    $aligned = [];
+    foreach ($diskHeaders as $col) {
+        $aligned[] = array_key_exists($col, $row) ? $row[$col] : '';
+    }
+    $h = fopen($file, 'a');
+    fputcsv($h, $aligned);
     fclose($h);
 }
 function writeCSV($file, $rows, $headers) {
