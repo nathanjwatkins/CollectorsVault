@@ -935,16 +935,17 @@ function renderRecent(items){
   }
   grid.innerHTML=items.map((item,i)=>{
     const icon=CAT_ICONS_SVG[item.category]||CAT_ICONS_SVG.other;
-    // Always render an <img> placeholder + a fallback icon. The img stays
-    // hidden (via empty src) until fetchRecentImage() resolves a URL from
-    // /api.php?action=getImage. If the lookup fails or eBay returns nothing
-    // the icon stays visible.
+    // Always render an <img> placeholder + a fallback icon. The img is
+    // initially transparent (opacity:0) — browsers WILL download these,
+    // unlike display:none which suppresses the request entirely. Once
+    // fetchRecentImage() resolves a URL and the image loads, opacity flips
+    // to 1 and the icon hides. If the lookup fails the icon stays.
     const safeId=String(item.id||'').replace(/[^a-zA-Z0-9_.\-]/g,'');
     const thumb=`
       <img id="rc-img-${safeId}" alt="${item.name}" loading="lazy"
-           style="width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0"
-           onload="this.style.display='block';this.parentElement.querySelector('.rc-icon').style.display='none'"
-           onerror="this.style.display='none'">
+           style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity .2s"
+           onload="this.style.opacity='1';const ic=this.parentElement.querySelector('.rc-icon');if(ic)ic.style.display='none'"
+           onerror="this.style.opacity='0'">
       <div class="rc-icon">${icon}</div>`;
     const val=item.value?'£'+parseFloat(item.value).toFixed(2):'—';
     const badge=item.item_type||item.series?`<span class="rc-tag">${item.item_type||item.series}</span>`:'';
@@ -976,14 +977,17 @@ async function fetchRecentImage(item){
 function openRecentModal(item){
   const existing=document.getElementById('recentModal');if(existing)existing.remove();
   const icon=CAT_ICONS_SVG[item.category]||CAT_ICONS_SVG.other;
-  // Always render an <img> with a fallback icon underneath. fetchRecentImage
-  // populates the src in the same way as for the grid cards.
+  // Always render an <img> with a fallback icon underneath. opacity:0 lets
+  // the browser actually download the image (display:none suppresses the
+  // request entirely). fetchRecentImageInto sets img.src; the onload reveals
+  // it and hides the icon.
   const safeId=String(item.id||'').replace(/[^a-zA-Z0-9_.\-]/g,'');
   const thumb=`
     <div style="position:relative;width:100%;height:200px;background:rgba(0,0,0,.15);overflow:hidden">
       <img id="rcm-img-${safeId}" alt="${item.name}"
-           style="width:100%;height:100%;object-fit:cover;display:none;position:absolute;inset:0"
-           onload="this.style.display='block';this.parentElement.querySelector('.rcm-icon').style.display='none'">
+           style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity .2s"
+           onload="this.style.opacity='1';const ic=this.parentElement.querySelector('.rcm-icon');if(ic)ic.style.display='none'"
+           onerror="this.style.opacity='0'">
       <div class="rcm-icon" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.25">${icon}</div>
     </div>`;
 
