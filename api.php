@@ -70,6 +70,8 @@ switch ($action) {
     case 'update':        doUpdate();       break;
     case 'stats':         doStats();        break;
     case 'getImage':      doGetImage();     break;
+    case 'imgProxy':      doImgProxy();     break;
+    case 'imgProxy':      doImgProxy();     break;
     case 'csvDebug':
         requireAuth();
         $userId = $_SESSION['user_id'];
@@ -659,6 +661,64 @@ function doScan() {
 
     // ── Everything failed — friendly user message ──────────────────────────────
     json(['error' => 'AI scanning is temporarily unavailable due to high demand. Please wait a moment and try again.'], 503);
+}
+
+// ── IMAGE PROXY ───────────────────────────────────────────────────────────────
+// eBay's image servers (i.ebayimg.com) refuse to serve images when the Referer
+// is anything other than ebay.* — direct <img src=...> from CollectorVault gets
+// blocked silently (image stays naturalWidth=0 forever, no onload/onerror).
+// This proxy fetches the image server-side with a browser-like User-Agent and
+// an ebay.co.uk Referer, then streams the bytes back. Browser caches it.
+function doImgProxy() {
+    requireAuth();
+    $url = $_GET['url'] ?? '';
+    // Allow-list: only proxy from known-safe image hosts so this can't be
+    // abused as an open proxy.
+    $host = parse_url($url, PHP_URL_HOST) ?: '';
+    $allowedHosts = [
+        'i.ebayimg.com',
+        'thumbs.ebaystatic.com',
+        'encrypted-tbn0.gstatic.com', // Google CSE thumbnails
+        'encrypted-tbn1.gstatic.com',
+        'encrypted-tbn2.gstatic.com',
+        'encrypted-tbn3.gstatic.com',
+    ];
+    if (!in_array($host, $allowedHosts, true)) {
+        http_response_code(400);
+        header('Content-Type: text/plain');
+        echo 'Host not allowed';
+        return;
+    }
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_TIMEOUT        => 10,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_HEADER         => false,
+        CURLOPT_HTTPHEADER     => [
+            'Referer: https://www.ebay.co.uk/',
+            'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36',
+            'Accept: image/avif,image/webp,image/png,image/jpeg,*/*;q=0.8',
+        ],
+    ]);
+    $body = curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE) ?: 'image/jpeg';
+    curl_close($ch);
+
+    if ($code !== 200 || !$body) {
+        http_response_code(502);
+        header('Content-Type: text/plain');
+        echo 'Upstream fetch failed: ' . $code;
+        return;
+    }
+    // Cache hard — image URLs are content-addressed by eBay so they don't change.
+    header('Content-Type: ' . $type);
+    header('Cache-Control: public, max-age=2592000, immutable'); // 30 days
+    header('Content-Length: ' . strlen($body));
+    echo $body;
 }
 
 // ── IMAGE LOOKUP ──────────────────────────────────────────────────────────────

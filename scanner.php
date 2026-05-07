@@ -1047,7 +1047,10 @@ async function fetchRecentImageInto(item, prefix){
   try{
     const r=await fetch(`api.php?action=getImage&id=${encodeURIComponent(item.id)}&query=${encodeURIComponent(query)}&cat=${encodeURIComponent(item.category||'')}`,{credentials:'same-origin'});
     const d=await r.json();
-    if(d&&d.ok&&d.url) img.src=d.url;
+    // Route through imgProxy: eBay refuses direct hotlinks (no Referer match)
+    // so we fetch server-side and stream bytes back. The browser caches the
+    // proxied URL, so this only adds one origin hop.
+    if(d&&d.ok&&d.url) img.src='api.php?action=imgProxy&url='+encodeURIComponent(d.url);
   }catch(_){}
 }
 
