@@ -850,20 +850,24 @@ function scrapeEbayListings($query, $limit) {
 
     // eBay's new (2025) search-results layout uses these classes per listing:
     //   <div class="su-card-container ...">
-    //     <a class="s-card__link image-treatment" href="https://www.ebay.com/itm/...">
-    //       <img src="https://i.ebayimg.com/...">
+    //     <a class="s-card__link image-treatment" href=https://www.ebay.com/itm/...>
+    //       <img src=https://i.ebayimg.com/...>
     //     </a>
     //     <span class="su-styled-text primary default">Title</span>
     //     <span class="su-styled-text secondary default">Subtitle/condition</span>
     //     <span class="su-styled-text primary bold large-1 s-card__price">£12.34</span>
     //   </div>
     //
+    // IMPORTANT: eBay serves UNQUOTED attribute values in this markup
+    // (href=https://... not href="https://..."). All attribute regexes
+    // below accept either form: ="..."  |  =unquoted
+    //
     // We split the body on the su-card-container marker, then parse each
     // resulting chunk independently. The first chunk (before any container)
     // is page chrome and is discarded.
-    $parts = preg_split('/<div[^>]+class="[^"]*su-card-container[^"]*"/i', $body);
+    $parts = preg_split('/<div[^>]+class=(?:"[^"]*su-card-container[^"]*"|\S*su-card-container\S*)/i', $body);
     if (!$parts || count($parts) < 2) return [];
-    array_shift($parts); // drop the page chrome before the first listing
+    array_shift($parts); // drop page chrome
 
     $out = [];
     foreach ($parts as $chunk) {
@@ -871,37 +875,36 @@ function scrapeEbayListings($query, $limit) {
         // Limit each chunk so we don't accidentally swallow the next listing.
         $chunk = substr($chunk, 0, 8000);
 
-        // Title: first <span class="...primary default">TITLE</span>
+        // Title: <span class="...primary default">TITLE</span>
+        // Title classes appear quoted in the live markup (multi-class needs quotes).
         $title = '';
         if (preg_match('/<span[^>]*class="[^"]*\bsu-styled-text\b[^"]*\bprimary\b[^"]*\bdefault\b[^"]*"[^>]*>(.*?)<\/span>/is', $chunk, $tm)) {
             $title = trim(strip_tags($tm[1]));
         }
-        // Strip eBay's "New Listing" / "Sponsored" prefix if present.
         $title = preg_replace('/^(New Listing|Sponsored)\s*/i', '', $title);
-        // First card on every results page is the "Shop on eBay" template — skip it.
         if ($title === '' || stripos($title, 'Shop on eBay') !== false) continue;
 
-        // Listing URL: first s-card__link href.
+        // Listing URL — accept BOTH quoted and unquoted href forms.
+        // eBay's new layout serves them unquoted (href=https://...).
         $listingUrl = '';
-        if (preg_match('/<a[^>]+class="[^"]*\bs-card__link\b[^"]*"[^>]*href="([^"]+)"/i', $chunk, $um)) {
-            $listingUrl = html_entity_decode($um[1]);
+        if (preg_match('/<a[^>]+class="[^"]*\bs-card__link\b[^"]*"[^>]*\bhref=(?:"([^"]+)"|(\S+))/i', $chunk, $um)) {
+            $listingUrl = html_entity_decode($um[1] !== '' ? $um[1] : $um[2]);
         }
         if (!$listingUrl) continue;
 
-        // Image: first i.ebayimg.com URL inside the chunk (could be src or data-src).
+        // Image — also accept quoted/unquoted src + data-src + srcset.
         $image = '';
-        if (preg_match('/<img[^>]+src="(https:\/\/i\.ebayimg\.com\/[^"]+)"/i', $chunk, $im)) {
-            $image = $im[1];
+        if (preg_match('/<img[^>]+\bsrc=(?:"(https:\/\/i\.ebayimg\.com\/[^"]+)"|(https:\/\/i\.ebayimg\.com\/\S+))/i', $chunk, $im)) {
+            $image = $im[1] !== '' ? $im[1] : $im[2];
         }
         if ($image && stripos($image, 'spinner') !== false) {
             $image = '';
-            if (preg_match('/data-src="(https:\/\/i\.ebayimg\.com\/[^"]+)"/i', $chunk, $im2)) {
-                $image = $im2[1];
+            if (preg_match('/\bdata-src=(?:"(https:\/\/i\.ebayimg\.com\/[^"]+)"|(https:\/\/i\.ebayimg\.com\/\S+))/i', $chunk, $im2)) {
+                $image = $im2[1] !== '' ? $im2[1] : $im2[2];
             }
         }
-        // Fallback: srcset (the new layout uses it for retina assets).
-        if (!$image && preg_match('/srcset="(https:\/\/i\.ebayimg\.com\/[^"\s,]+)/i', $chunk, $im3)) {
-            $image = $im3[1];
+        if (!$image && preg_match('/\bsrcset=(?:"(https:\/\/i\.ebayimg\.com\/[^"\s,]+)|(https:\/\/i\.ebayimg\.com\/\S+))/i', $chunk, $im3)) {
+            $image = $im3[1] !== '' ? $im3[1] : $im3[2];
         }
         if ($image) {
             $image = str_replace('/thumbs/images/g/', '/images/g/', $image);

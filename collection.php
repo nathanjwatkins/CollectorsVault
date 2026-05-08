@@ -1312,20 +1312,19 @@ function openEdit(id) {
     ebay_query:'eBay Search Query'};
 
   fields.innerHTML = editableKeys.map(k => {
-    // For ebay_query, show only the user's explicitly set override as the
-    // input value. The auto-generated query goes in the placeholder so the
-    // user can see what we'd use by default, but submitting an unchanged
-    // form won't unintentionally pin a query.
-    const val = (item[k] || '');
-    const placeholder = (k === 'ebay_query' && !item.ebay_query)
+    // For ebay_query, pre-fill the input with the auto-built query when no
+    // override is set, so the user can edit it directly rather than typing
+    // from scratch. saveEdit only writes ebay_query if it actually differs
+    // from the current value, so this doesn't unintentionally pin queries.
+    const val = (k === 'ebay_query' && !item.ebay_query)
       ? buildQuery(item)
-      : '';
+      : (item[k] || '');
     const hint = k === 'ebay_query'
-      ? '<div style="font-family:var(--mono);font-size:8px;color:var(--ink3);margin-top:3px;letter-spacing:.04em">Override the search term used for eBay pricing (leave blank for auto)</div>'
+      ? '<div style="font-family:var(--mono);font-size:8px;color:var(--ink3);margin-top:3px;letter-spacing:.04em">Edit to override the auto-generated query, or pick a candidate above to set automatically.</div>'
       : '';
     return `<div>
       <label style="font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:4px">${labelMap[k]||k}</label>
-      <input id="ef_${k}" type="${k==='price_paid'?'number':'text'}" value="${esc(val)}" placeholder="${esc(placeholder)}"
+      <input id="ef_${k}" type="${k==='price_paid'?'number':'text'}" value="${esc(val)}"
         style="width:100%;height:36px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--font);font-size:13px;color:var(--ink);outline:none;transition:border-color .15s"
         onfocus="this.style.borderColor='rgba(200,255,0,.35)'"
         onblur="this.style.borderColor=''"
