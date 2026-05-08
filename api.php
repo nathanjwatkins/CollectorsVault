@@ -780,15 +780,24 @@ function doSearchEbayCandidates() {
     requireAuth();
     $query = trim((string)($_GET['query'] ?? $_POST['query'] ?? ''));
     $limit = max(1, min(12, intval($_GET['limit'] ?? $_POST['limit'] ?? 6)));
+    // mode: 'sold' (default — completed listings only, real sale prices) or
+    // 'live' (current active listings — better/fresher images, asking prices).
+    $mode = ($_GET['mode'] ?? $_POST['mode'] ?? 'sold') === 'live' ? 'live' : 'sold';
     if ($query === '') json(['error' => 'Missing query'], 400);
-    $candidates = scrapeEbayListings($query, $limit);
-    json(['ok' => true, 'query' => $query, 'candidates' => $candidates]);
+    $candidates = scrapeEbayListings($query, $limit, $mode);
+    json(['ok' => true, 'query' => $query, 'mode' => $mode, 'candidates' => $candidates]);
 }
 
-function scrapeEbayListings($query, $limit) {
-    $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
-        '_nkw' => $query, '_ipg' => '60', '_sop' => '12',
-    ]);
+function scrapeEbayListings($query, $limit, $mode = 'sold') {
+    // Build search URL. Sold mode adds LH_Sold + LH_Complete to filter to
+    // completed sale listings (real prices). Live mode (default before this
+    // change) returns current active listings (asking prices, fresher images).
+    $params = ['_nkw' => $query, '_ipg' => '60', '_sop' => '12'];
+    if ($mode === 'sold') {
+        $params['LH_Sold'] = '1';
+        $params['LH_Complete'] = '1';
+    }
+    $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query($params);
     $resp = curlGet($url, [
         'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',

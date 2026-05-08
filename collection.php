@@ -951,10 +951,24 @@ body::before {
           <div style="font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">eBay match</div>
           <div id="ebayPickerStatus" style="font-family:var(--font);font-size:11px;color:var(--ink2)">No match selected — using auto.</div>
         </div>
-        <button id="ebayPickerBtn" onclick="loadEbayCandidates()" style="height:32px;padding:0 12px;background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--mono);font-size:9px;letter-spacing:.10em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0">
-          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" style="display:block"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-          Find on eBay
-        </button>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <!--
+            Sold/Live toggle. Default 'sold' (real completed-sale prices,
+            matches the price-refresh logic so picked items reflect actual
+            value). 'live' falls back to current active listings — better
+            images for rare items, but asking prices not realised prices.
+          -->
+          <div id="ebayModeToggle" style="display:inline-flex;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;height:32px">
+            <button type="button" data-mode="sold" onclick="setEbayMode('sold')"
+              style="padding:0 10px;background:var(--acid);color:var(--void);border:none;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;cursor:pointer;transition:background .15s">Sold</button>
+            <button type="button" data-mode="live" onclick="setEbayMode('live')"
+              style="padding:0 10px;background:transparent;color:var(--ink2);border:none;font-family:var(--mono);font-size:9px;letter-spacing:.10em;text-transform:uppercase;cursor:pointer;transition:background .15s">Live</button>
+          </div>
+          <button id="ebayPickerBtn" onclick="loadEbayCandidates()" style="height:32px;padding:0 12px;background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--mono);font-size:9px;letter-spacing:.10em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" style="display:block"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+            Find on eBay
+          </button>
+        </div>
       </div>
       <div id="ebayCandidates" style="display:none;margin-top:8px"></div>
     </div>
@@ -968,7 +982,7 @@ body::before {
 </div>
 
 <script>
-let allItems=[],priceData={},imageCache={},currentTab='all',currentView='grid',currentModalId=null,editItemId=null,pendingChosenImage=null,toastT;
+let allItems=[],priceData={},imageCache={},currentTab='all',currentView='grid',currentModalId=null,editItemId=null,pendingChosenImage=null,ebayMode='sold',toastT;
 
 
 
@@ -1164,12 +1178,35 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 // 6 listing candidates with images, titles, prices. Clicking a candidate
 // stores its image URL in pendingChosenImage and copies the listing title
 // into the ebay_query input — saveEdit picks both up.
+// Switch the picker between sold/completed listings (default — real sale
+// prices, matches what price refresh uses) and live active listings (better
+// images for rare items, asking prices though). Re-fires the search if
+// candidates are already on screen so the user sees results in the new mode.
+function setEbayMode(mode) {
+  if (mode !== 'sold' && mode !== 'live') return;
+  ebayMode = mode;
+  // Update toggle button styles
+  const toggle = document.getElementById('ebayModeToggle');
+  if (toggle) {
+    toggle.querySelectorAll('button').forEach(b => {
+      const active = b.dataset.mode === mode;
+      b.style.background = active ? 'var(--acid)' : 'transparent';
+      b.style.color = active ? 'var(--void)' : 'var(--ink2)';
+      b.style.fontWeight = active ? '700' : 'normal';
+    });
+  }
+  // If the candidates panel is already open with results, re-fetch in the
+  // new mode so the toggle feels responsive.
+  const cands = document.getElementById('ebayCandidates');
+  if (cands && cands.style.display !== 'none' && cands.innerHTML.trim() !== '') {
+    loadEbayCandidates();
+  }
+}
+
 async function loadEbayCandidates() {
   const item = allItems.find(i => i.id === editItemId);
   if (!item) return;
 
-  // Use whatever's currently in the ebay_query input, or fall back to the
-  // auto-built query (mirrors how openEdit decides the placeholder).
   const queryInput = document.getElementById('ef_ebay_query');
   const query = (queryInput && queryInput.value.trim()) || buildQuery(item);
 
@@ -1177,22 +1214,26 @@ async function loadEbayCandidates() {
   const cands = document.getElementById('ebayCandidates');
   const status = document.getElementById('ebayPickerStatus');
   if (btn) { btn.disabled = true; btn.style.opacity = '.6'; }
-  if (status) status.textContent = `Searching for "${query}"…`;
+  if (status) status.textContent = `Searching ${ebayMode} listings for "${query}"…`;
   if (cands) {
     cands.style.display = 'block';
     cands.innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.10em;padding:14px 0;text-align:center">Loading 6 candidates…</div>';
   }
 
   try {
-    const r = await fetch('api.php?action=searchEbayCandidates&limit=6&query=' + encodeURIComponent(query), {credentials: 'same-origin'});
+    const r = await fetch('api.php?action=searchEbayCandidates&limit=6&mode=' + ebayMode + '&query=' + encodeURIComponent(query), {credentials: 'same-origin'});
     const d = await r.json();
     if (!d.ok || !d.candidates || !d.candidates.length) {
-      cands.innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.06em;padding:14px 0;text-align:center">No candidates found. Try a different query.</div>';
-      if (status) status.textContent = 'No matches.';
+      const tryOther = ebayMode === 'sold'
+        ? ' Try the Live toggle for active listings.'
+        : ' Try the Sold toggle for completed sales.';
+      cands.innerHTML = `<div style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.06em;padding:14px 0;text-align:center">No ${ebayMode} candidates found.${tryOther}</div>`;
+      if (status) status.textContent = `No ${ebayMode} matches.`;
       return;
     }
     renderEbayCandidates(d.candidates);
-    if (status) status.textContent = `${d.candidates.length} matches — click one to lock in.`;
+    const label = ebayMode === 'sold' ? 'sold' : 'live';
+    if (status) status.textContent = `${d.candidates.length} ${label} matches — click one to lock in.`;
   } catch (e) {
     cands.innerHTML = `<div style="font-family:var(--mono);font-size:9px;color:var(--red);padding:14px 0;text-align:center">Search failed: ${esc(e.message || e)}</div>`;
     if (status) status.textContent = 'Search failed.';
@@ -1281,6 +1322,7 @@ function openEdit(id) {
   // the user can see what's currently locked in. Otherwise show the
   // "no match selected" hint.
   pendingChosenImage = null; // populated when a candidate is clicked
+  setEbayMode('sold');       // always start in sold/completed mode
   const status = document.getElementById('ebayPickerStatus');
   const cands  = document.getElementById('ebayCandidates');
   if (cands) { cands.style.display = 'none'; cands.innerHTML = ''; }
