@@ -46,7 +46,11 @@ $log  = [date('Y-m-d H:i:s') . ' — Deploy (GitHub fetch)'];
 $root = __DIR__;
 
 function cv_fetch(string $path): array {
-    $ch = curl_init(GITHUB_RAW . $path);
+    // Append a cache-busting query string. GitHub raw aggressively caches
+    // (~5min) which means a deploy fired immediately after a push can fetch
+    // the previous commit's contents. The query param forces a fresh fetch.
+    $bust = '?_cb=' . time() . '_' . mt_rand(1000, 9999);
+    $ch = curl_init(GITHUB_RAW . $path . $bust);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
@@ -54,7 +58,9 @@ function cv_fetch(string $path): array {
         CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_HTTPHEADER     => [
             'Authorization: token ' . GITHUB_TOKEN,
-            'User-Agent: CV-Deploy/7.1',
+            'User-Agent: CV-Deploy/7.2',
+            'Cache-Control: no-cache',
+            'Pragma: no-cache',
         ],
     ]);
     $body = curl_exec($ch);
