@@ -825,7 +825,15 @@ function doSearchEbayCandidates() {
         }
         @file_put_contents(__DIR__ . '/probeEbay.txt', $out);
 
-        json(['ok' => true, 'wrote_bytes' => strlen($out), 'body_length' => $bodyLen]);
+        $diag = null;
+        $candidates = scrapeEbayListings($query, $limit, $diag);
+        json([
+            'ok' => true,
+            'wrote_bytes' => strlen($out),
+            'body_length' => $bodyLen,
+            'parser_diag' => $diag,
+            'candidates_returned' => count($candidates),
+        ]);
         return;
     }
 
@@ -833,7 +841,7 @@ function doSearchEbayCandidates() {
     json(['ok' => true, 'query' => $query, 'candidates' => $candidates]);
 }
 
-function scrapeEbayListings($query, $limit) {
+function scrapeEbayListings($query, $limit, &$diag = null) {
     $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
         '_nkw' => $query, '_ipg' => '60', '_sop' => '12',
     ]);
@@ -842,11 +850,17 @@ function scrapeEbayListings($query, $limit) {
         'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language: en-GB,en;q=0.9',
     ]);
-    if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 1000) return [];
+    if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 1000) {
+        if ($diag !== null) $diag = ['stage' => 'fetch_failed', 'code' => $resp['code'] ?? 0];
+        return [];
+    }
     $body = $resp['body'];
     if (stripos($body, 'Pardon our interruption') !== false ||
         stripos($body, 'Please verify you are a human') !== false ||
-        stripos($body, 'captcha') !== false) return [];
+        stripos($body, 'captcha') !== false) {
+        if ($diag !== null) $diag = ['stage' => 'bot_detected'];
+        return [];
+    }
 
     // eBay's new (2025) search-results layout uses these classes per listing:
     //   <div class="su-card-container ...">
@@ -866,33 +880,43 @@ function scrapeEbayListings($query, $limit) {
     // resulting chunk independently. The first chunk (before any container)
     // is page chrome and is discarded.
     $parts = preg_split('/<div[^>]+class=(?:"[^"]*su-card-container[^"]*"|\S*su-card-container\S*)/i', $body);
-    if (!$parts || count($parts) < 2) return [];
+    if (!$parts || count($parts) < 2) {
+        if ($diag !== null) $diag = ['stage' => 'no_cards', 'parts_count' => count($parts ?: [])];
+        return [];
+    }
     array_shift($parts); // drop page chrome
 
+    $skipReasons = [];
     $out = [];
-    foreach ($parts as $chunk) {
+    foreach ($parts as $idx => $chunk) {
         if (count($out) >= $limit) break;
-        // Limit each chunk so we don't accidentally swallow the next listing.
         $chunk = substr($chunk, 0, 8000);
 
-        // Title: <span class="...primary default">TITLE</span>
-        // Title classes appear quoted in the live markup (multi-class needs quotes).
+        // Title
         $title = '';
         if (preg_match('/<span[^>]*class="[^"]*\bsu-styled-text\b[^"]*\bprimary\b[^"]*\bdefault\b[^"]*"[^>]*>(.*?)<\/span>/is', $chunk, $tm)) {
             $title = trim(strip_tags($tm[1]));
         }
         $title = preg_replace('/^(New Listing|Sponsored)\s*/i', '', $title);
-        if ($title === '' || stripos($title, 'Shop on eBay') !== false) continue;
+        if ($title === '') { if ($idx < 5) $skipReasons[] = "[$idx] no_title"; continue; }
+        if (stripos($title, 'Shop on eBay') !== false) { if ($idx < 5) $skipReasons[] = "[$idx] shop_on_ebay_stub"; continue; }
 
-        // Listing URL — accept BOTH quoted and unquoted href forms.
-        // eBay's new layout serves them unquoted (href=https://...).
+        // Listing URL
         $listingUrl = '';
         if (preg_match('/<a[^>]+class="[^"]*\bs-card__link\b[^"]*"[^>]*\bhref=(?:"([^"]+)"|(\S+))/i', $chunk, $um)) {
             $listingUrl = html_entity_decode($um[1] !== '' ? $um[1] : $um[2]);
         }
-        if (!$listingUrl) continue;
+        if (!$listingUrl) {
+            if ($idx < 5) {
+                // Detail probe — what DID we see?
+                $hasAnchor = preg_match('/<a[^>]+s-card__link/i', $chunk) ? 'yes' : 'no';
+                $hasHref   = preg_match('/href=/i', $chunk) ? 'yes' : 'no';
+                $skipReasons[] = "[$idx] no_url anchor=$hasAnchor href=$hasHref";
+            }
+            continue;
+        }
 
-        // Image — also accept quoted/unquoted src + data-src + srcset.
+        // Image
         $image = '';
         if (preg_match('/<img[^>]+\bsrc=(?:"(https:\/\/i\.ebayimg\.com\/[^"]+)"|(https:\/\/i\.ebayimg\.com\/\S+))/i', $chunk, $im)) {
             $image = $im[1] !== '' ? $im[1] : $im[2];
@@ -910,9 +934,15 @@ function scrapeEbayListings($query, $limit) {
             $image = str_replace('/thumbs/images/g/', '/images/g/', $image);
             $image = preg_replace('/s-l\d+(\.\w+)$/', 's-l500$1', $image);
         }
-        if (!$image) continue;
+        if (!$image) {
+            if ($idx < 5) {
+                $hasImg = preg_match('/<img\s[^>]+/', $chunk) ? 'yes' : 'no';
+                $hasEbayimg = preg_match('/i\.ebayimg\.com/', $chunk) ? 'yes' : 'no';
+                $skipReasons[] = "[$idx] no_img tag=$hasImg ebayimg=$hasEbayimg";
+            }
+            continue;
+        }
 
-        // Price: span with s-card__price class.
         $price = '';
         if (preg_match('/<span[^>]*class="[^"]*\bs-card__price\b[^"]*"[^>]*>(.*?)<\/span>/is', $chunk, $pm)) {
             $price = trim(strip_tags(html_entity_decode($pm[1])));
@@ -923,6 +953,14 @@ function scrapeEbayListings($query, $limit) {
             'image' => $image,
             'price' => $price,
             'url'   => $listingUrl,
+        ];
+    }
+    if ($diag !== null) {
+        $diag = [
+            'stage'     => 'parsed',
+            'chunks'    => count($parts),
+            'returned'  => count($out),
+            'first_skips' => $skipReasons,
         ];
     }
     return $out;
