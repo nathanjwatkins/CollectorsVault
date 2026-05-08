@@ -78,7 +78,6 @@ switch ($action) {
         header('Content-Type: text/plain; charset=utf-8');
         echo file_exists($f) ? file_get_contents($f) : '(no probe file)';
         exit;
-    case 'imgProxy':      doImgProxy();     break;
     case 'csvDebug':
         requireAuth();
         $userId = $_SESSION['user_id'];
@@ -791,7 +790,10 @@ function doSearchEbayCandidates() {
     if ($query === '') json(['error' => 'Missing query'], 400);
 
     if ($debug) {
-        // Surface the raw scrape state so we can diagnose empty results.
+        // Lightweight probe: scrape eBay, write everything we need to a probe
+        // file on disk, return a tiny JSON ack. Avoids embedding 1.6MB worth
+        // of HTML samples in the JSON response (which previously OOMed PHP
+        // and triggered HTTP 500 with empty body).
         $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
             '_nkw' => $query, '_ipg' => '60', '_sop' => '12',
         ]);
@@ -799,79 +801,31 @@ function doSearchEbayCandidates() {
             'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
             'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language: en-GB,en;q=0.9',
-            'Cache-Control: no-cache',
         ]);
         $body = $resp['body'] ?? '';
         $bodyLen = strlen($body);
-        $hasBot     = stripos($body, 'Pardon our interruption') !== false ||
-                      stripos($body, 'Please verify you are a human') !== false ||
-                      stripos($body, 'captcha') !== false;
-        $sItemCount = preg_match_all('/<li[^>]+class="[^"]*s-item[^"]*"[^>]*>(.*?)<\/li>/is', $body, $m);
-        // Probe what listing wrappers eBay is using NOW.
-        $structureHints = [
-            'li_s_item'       => preg_match_all('/<li[^>]+class="[^"]*s-item/i', $body, $x1),
-            'div_s_item'      => preg_match_all('/<div[^>]+class="[^"]*s-item/i', $body, $x2),
-            'div_su_card'     => preg_match_all('/<div[^>]+class="[^"]*su-card/i', $body, $x3),
-            'a_su_link'       => preg_match_all('/<a[^>]+class="[^"]*su-link/i', $body, $x4),
-            'data_view_attr'  => preg_match_all('/data-view="[^"]*"/i', $body, $x5),
-            'itm_links'       => preg_match_all('/href="https:\/\/www\.ebay\.co\.uk\/itm\/[^"]+/i', $body, $x6),
-            'href_itm_any'    => preg_match_all('/href="[^"]*\/itm\/[^"]+/i', $body, $x6b),
-            'ebayimg_imgs'    => preg_match_all('/https:\/\/i\.ebayimg\.com\/[^"\'\s>]+/i', $body, $x7),
-        ];
-        // Sample around the first su-card so we can write a new regex.
-        $sampleStruct = '';
-        if (preg_match('/<div[^>]+class="[^"]*su-card[^"]*"/i', $body, $sm, PREG_OFFSET_CAPTURE)) {
-            $start = $sm[0][1];
-            $sampleStruct = substr($body, $start, 2400);
-        }
-        // Also pull a sample around the first itm-style link (any hostname).
-        $linkSample = '';
-        if (preg_match('/href="[^"]*\/itm\/[^"]+/i', $body, $lm, PREG_OFFSET_CAPTURE)) {
-            $start = max(0, $lm[0][1] - 400);
-            $linkSample = substr($body, $start, 1200);
-        }
-        $titleSnips = [];
-        $imgSnips   = [];
-        foreach ($m[1] ?? [] as $i => $chunk) {
-            if ($i >= 3) break;
-            $titleSnips[] = '(no s-item li)';
-            $imgSnips[] = '(no s-item li)';
-        }
-        // Write the structural samples to a probe file so we can read them
-        // back as plain text via /probeEbay.txt — Chrome MCP redacts URLs
-        // with query strings when they're returned in JSON.
-        $probeFile = __DIR__ . '/probeEbay.txt';
-        $probeOut = "=== Hints ===\n" . print_r($structureHints, true) . "\n";
-        $probeOut .= "=== Body length: $bodyLen ===\n\n";
-        if (preg_match('/<div[^>]+class="[^"]*su-card[^"]*"/i', $body, $sm, PREG_OFFSET_CAPTURE)) {
-            $probeOut .= "=== Sample around first su-card (3500 chars) ===\n";
-            $probeOut .= substr($body, $sm[0][1], 3500) . "\n\n";
-        }
-        if (preg_match('/href="[^"]*\/itm\/[^"]+/i', $body, $lm, PREG_OFFSET_CAPTURE)) {
-            $probeOut .= "=== Sample around first /itm/ link (1500 chars) ===\n";
-            $probeOut .= substr($body, max(0, $lm[0][1] - 400), 1500) . "\n\n";
-        }
-        // Look for common SPA / React data scripts that might hold listing data
-        if (preg_match('/<script[^>]*>([^<]{200,})<\/script>/i', $body, $jm, PREG_OFFSET_CAPTURE)) {
-            // Just first one to get a feel
-            $probeOut .= "=== First sizable inline <script> (1500 chars) ===\n";
-            $probeOut .= substr($jm[1], 0, 1500) . "\n\n";
-        }
-        @file_put_contents($probeFile, $probeOut);
 
-        $candidates = scrapeEbayListings($query, $limit);
-        json([
-            'ok' => true, 'query' => $query, 'debug' => true,
-            'http_code' => $resp['code'] ?? 0,
-            'body_length' => $bodyLen,
-            'bot_detected' => $hasBot,
-            's_item_li_count' => $sItemCount ?: 0,
-            'structure_hints' => $structureHints,
-            'sample_around_su_card' => $sampleStruct,
-            'sample_around_itm_link' => $linkSample,
-            'candidates_returned' => count($candidates),
-            'candidates' => $candidates,
-        ]);
+        $out = "=== eBay search probe ===\n";
+        $out .= "Query: $query\nHTTP: " . ($resp['code'] ?? 0) . "\nBody: $bodyLen bytes\n\n";
+        $out .= "=== Structure counts ===\n";
+        $out .= "li.s-item:    " . preg_match_all('/<li[^>]+class="[^"]*s-item/i', $body) . "\n";
+        $out .= "div.s-item:   " . preg_match_all('/<div[^>]+class="[^"]*s-item/i', $body) . "\n";
+        $out .= "div.su-card:  " . preg_match_all('/<div[^>]+class="[^"]*su-card/i', $body) . "\n";
+        $out .= "a.su-link:    " . preg_match_all('/<a[^>]+class="[^"]*su-link/i', $body) . "\n";
+        $out .= "/itm/ links:  " . preg_match_all('/href="[^"]*\/itm\/[^"]+/i', $body) . "\n";
+        $out .= "ebayimg URLs: " . preg_match_all('/https:\/\/i\.ebayimg\.com\/[^"\'\s>]+/i', $body) . "\n\n";
+
+        if (preg_match('/<div[^>]+class="[^"]*su-card[^"]*"/i', $body, $sm, PREG_OFFSET_CAPTURE)) {
+            $out .= "=== Sample around first su-card (4000 chars) ===\n";
+            $out .= substr($body, $sm[0][1], 4000) . "\n\n";
+        }
+        if (preg_match('/href="[^"]*\/itm\/[^"]+/i', $body, $lm, PREG_OFFSET_CAPTURE)) {
+            $out .= "=== Sample around first /itm/ link (1500 chars) ===\n";
+            $out .= substr($body, max(0, $lm[0][1] - 400), 1500) . "\n\n";
+        }
+        @file_put_contents(__DIR__ . '/probeEbay.txt', $out);
+
+        json(['ok' => true, 'wrote_bytes' => strlen($out), 'body_length' => $bodyLen]);
         return;
     }
 
