@@ -1223,6 +1223,13 @@ async function loadEbayCandidates() {
   try {
     const r = await fetch('api.php?action=searchEbayCandidates&limit=6&mode=' + ebayMode + '&query=' + encodeURIComponent(query), {credentials: 'same-origin'});
     const d = await r.json();
+    if (d.blocked) {
+      // eBay is rate-limiting our IP. Surface this clearly so the user
+      // doesn't think the query is bad — it's a temporary network issue.
+      cands.innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.06em;padding:14px 8px;text-align:center;line-height:1.5">eBay temporarily rate-limited the search.<br>Try again in 5–10 minutes, or pick a slightly different query.</div>';
+      if (status) status.textContent = 'eBay rate-limited — try again shortly.';
+      return;
+    }
     if (!d.ok || !d.candidates || !d.candidates.length) {
       const tryOther = ebayMode === 'sold'
         ? ' Try the Live toggle for active listings.'

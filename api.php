@@ -72,12 +72,6 @@ switch ($action) {
     case 'getImage':      doGetImage();     break;
     case 'imgProxy':      doImgProxy();     break;
     case 'searchEbayCandidates': doSearchEbayCandidates(); break;
-    case 'probeRead':
-        requireAuth();
-        $f = __DIR__ . '/probeEbay.txt';
-        header('Content-Type: text/plain; charset=utf-8');
-        echo file_exists($f) ? file_get_contents($f) : '(no probe file)';
-        exit;
     case 'csvDebug':
         requireAuth();
         $userId = $_SESSION['user_id'];
@@ -789,34 +783,27 @@ function doSearchEbayCandidates() {
     $mode = ($_GET['mode'] ?? $_POST['mode'] ?? 'sold') === 'live' ? 'live' : 'sold';
     if ($query === '') json(['error' => 'Missing query'], 400);
     $candidates = scrapeEbayListings($query, $limit, $mode);
-    // Temporary diag: when results are empty, write a minimal probe to disk
-    // so we can see whether eBay bot-blocked us, served a different layout,
-    // or our split is still wrong.
-    if (empty($candidates)) {
-        $params = ['_nkw' => $query, '_ipg' => '60', '_sop' => '12'];
-        if ($mode === 'sold') { $params['LH_Sold']='1'; $params['LH_Complete']='1'; }
-        $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query($params);
-        $resp = curlGet($url, [
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language: en-GB,en;q=0.9',
-        ]);
-        $body = $resp['body'] ?? '';
-        $diagOut = "Q=$query  mode=$mode  HTTP=" . ($resp['code'] ?? 0) . "  body=" . strlen($body) . "\n";
-        $diagOut .= "su-card-container:    " . preg_match_all('/<div[^>]+class="[^"]*su-card-container/i', $body) . "\n";
-        $diagOut .= "su-card-container--horizontal: " . preg_match_all('/<div[^>]+class="[^"]*su-card-container--horizontal/i', $body) . "\n";
-        $diagOut .= "su-card-container__horizontal: " . preg_match_all('/<div[^>]+class="[^"]*su-card-container__horizontal/i', $body) . "\n";
-        $diagOut .= "Pardon-our-interruption: " . (stripos($body, 'Pardon our interruption') !== false ? 'YES' : 'no') . "\n";
-        $diagOut .= "captcha: " . (stripos($body, 'captcha') !== false ? 'YES' : 'no') . "\n";
-        if (preg_match('/<div[^>]+class="[^"]*su-card-container[^"]*"/i', $body, $sm, PREG_OFFSET_CAPTURE)) {
-            $diagOut .= "first su-card-container at " . $sm[0][1] . " — class: " . $sm[0][0] . "\n";
-        }
-        @file_put_contents(__DIR__ . '/probeEbay.txt', $diagOut);
-    }
-    json(['ok' => true, 'query' => $query, 'mode' => $mode, 'candidates' => $candidates]);
+    // Check if scrape was bot-blocked (sentinel file written by scraper).
+    $blockedFile = __DIR__ . '/data/ebay_cands_' . md5($mode . '|' . strtolower(trim($query))) . '.blocked';
+    $blocked = file_exists($blockedFile) && (time() - filemtime($blockedFile)) < 60;
+    json(['ok' => true, 'query' => $query, 'mode' => $mode, 'blocked' => $blocked, 'candidates' => $candidates]);
 }
 
 function scrapeEbayListings($query, $limit, $mode = 'sold') {
+    // 10-minute file cache per (query, mode). Stops the picker hammering
+    // eBay every time the user opens an item — and avoids the soft-rate-
+    // limit that triggers "Pardon our interruption" pages.
+    $dataDir = __DIR__ . '/data';
+    if (!is_dir($dataDir)) @mkdir($dataDir, 0755, true);
+    $cacheKey = 'ebay_cands_' . md5($mode . '|' . strtolower(trim($query)));
+    $cacheFile = $dataDir . '/' . $cacheKey . '.json';
+    if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 600) {
+        $cached = json_decode(file_get_contents($cacheFile), true);
+        if (is_array($cached) && isset($cached['candidates'])) {
+            return array_slice($cached['candidates'], 0, $limit);
+        }
+    }
+
     // Build search URL. Sold mode adds LH_Sold + LH_Complete to filter to
     // completed sale listings (real prices). Live mode (default before this
     // change) returns current active listings (asking prices, fresher images).
@@ -835,7 +822,13 @@ function scrapeEbayListings($query, $limit, $mode = 'sold') {
     $body = $resp['body'];
     if (stripos($body, 'Pardon our interruption') !== false ||
         stripos($body, 'Please verify you are a human') !== false ||
-        stripos($body, 'captcha') !== false) return [];
+        stripos($body, 'captcha') !== false) {
+        // eBay rate-limit / bot-block. Mark in a side-channel cache so the
+        // API layer can return a different error message to the user. Don't
+        // cache the empty result — we want to retry on next call.
+        @file_put_contents($dataDir . '/' . $cacheKey . '.blocked', (string)time());
+        return [];
+    }
 
     // eBay's new (2025) search-results layout uses these classes per listing:
     //   <div class="su-card-container ...">
@@ -910,6 +903,13 @@ function scrapeEbayListings($query, $limit, $mode = 'sold') {
             'price' => $price,
             'url'   => $listingUrl,
         ];
+    }
+    if (!empty($out)) {
+        // Cache successful results for 10 min — repeated picker opens or
+        // toggle flips don't re-hit eBay. Clear any previous blocked
+        // sentinel since we just got real data.
+        @file_put_contents($cacheFile, json_encode(['candidates' => $out]));
+        @unlink($dataDir . '/' . $cacheKey . '.blocked');
     }
     return $out;
 }
