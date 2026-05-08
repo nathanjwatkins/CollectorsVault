@@ -781,7 +781,56 @@ function doSearchEbayCandidates() {
     requireAuth();
     $query = trim((string)($_GET['query'] ?? $_POST['query'] ?? ''));
     $limit = max(1, min(12, intval($_GET['limit'] ?? $_POST['limit'] ?? 6)));
+    $debug = !empty($_GET['debug']);
     if ($query === '') json(['error' => 'Missing query'], 400);
+
+    if ($debug) {
+        // Surface the raw scrape state so we can diagnose empty results.
+        $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
+            '_nkw' => $query, '_ipg' => '60', '_sop' => '12',
+        ]);
+        $resp = curlGet($url, [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language: en-GB,en;q=0.9',
+            'Cache-Control: no-cache',
+        ]);
+        $body = $resp['body'] ?? '';
+        $bodyLen = strlen($body);
+        $hasBot     = stripos($body, 'Pardon our interruption') !== false ||
+                      stripos($body, 'Please verify you are a human') !== false ||
+                      stripos($body, 'captcha') !== false;
+        $sItemCount = preg_match_all('/<li[^>]+class="[^"]*s-item[^"]*"[^>]*>(.*?)<\/li>/is', $body, $m);
+        $titleSnips = [];
+        $imgSnips   = [];
+        foreach ($m[1] ?? [] as $i => $chunk) {
+            if ($i >= 3) break;
+            if (preg_match('/<span\s+role="heading"[^>]*>(.*?)<\/span>/is', $chunk, $tm)) {
+                $titleSnips[] = trim(strip_tags($tm[1]));
+            } else {
+                $titleSnips[] = '(no role=heading match)';
+            }
+            if (preg_match('/<img[^>]+src="(https:\/\/i\.ebayimg\.com\/[^"]+)"/i', $chunk, $im)) {
+                $imgSnips[] = $im[1];
+            } else {
+                $imgSnips[] = '(no ebay img match)';
+            }
+        }
+        $candidates = scrapeEbayListings($query, $limit);
+        json([
+            'ok' => true, 'query' => $query, 'debug' => true,
+            'http_code' => $resp['code'] ?? 0,
+            'body_length' => $bodyLen,
+            'bot_detected' => $hasBot,
+            's_item_li_count' => $sItemCount ?: 0,
+            'title_samples' => $titleSnips,
+            'image_samples' => $imgSnips,
+            'first_chars' => substr($body, 0, 300),
+            'candidates_returned' => count($candidates),
+            'candidates' => $candidates,
+        ]);
+        return;
+    }
 
     $candidates = scrapeEbayListings($query, $limit);
     json(['ok' => true, 'query' => $query, 'candidates' => $candidates]);
