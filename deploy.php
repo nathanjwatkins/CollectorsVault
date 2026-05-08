@@ -13,7 +13,7 @@ $token = file_exists($tokenFile) ? trim(file_get_contents($tokenFile)) : '';
 if (!$token) { http_response_code(500); die('Token file missing'); }
 
 define('GITHUB_TOKEN',   $token);
-define('GITHUB_RAW',     'https://raw.githubusercontent.com/nathanjwatkins/CollectorsVault/main/');
+define('GITHUB_API',     'https://api.github.com/repos/nathanjwatkins/CollectorsVault/contents/');
 define('WEBHOOK_SECRET', 'cv_deploy_2025_nate');
 
 $payload   = file_get_contents('php://input');
@@ -46,11 +46,13 @@ $log  = [date('Y-m-d H:i:s') . ' — Deploy (GitHub fetch)'];
 $root = __DIR__;
 
 function cv_fetch(string $path): array {
-    // Append a cache-busting query string. GitHub raw aggressively caches
-    // (~5min) which means a deploy fired immediately after a push can fetch
-    // the previous commit's contents. The query param forces a fresh fetch.
-    $bust = '?_cb=' . time() . '_' . mt_rand(1000, 9999);
-    $ch = curl_init(GITHUB_RAW . $path . $bust);
+    // Use GitHub Contents API instead of raw.githubusercontent.com — the
+    // raw CDN caches aggressively (5-10min) and ignores query-string
+    // cache-busts. The Contents API is uncached and always returns the
+    // current main-branch SHA. Costs us a base64 decode step but is the
+    // only reliable way to auto-deploy seconds after a push.
+    $url = GITHUB_API . $path . '?ref=main';
+    $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
@@ -58,15 +60,19 @@ function cv_fetch(string $path): array {
         CURLOPT_CONNECTTIMEOUT => 10,
         CURLOPT_HTTPHEADER     => [
             'Authorization: token ' . GITHUB_TOKEN,
-            'User-Agent: CV-Deploy/7.2',
-            'Cache-Control: no-cache',
-            'Pragma: no-cache',
+            'User-Agent: CV-Deploy/7.3',
+            'Accept: application/vnd.github.v3+json',
         ],
     ]);
-    $body = curl_exec($ch);
+    $resp = curl_exec($ch);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    return [$code, $body ?: ''];
+    if ($code !== 200 || !$resp) return [$code, ''];
+    $data = json_decode($resp, true);
+    if (empty($data['content'])) return [$code, ''];
+    // Contents API base64-encodes content with embedded newlines.
+    $body = base64_decode(str_replace("\n", '', $data['content']));
+    return [200, $body ?: ''];
 }
 
 // Self-update deploy.php
