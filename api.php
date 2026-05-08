@@ -71,6 +71,7 @@ switch ($action) {
     case 'stats':         doStats();        break;
     case 'getImage':      doGetImage();     break;
     case 'imgProxy':      doImgProxy();     break;
+    case 'searchEbayCandidates': doSearchEbayCandidates(); break;
     case 'imgProxy':      doImgProxy();     break;
     case 'csvDebug':
         requireAuth();
@@ -772,6 +773,102 @@ function fetchEbayListingImage($query) {
     return null;
 }
 
+// ── EBAY MULTI-CANDIDATE SEARCH ──────────────────────────────────────────────
+// Returns up to N listings with {title, image, price, url} so the user can
+// visually pick the closest match. Used by the edit screen to lock in the
+// correct eBay item before pricing/imagery refreshes.
+function doSearchEbayCandidates() {
+    requireAuth();
+    $query = trim((string)($_GET['query'] ?? $_POST['query'] ?? ''));
+    $limit = max(1, min(12, intval($_GET['limit'] ?? $_POST['limit'] ?? 6)));
+    if ($query === '') json(['error' => 'Missing query'], 400);
+
+    $candidates = scrapeEbayListings($query, $limit);
+    json(['ok' => true, 'query' => $query, 'candidates' => $candidates]);
+}
+
+function scrapeEbayListings($query, $limit) {
+    $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
+        '_nkw' => $query, '_ipg' => '60', '_sop' => '12',
+    ]);
+    $resp = curlGet($url, [
+        'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language: en-GB,en;q=0.9',
+        'Cache-Control: no-cache',
+    ]);
+    if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 1000) return [];
+    $body = $resp['body'];
+    // Same bot-detection guards as the price scrape.
+    if (stripos($body, 'Pardon our interruption') !== false ||
+        stripos($body, 'Please verify you are a human') !== false ||
+        stripos($body, 'captcha') !== false) return [];
+
+    // Each listing is rendered inside <li class="s-item ...">...</li>. We
+    // split on those then extract title / image / price / link from each
+    // chunk. The first chunk is typically a "Shop on eBay" template stub.
+    if (!preg_match_all('/<li[^>]+class="[^"]*s-item[^"]*"[^>]*>(.*?)<\/li>/is', $body, $m)) {
+        return [];
+    }
+
+    $out = [];
+    foreach ($m[1] as $chunk) {
+        if (count($out) >= $limit) break;
+
+        // Title: <span role="heading" ...>TITLE</span> — falls back to s-item__title.
+        $title = '';
+        if (preg_match('/<span\s+role="heading"[^>]*>(.*?)<\/span>/is', $chunk, $tm)) {
+            $title = trim(strip_tags($tm[1]));
+        } elseif (preg_match('/class="s-item__title"[^>]*>(.*?)<\/(?:span|h3|div)>/is', $chunk, $tm)) {
+            $title = trim(strip_tags($tm[1]));
+        }
+        $title = preg_replace('/^(New Listing|Sponsored)\s*/i', '', $title);
+        if ($title === '' || stripos($title, 'Shop on eBay') !== false) continue;
+
+        // Image: first i.ebayimg.com URL inside the chunk.
+        $image = '';
+        if (preg_match('/<img[^>]+src="(https:\/\/i\.ebayimg\.com\/[^"]+)"/i', $chunk, $im)) {
+            $image = $im[1];
+        }
+        if ($image && stripos($image, 'spinner') !== false) {
+            // Skip spinner; sometimes the real image is in data-src instead.
+            $image = '';
+            if (preg_match('/data-src="(https:\/\/i\.ebayimg\.com\/[^"]+)"/i', $chunk, $im2)) {
+                $image = $im2[1];
+            }
+        }
+        if ($image) {
+            $image = str_replace('/thumbs/images/g/', '/images/g/', $image);
+            $image = preg_replace('/s-l\d+(\.\w+)$/', 's-l500$1', $image);
+        }
+
+        // Price: prefer s-item__price block, fall back to first £ in chunk.
+        $price = '';
+        if (preg_match('/class="s-item__price"[^>]*>(.*?)<\/span>/is', $chunk, $pm)) {
+            $price = trim(strip_tags(html_entity_decode($pm[1])));
+        }
+        if ($price === '' && preg_match('/(?:£|&#163;)\s*[\d,]+\.?\d{0,2}/', $chunk, $pm2)) {
+            $price = html_entity_decode($pm2[0]);
+        }
+
+        // Listing URL: first https://www.ebay.co.uk/itm/... link.
+        $listingUrl = '';
+        if (preg_match('/href="(https:\/\/www\.ebay\.co\.uk\/itm\/[^"#?]+)/i', $chunk, $um)) {
+            $listingUrl = $um[1];
+        }
+
+        if (!$image || !$listingUrl) continue;
+
+        $out[] = [
+            'title' => mb_substr($title, 0, 140),
+            'image' => $image,
+            'price' => $price,
+            'url'   => $listingUrl,
+        ];
+    }
+    return $out;
+}
+
 function fetchGoogleImage($query) {
     if (GOOGLE_CSE_ID === 'YOUR_CSE_ID_HERE') return null;
     $url = 'https://www.googleapis.com/customsearch/v1?' . http_build_query([
@@ -1138,7 +1235,7 @@ function doUpdate() {
     $allowed = ['name','subtitle','series','year','item_type','condition','manufacturer',
                 'card_number','platform','genre','region','artist','label','format',
                 'pressing','kit_type','size','signed','price_paid','ebay_query','notes',
-                'value','bought','extra1','extra2','extra3','extra4'];
+                'value','bought','extra1','extra2','extra3','extra4','thumbnail'];
 
     foreach ($rows as &$row) {
         if ($row['id'] === $itemId && $row['user_id'] === $userId) {

@@ -935,7 +935,7 @@ body::before {
 
 <!-- Edit Modal -->
 <div id="editBg" style="display:none;position:fixed;inset:0;background:rgba(5,5,7,.90);z-index:600;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px" onclick="if(event.target===this)closeEdit()">
-  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:480px;max-height:88dvh;overflow-y:auto">
+  <div style="background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:88dvh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--acid);display:flex;align-items:center;gap:8px">
         <span style="width:5px;height:5px;border-radius:50%;background:var(--acid);display:inline-block;box-shadow:var(--acid-glow-sm)"></span>
@@ -943,6 +943,22 @@ body::before {
       </div>
       <button onclick="closeEdit()" style="width:28px;height:28px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--ink2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;font-family:var(--font)">×</button>
     </div>
+
+    <!-- ── eBay match picker ────────────────────────────────────────────── -->
+    <div id="ebayPicker" style="padding:16px 20px;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px">
+        <div>
+          <div style="font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">eBay match</div>
+          <div id="ebayPickerStatus" style="font-family:var(--font);font-size:11px;color:var(--ink2)">No match selected — using auto.</div>
+        </div>
+        <button id="ebayPickerBtn" onclick="loadEbayCandidates()" style="height:32px;padding:0 12px;background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--mono);font-size:9px;letter-spacing:.10em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" style="display:block"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+          Find on eBay
+        </button>
+      </div>
+      <div id="ebayCandidates" style="display:none;margin-top:8px"></div>
+    </div>
+
     <div style="padding:20px;display:flex;flex-direction:column;gap:14px" id="editFields"></div>
     <div style="padding:0 20px 20px;display:flex;gap:8px">
       <button onclick="saveEdit()" style="flex:1;height:40px;background:var(--acid);color:var(--void);border:none;border-radius:var(--radius-md);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;box-shadow:var(--acid-glow-sm)">Save Changes</button>
@@ -952,7 +968,7 @@ body::before {
 </div>
 
 <script>
-let allItems=[],priceData={},imageCache={},currentTab='all',currentView='grid',currentModalId=null,editItemId=null,toastT;
+let allItems=[],priceData={},imageCache={},currentTab='all',currentView='grid',currentModalId=null,editItemId=null,pendingChosenImage=null,toastT;
 
 
 
@@ -1044,11 +1060,30 @@ function searchQuery(item){return (item.ebay_query && item.ebay_query.trim()) ? 
 
 async function loadImagesForVisible(){
   const visible=allItems.filter(i=>!imageCache[i.id]&&(document.getElementById('img-'+i.id)||document.getElementById('limg-'+i.id)));
-  for(const item of visible.slice(0,20)){loadImg(item.id,searchQuery(item),item.category,item.name);}
+  for(const item of visible.slice(0,20)){
+    // If the item has a locked-in thumbnail (user picked an eBay candidate
+    // via the edit screen), use it directly — no scrape needed.
+    if (item.thumbnail) {
+      const proxied = 'api.php?action=imgProxy&url=' + encodeURIComponent(item.thumbnail);
+      imageCache[item.id] = proxied;
+      setImgEl(item.id, proxied, item.name);
+      continue;
+    }
+    loadImg(item.id,searchQuery(item),item.category,item.name);
+  }
 }
 
 async function loadImg(id,query,cat,fallback){
-  try{const resp=await fetch('/api.php?'+new URLSearchParams({action:'getImage',id,query,cat}),{credentials:'same-origin'});const d=await resp.json();if(d.url){imageCache[id]=d.url;setImgEl(id,d.url,fallback);}}catch(e){}
+  try{
+    const resp=await fetch('/api.php?'+new URLSearchParams({action:'getImage',id,query,cat}),{credentials:'same-origin'});
+    const d=await resp.json();
+    if(d.url){
+      // eBay refuses direct hotlinks, so route every image through our proxy.
+      const proxied='api.php?action=imgProxy&url='+encodeURIComponent(d.url);
+      imageCache[id]=proxied;
+      setImgEl(id,proxied,fallback);
+    }
+  }catch(e){}
 }
 
 function setImgEl(id,src,alt){
@@ -1123,6 +1158,116 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 
 /* ── Edit item ─────────────────────────────────────────────────────────── */
 
+// ── eBay candidate picker ────────────────────────────────────────────────
+// Fires when the user clicks "Find on eBay" inside the edit modal. Uses
+// the current ebay_query input (or the auto-built query if empty) to fetch
+// 6 listing candidates with images, titles, prices. Clicking a candidate
+// stores its image URL in pendingChosenImage and copies the listing title
+// into the ebay_query input — saveEdit picks both up.
+async function loadEbayCandidates() {
+  const item = allItems.find(i => i.id === editItemId);
+  if (!item) return;
+
+  // Use whatever's currently in the ebay_query input, or fall back to the
+  // auto-built query (mirrors how openEdit decides the placeholder).
+  const queryInput = document.getElementById('ef_ebay_query');
+  const query = (queryInput && queryInput.value.trim()) || buildQuery(item);
+
+  const btn = document.getElementById('ebayPickerBtn');
+  const cands = document.getElementById('ebayCandidates');
+  const status = document.getElementById('ebayPickerStatus');
+  if (btn) { btn.disabled = true; btn.style.opacity = '.6'; }
+  if (status) status.textContent = `Searching for "${query}"…`;
+  if (cands) {
+    cands.style.display = 'block';
+    cands.innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.10em;padding:14px 0;text-align:center">Loading 6 candidates…</div>';
+  }
+
+  try {
+    const r = await fetch('api.php?action=searchEbayCandidates&limit=6&query=' + encodeURIComponent(query), {credentials: 'same-origin'});
+    const d = await r.json();
+    if (!d.ok || !d.candidates || !d.candidates.length) {
+      cands.innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--ink3);letter-spacing:.06em;padding:14px 0;text-align:center">No candidates found. Try a different query.</div>';
+      if (status) status.textContent = 'No matches.';
+      return;
+    }
+    renderEbayCandidates(d.candidates);
+    if (status) status.textContent = `${d.candidates.length} matches — click one to lock in.`;
+  } catch (e) {
+    cands.innerHTML = `<div style="font-family:var(--mono);font-size:9px;color:var(--red);padding:14px 0;text-align:center">Search failed: ${esc(e.message || e)}</div>`;
+    if (status) status.textContent = 'Search failed.';
+  } finally {
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+  }
+}
+
+function renderEbayCandidates(list) {
+  const cands = document.getElementById('ebayCandidates');
+  if (!cands) return;
+  cands.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">` +
+    list.map((c, i) => {
+      const proxied = 'api.php?action=imgProxy&url=' + encodeURIComponent(c.image);
+      const titleSafe = esc(c.title);
+      const priceSafe = esc(c.price || '');
+      // Embed all data we need on click as data-* attrs to keep the inline onclick simple.
+      return `
+        <div onclick="pickEbayCandidate(${i})" data-cand-idx="${i}"
+             style="cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s,transform .1s"
+             onmouseover="this.style.borderColor='rgba(200,255,0,.45)'"
+             onmouseout="this.style.borderColor=''"
+             onmousedown="this.style.transform='scale(.98)'"
+             onmouseup="this.style.transform=''">
+          <div style="position:relative;width:100%;aspect-ratio:1/1;background:rgba(0,0,0,.18);overflow:hidden">
+            <img src="${proxied}" alt="" loading="lazy"
+                 style="width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .2s"
+                 onload="this.style.opacity='1'"
+                 onerror="this.style.opacity='0'">
+          </div>
+          <div style="padding:6px 8px 8px;display:flex;flex-direction:column;gap:2px;min-height:54px">
+            <div style="font-family:var(--font);font-size:10px;line-height:1.25;color:var(--ink);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word">${titleSafe}</div>
+            ${priceSafe ? `<div style="font-family:var(--mono);font-size:9px;color:var(--acid);letter-spacing:.04em;margin-top:auto">${priceSafe}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('') +
+    `</div>`;
+  // Stash the list on the element so pickEbayCandidate can grab it.
+  cands._candidates = list;
+}
+
+function pickEbayCandidate(idx) {
+  const cands = document.getElementById('ebayCandidates');
+  if (!cands || !cands._candidates) return;
+  const chosen = cands._candidates[idx];
+  if (!chosen) return;
+
+  pendingChosenImage = chosen.image;
+  // Use the listing's title as the ebay_query so price refreshes lock onto
+  // the same kind of listing in future. Truncate aggressive titles down to
+  // the first ~10 words — eBay search is happier with shorter queries.
+  const queryInput = document.getElementById('ef_ebay_query');
+  if (queryInput) {
+    const words = (chosen.title || '').replace(/\s+/g, ' ').trim().split(' ').slice(0, 10).join(' ');
+    queryInput.value = words;
+  }
+
+  // Update status row with a thumbnail preview of the new pick.
+  const status = document.getElementById('ebayPickerStatus');
+  if (status) {
+    const proxied = 'api.php?action=imgProxy&url=' + encodeURIComponent(chosen.image);
+    status.innerHTML = `
+      <span style="display:inline-flex;align-items:center;gap:8px">
+        <img src="${proxied}" alt="" style="width:32px;height:32px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">
+        <span style="color:var(--acid)">Match selected — save to lock</span>
+      </span>`;
+  }
+  // Collapse the candidates grid to keep the modal tidy.
+  cands.style.display = 'none';
+  cands.innerHTML = '';
+}
+
+// Default query builder used when the user hasn't set ebay_query explicitly.
+// (See buildQuery() defined earlier for the actual implementation.)
+
 function openEdit(id) {
   editItemId = id;
   const item = allItems.find(i => i.id === id);
@@ -1130,6 +1275,29 @@ function openEdit(id) {
 
   // Close view modal first
   closeModal();
+
+  // ── Reset eBay picker ────────────────────────────────────────────────
+  // If the item already has a chosen thumbnail, render it as a preview so
+  // the user can see what's currently locked in. Otherwise show the
+  // "no match selected" hint.
+  pendingChosenImage = null; // populated when a candidate is clicked
+  const status = document.getElementById('ebayPickerStatus');
+  const cands  = document.getElementById('ebayCandidates');
+  if (cands) { cands.style.display = 'none'; cands.innerHTML = ''; }
+  if (status) {
+    if (item.thumbnail) {
+      const proxied = 'api.php?action=imgProxy&url=' + encodeURIComponent(item.thumbnail);
+      status.innerHTML = `
+        <span style="display:inline-flex;align-items:center;gap:8px">
+          <img src="${proxied}" alt="" style="width:32px;height:32px;border-radius:6px;object-fit:cover;border:1px solid var(--border)">
+          <span style="color:var(--acid)">Match locked</span>
+        </span>`;
+    } else {
+      status.textContent = 'No match selected — using auto.';
+    }
+  }
+  const btn = document.getElementById('ebayPickerBtn');
+  if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
 
   const fields = document.getElementById('editFields');
   const editableKeys = ['name','subtitle','series','year','item_type','condition','manufacturer',
@@ -1201,6 +1369,15 @@ async function saveEdit() {
     if (newVal === '' && oldVal !== '') return;
     if (newVal !== oldVal) updates[k] = newVal;
   });
+
+  // If a new eBay candidate was picked in the picker, save its image URL
+  // into the thumbnail column. This bypasses the auto-scrape on next view
+  // and locks the picture to the user's choice. Also include it even if
+  // it's the only change — the early-return-when-nothing-changed check
+  // below sees it and won't bail.
+  if (pendingChosenImage && pendingChosenImage !== item.thumbnail) {
+    updates.thumbnail = pendingChosenImage;
+  }
 
   // If nothing changed, just close edit and reopen view modal
   if (Object.keys(updates).length === 0) {

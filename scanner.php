@@ -1032,6 +1032,12 @@ async function fetchRecentImageInto(item, prefix){
   const safeId=String(item.id||'').replace(/[^a-zA-Z0-9_.\-]/g,'');
   const img=document.getElementById(prefix+safeId);
   if(!img) return;
+  // If the user locked in a chosen eBay match via the edit screen, use it
+  // directly (still proxied for hotlink-protection bypass). Skip the scrape.
+  if(item.thumbnail){
+    img.src='api.php?action=imgProxy&url='+encodeURIComponent(item.thumbnail);
+    return;
+  }
   const parts=[item.name];
   if(item.category==='shirts'){
     if(item.series) parts.push(item.series);
