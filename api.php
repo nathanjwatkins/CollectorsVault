@@ -841,69 +841,79 @@ function scrapeEbayListings($query, $limit) {
         'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language: en-GB,en;q=0.9',
-        'Cache-Control: no-cache',
     ]);
     if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 1000) return [];
     $body = $resp['body'];
-    // Same bot-detection guards as the price scrape.
     if (stripos($body, 'Pardon our interruption') !== false ||
         stripos($body, 'Please verify you are a human') !== false ||
         stripos($body, 'captcha') !== false) return [];
 
-    // Each listing is rendered inside <li class="s-item ...">...</li>. We
-    // split on those then extract title / image / price / link from each
-    // chunk. The first chunk is typically a "Shop on eBay" template stub.
-    if (!preg_match_all('/<li[^>]+class="[^"]*s-item[^"]*"[^>]*>(.*?)<\/li>/is', $body, $m)) {
-        return [];
-    }
+    // eBay's new (2025) search-results layout uses these classes per listing:
+    //   <div class="su-card-container ...">
+    //     <a class="s-card__link image-treatment" href="https://www.ebay.com/itm/...">
+    //       <img src="https://i.ebayimg.com/...">
+    //     </a>
+    //     <span class="su-styled-text primary default">Title</span>
+    //     <span class="su-styled-text secondary default">Subtitle/condition</span>
+    //     <span class="su-styled-text primary bold large-1 s-card__price">£12.34</span>
+    //   </div>
+    //
+    // We split the body on the su-card-container marker, then parse each
+    // resulting chunk independently. The first chunk (before any container)
+    // is page chrome and is discarded.
+    $parts = preg_split('/<div[^>]+class="[^"]*su-card-container[^"]*"/i', $body);
+    if (!$parts || count($parts) < 2) return [];
+    array_shift($parts); // drop the page chrome before the first listing
 
     $out = [];
-    foreach ($m[1] as $chunk) {
+    foreach ($parts as $chunk) {
         if (count($out) >= $limit) break;
+        // Limit each chunk so we don't accidentally swallow the next listing.
+        $chunk = substr($chunk, 0, 8000);
 
-        // Title: <span role="heading" ...>TITLE</span> — falls back to s-item__title.
+        // Title: first <span class="...primary default">TITLE</span>
         $title = '';
-        if (preg_match('/<span\s+role="heading"[^>]*>(.*?)<\/span>/is', $chunk, $tm)) {
-            $title = trim(strip_tags($tm[1]));
-        } elseif (preg_match('/class="s-item__title"[^>]*>(.*?)<\/(?:span|h3|div)>/is', $chunk, $tm)) {
+        if (preg_match('/<span[^>]*class="[^"]*\bsu-styled-text\b[^"]*\bprimary\b[^"]*\bdefault\b[^"]*"[^>]*>(.*?)<\/span>/is', $chunk, $tm)) {
             $title = trim(strip_tags($tm[1]));
         }
+        // Strip eBay's "New Listing" / "Sponsored" prefix if present.
         $title = preg_replace('/^(New Listing|Sponsored)\s*/i', '', $title);
+        // First card on every results page is the "Shop on eBay" template — skip it.
         if ($title === '' || stripos($title, 'Shop on eBay') !== false) continue;
 
-        // Image: first i.ebayimg.com URL inside the chunk.
+        // Listing URL: first s-card__link href.
+        $listingUrl = '';
+        if (preg_match('/<a[^>]+class="[^"]*\bs-card__link\b[^"]*"[^>]*href="([^"]+)"/i', $chunk, $um)) {
+            $listingUrl = html_entity_decode($um[1]);
+        }
+        if (!$listingUrl) continue;
+
+        // Image: first i.ebayimg.com URL inside the chunk (could be src or data-src).
         $image = '';
         if (preg_match('/<img[^>]+src="(https:\/\/i\.ebayimg\.com\/[^"]+)"/i', $chunk, $im)) {
             $image = $im[1];
         }
         if ($image && stripos($image, 'spinner') !== false) {
-            // Skip spinner; sometimes the real image is in data-src instead.
             $image = '';
             if (preg_match('/data-src="(https:\/\/i\.ebayimg\.com\/[^"]+)"/i', $chunk, $im2)) {
                 $image = $im2[1];
             }
         }
+        // Fallback: srcset (the new layout uses it for retina assets).
+        if (!$image && preg_match('/srcset="(https:\/\/i\.ebayimg\.com\/[^"\s,]+)/i', $chunk, $im3)) {
+            $image = $im3[1];
+        }
         if ($image) {
             $image = str_replace('/thumbs/images/g/', '/images/g/', $image);
             $image = preg_replace('/s-l\d+(\.\w+)$/', 's-l500$1', $image);
         }
+        if (!$image) continue;
 
-        // Price: prefer s-item__price block, fall back to first £ in chunk.
+        // Price: span with s-card__price class.
         $price = '';
-        if (preg_match('/class="s-item__price"[^>]*>(.*?)<\/span>/is', $chunk, $pm)) {
+        if (preg_match('/<span[^>]*class="[^"]*\bs-card__price\b[^"]*"[^>]*>(.*?)<\/span>/is', $chunk, $pm)) {
             $price = trim(strip_tags(html_entity_decode($pm[1])));
         }
-        if ($price === '' && preg_match('/(?:£|&#163;)\s*[\d,]+\.?\d{0,2}/', $chunk, $pm2)) {
-            $price = html_entity_decode($pm2[0]);
-        }
-
-        // Listing URL: first https://www.ebay.co.uk/itm/... link.
-        $listingUrl = '';
-        if (preg_match('/href="(https:\/\/www\.ebay\.co\.uk\/itm\/[^"#?]+)/i', $chunk, $um)) {
-            $listingUrl = $um[1];
-        }
-
-        if (!$image || !$listingUrl) continue;
 
         $out[] = [
             'title' => mb_substr($title, 0, 140),
