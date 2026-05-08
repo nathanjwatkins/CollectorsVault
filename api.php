@@ -825,7 +825,7 @@ function doSearchEbayCandidates() {
         }
         @file_put_contents(__DIR__ . '/probeEbay.txt', $out);
 
-        $diag = null;
+        $diag = [];
         $candidates = scrapeEbayListings($query, $limit, $diag);
         json([
             'ok' => true,
@@ -841,7 +841,8 @@ function doSearchEbayCandidates() {
     json(['ok' => true, 'query' => $query, 'candidates' => $candidates]);
 }
 
-function scrapeEbayListings($query, $limit, &$diag = null) {
+function scrapeEbayListings($query, $limit, array &$diag = null) {
+    $diag = ['stage' => 'start'];
     $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
         '_nkw' => $query, '_ipg' => '60', '_sop' => '12',
     ]);
@@ -851,14 +852,14 @@ function scrapeEbayListings($query, $limit, &$diag = null) {
         'Accept-Language: en-GB,en;q=0.9',
     ]);
     if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 1000) {
-        if ($diag !== null) $diag = ['stage' => 'fetch_failed', 'code' => $resp['code'] ?? 0];
+        $diag = ['stage' => 'fetch_failed', 'code' => $resp['code'] ?? 0];
         return [];
     }
     $body = $resp['body'];
     if (stripos($body, 'Pardon our interruption') !== false ||
         stripos($body, 'Please verify you are a human') !== false ||
         stripos($body, 'captcha') !== false) {
-        if ($diag !== null) $diag = ['stage' => 'bot_detected'];
+        $diag = ['stage' => 'bot_detected'];
         return [];
     }
 
@@ -881,7 +882,7 @@ function scrapeEbayListings($query, $limit, &$diag = null) {
     // is page chrome and is discarded.
     $parts = preg_split('/<div[^>]+class=(?:"[^"]*su-card-container[^"]*"|\S*su-card-container\S*)/i', $body);
     if (!$parts || count($parts) < 2) {
-        if ($diag !== null) $diag = ['stage' => 'no_cards', 'parts_count' => count($parts ?: [])];
+        $diag = ['stage' => 'no_cards', 'parts_count' => count($parts ?: [])];
         return [];
     }
     array_shift($parts); // drop page chrome
@@ -908,7 +909,6 @@ function scrapeEbayListings($query, $limit, &$diag = null) {
         }
         if (!$listingUrl) {
             if ($idx < 5) {
-                // Detail probe — what DID we see?
                 $hasAnchor = preg_match('/<a[^>]+s-card__link/i', $chunk) ? 'yes' : 'no';
                 $hasHref   = preg_match('/href=/i', $chunk) ? 'yes' : 'no';
                 $skipReasons[] = "[$idx] no_url anchor=$hasAnchor href=$hasHref";
@@ -955,14 +955,12 @@ function scrapeEbayListings($query, $limit, &$diag = null) {
             'url'   => $listingUrl,
         ];
     }
-    if ($diag !== null) {
-        $diag = [
-            'stage'     => 'parsed',
-            'chunks'    => count($parts),
-            'returned'  => count($out),
-            'first_skips' => $skipReasons,
-        ];
-    }
+    $diag = [
+        'stage'     => 'parsed',
+        'chunks'    => count($parts),
+        'returned'  => count($out),
+        'first_skips' => $skipReasons,
+    ];
     return $out;
 }
 
