@@ -72,12 +72,6 @@ switch ($action) {
     case 'getImage':      doGetImage();     break;
     case 'imgProxy':      doImgProxy();     break;
     case 'searchEbayCandidates': doSearchEbayCandidates(); break;
-    case 'probeRead':
-        requireAuth();
-        $f = __DIR__ . '/probeEbay.txt';
-        header('Content-Type: text/plain; charset=utf-8');
-        echo file_exists($f) ? file_get_contents($f) : '(no probe file)';
-        exit;
     case 'csvDebug':
         requireAuth();
         $userId = $_SESSION['user_id'];
@@ -786,63 +780,12 @@ function doSearchEbayCandidates() {
     requireAuth();
     $query = trim((string)($_GET['query'] ?? $_POST['query'] ?? ''));
     $limit = max(1, min(12, intval($_GET['limit'] ?? $_POST['limit'] ?? 6)));
-    $debug = !empty($_GET['debug']);
     if ($query === '') json(['error' => 'Missing query'], 400);
-
-    if ($debug) {
-        // Lightweight probe: scrape eBay, write everything we need to a probe
-        // file on disk, return a tiny JSON ack. Avoids embedding 1.6MB worth
-        // of HTML samples in the JSON response (which previously OOMed PHP
-        // and triggered HTTP 500 with empty body).
-        $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
-            '_nkw' => $query, '_ipg' => '60', '_sop' => '12',
-        ]);
-        $resp = curlGet($url, [
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language: en-GB,en;q=0.9',
-        ]);
-        $body = $resp['body'] ?? '';
-        $bodyLen = strlen($body);
-
-        $out = "=== eBay search probe ===\n";
-        $out .= "Query: $query\nHTTP: " . ($resp['code'] ?? 0) . "\nBody: $bodyLen bytes\n\n";
-        $out .= "=== Structure counts ===\n";
-        $out .= "li.s-item:    " . preg_match_all('/<li[^>]+class="[^"]*s-item/i', $body) . "\n";
-        $out .= "div.s-item:   " . preg_match_all('/<div[^>]+class="[^"]*s-item/i', $body) . "\n";
-        $out .= "div.su-card:  " . preg_match_all('/<div[^>]+class="[^"]*su-card/i', $body) . "\n";
-        $out .= "a.su-link:    " . preg_match_all('/<a[^>]+class="[^"]*su-link/i', $body) . "\n";
-        $out .= "/itm/ links:  " . preg_match_all('/href="[^"]*\/itm\/[^"]+/i', $body) . "\n";
-        $out .= "ebayimg URLs: " . preg_match_all('/https:\/\/i\.ebayimg\.com\/[^"\'\s>]+/i', $body) . "\n\n";
-
-        if (preg_match('/<div[^>]+class="[^"]*su-card[^"]*"/i', $body, $sm, PREG_OFFSET_CAPTURE)) {
-            $out .= "=== Sample around first su-card (4000 chars) ===\n";
-            $out .= substr($body, $sm[0][1], 4000) . "\n\n";
-        }
-        if (preg_match('/href="[^"]*\/itm\/[^"]+/i', $body, $lm, PREG_OFFSET_CAPTURE)) {
-            $out .= "=== Sample around first /itm/ link (1500 chars) ===\n";
-            $out .= substr($body, max(0, $lm[0][1] - 400), 1500) . "\n\n";
-        }
-        @file_put_contents(__DIR__ . '/probeEbay.txt', $out);
-
-        $diag = [];
-        $candidates = scrapeEbayListings($query, $limit, $diag);
-        json([
-            'ok' => true,
-            'wrote_bytes' => strlen($out),
-            'body_length' => $bodyLen,
-            'parser_diag' => $diag,
-            'candidates_returned' => count($candidates),
-        ]);
-        return;
-    }
-
     $candidates = scrapeEbayListings($query, $limit);
     json(['ok' => true, 'query' => $query, 'candidates' => $candidates]);
 }
 
-function scrapeEbayListings($query, $limit, array &$diag = null) {
-    $diag = ['stage' => 'start'];
+function scrapeEbayListings($query, $limit) {
     $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query([
         '_nkw' => $query, '_ipg' => '60', '_sop' => '12',
     ]);
@@ -851,17 +794,11 @@ function scrapeEbayListings($query, $limit, array &$diag = null) {
         'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language: en-GB,en;q=0.9',
     ]);
-    if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 1000) {
-        $diag = ['stage' => 'fetch_failed', 'code' => $resp['code'] ?? 0];
-        return [];
-    }
+    if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 1000) return [];
     $body = $resp['body'];
     if (stripos($body, 'Pardon our interruption') !== false ||
         stripos($body, 'Please verify you are a human') !== false ||
-        stripos($body, 'captcha') !== false) {
-        $diag = ['stage' => 'bot_detected'];
-        return [];
-    }
+        stripos($body, 'captcha') !== false) return [];
 
     // eBay's new (2025) search-results layout uses these classes per listing:
     //   <div class="su-card-container ...">
@@ -880,21 +817,12 @@ function scrapeEbayListings($query, $limit, array &$diag = null) {
     // We split the body on the su-card-container marker, then parse each
     // resulting chunk independently. The first chunk (before any container)
     // is page chrome and is discarded.
-    // Split on the OUTER wrapper class only — `su-card-container--horizontal`
-    // is the per-listing wrapper (138 on a typical results page). The bare
-    // `su-card-container` class appears on inner sub-wrappers too, so a
-    // looser pattern produces 3-4× as many chunks and scatters each
-    // listing's content across them.
     $parts = preg_split('/<div[^>]+class=(?:"[^"]*su-card-container--horizontal[^"]*"|\S*su-card-container--horizontal\S*)/i', $body);
-    if (!$parts || count($parts) < 2) {
-        $diag = ['stage' => 'no_cards', 'parts_count' => count($parts ?: [])];
-        return [];
-    }
-    array_shift($parts); // drop page chrome
+    if (!$parts || count($parts) < 2) return [];
+    array_shift($parts); // drop page chrome before the first listing
 
-    $skipReasons = [];
     $out = [];
-    foreach ($parts as $idx => $chunk) {
+    foreach ($parts as $chunk) {
         if (count($out) >= $limit) break;
         $chunk = substr($chunk, 0, 8000);
 
@@ -904,22 +832,14 @@ function scrapeEbayListings($query, $limit, array &$diag = null) {
             $title = trim(strip_tags($tm[1]));
         }
         $title = preg_replace('/^(New Listing|Sponsored)\s*/i', '', $title);
-        if ($title === '') { if ($idx < 5) $skipReasons[] = "[$idx] no_title"; continue; }
-        if (stripos($title, 'Shop on eBay') !== false) { if ($idx < 5) $skipReasons[] = "[$idx] shop_on_ebay_stub"; continue; }
+        if ($title === '' || stripos($title, 'Shop on eBay') !== false) continue;
 
-        // Listing URL
+        // Listing URL — accept BOTH quoted and unquoted href forms.
         $listingUrl = '';
         if (preg_match('/<a[^>]+class="[^"]*\bs-card__link\b[^"]*"[^>]*\bhref=(?:"([^"]+)"|(\S+))/i', $chunk, $um)) {
             $listingUrl = html_entity_decode($um[1] !== '' ? $um[1] : $um[2]);
         }
-        if (!$listingUrl) {
-            if ($idx < 5) {
-                $hasAnchor = preg_match('/<a[^>]+s-card__link/i', $chunk) ? 'yes' : 'no';
-                $hasHref   = preg_match('/href=/i', $chunk) ? 'yes' : 'no';
-                $skipReasons[] = "[$idx] no_url anchor=$hasAnchor href=$hasHref";
-            }
-            continue;
-        }
+        if (!$listingUrl) continue;
 
         // Image
         $image = '';
@@ -939,15 +859,9 @@ function scrapeEbayListings($query, $limit, array &$diag = null) {
             $image = str_replace('/thumbs/images/g/', '/images/g/', $image);
             $image = preg_replace('/s-l\d+(\.\w+)$/', 's-l500$1', $image);
         }
-        if (!$image) {
-            if ($idx < 5) {
-                $hasImg = preg_match('/<img\s[^>]+/', $chunk) ? 'yes' : 'no';
-                $hasEbayimg = preg_match('/i\.ebayimg\.com/', $chunk) ? 'yes' : 'no';
-                $skipReasons[] = "[$idx] no_img tag=$hasImg ebayimg=$hasEbayimg";
-            }
-            continue;
-        }
+        if (!$image) continue;
 
+        // Price
         $price = '';
         if (preg_match('/<span[^>]*class="[^"]*\bs-card__price\b[^"]*"[^>]*>(.*?)<\/span>/is', $chunk, $pm)) {
             $price = trim(strip_tags(html_entity_decode($pm[1])));
@@ -960,12 +874,6 @@ function scrapeEbayListings($query, $limit, array &$diag = null) {
             'url'   => $listingUrl,
         ];
     }
-    $diag = [
-        'stage'     => 'parsed',
-        'chunks'    => count($parts),
-        'returned'  => count($out),
-        'first_skips' => $skipReasons,
-    ];
     return $out;
 }
 
