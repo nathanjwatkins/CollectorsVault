@@ -809,29 +809,27 @@ function doSearchEbayCandidates() {
             'a_su_link'       => preg_match_all('/<a[^>]+class="[^"]*su-link/i', $body, $x4),
             'data_view_attr'  => preg_match_all('/data-view="[^"]*"/i', $body, $x5),
             'itm_links'       => preg_match_all('/href="https:\/\/www\.ebay\.co\.uk\/itm\/[^"]+/i', $body, $x6),
+            'href_itm_any'    => preg_match_all('/href="[^"]*\/itm\/[^"]+/i', $body, $x6b),
             'ebayimg_imgs'    => preg_match_all('/https:\/\/i\.ebayimg\.com\/[^"\'\s>]+/i', $body, $x7),
         ];
+        // Sample around the first su-card so we can write a new regex.
+        $sampleStruct = '';
+        if (preg_match('/<div[^>]+class="[^"]*su-card[^"]*"/i', $body, $sm, PREG_OFFSET_CAPTURE)) {
+            $start = $sm[0][1];
+            $sampleStruct = substr($body, $start, 2400);
+        }
+        // Also pull a sample around the first itm-style link (any hostname).
+        $linkSample = '';
+        if (preg_match('/href="[^"]*\/itm\/[^"]+/i', $body, $lm, PREG_OFFSET_CAPTURE)) {
+            $start = max(0, $lm[0][1] - 400);
+            $linkSample = substr($body, $start, 1200);
+        }
         $titleSnips = [];
         $imgSnips   = [];
         foreach ($m[1] ?? [] as $i => $chunk) {
             if ($i >= 3) break;
-            if (preg_match('/<span\s+role="heading"[^>]*>(.*?)<\/span>/is', $chunk, $tm)) {
-                $titleSnips[] = trim(strip_tags($tm[1]));
-            } else {
-                $titleSnips[] = '(no role=heading match)';
-            }
-            if (preg_match('/<img[^>]+src="(https:\/\/i\.ebayimg\.com\/[^"]+)"/i', $chunk, $im)) {
-                $imgSnips[] = $im[1];
-            } else {
-                $imgSnips[] = '(no ebay img match)';
-            }
-        }
-        // Pull a sample around the first eBay product link so we can see the
-        // wrapper structure the new layout uses.
-        $sampleStruct = '';
-        if (preg_match('/href="https:\/\/www\.ebay\.co\.uk\/itm\/[^"]+/i', $body, $sm, PREG_OFFSET_CAPTURE)) {
-            $start = max(0, $sm[0][1] - 800);
-            $sampleStruct = substr($body, $start, 1600);
+            $titleSnips[] = '(no s-item li)';
+            $imgSnips[] = '(no s-item li)';
         }
         $candidates = scrapeEbayListings($query, $limit);
         json([
@@ -841,10 +839,8 @@ function doSearchEbayCandidates() {
             'bot_detected' => $hasBot,
             's_item_li_count' => $sItemCount ?: 0,
             'structure_hints' => $structureHints,
-            'title_samples' => $titleSnips,
-            'image_samples' => $imgSnips,
-            'first_chars' => substr($body, 0, 300),
-            'sample_around_first_itm_link' => $sampleStruct,
+            'sample_around_su_card' => $sampleStruct,
+            'sample_around_itm_link' => $linkSample,
             'candidates_returned' => count($candidates),
             'candidates' => $candidates,
         ]);
