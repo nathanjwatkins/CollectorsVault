@@ -801,6 +801,16 @@ function doSearchEbayCandidates() {
                       stripos($body, 'Please verify you are a human') !== false ||
                       stripos($body, 'captcha') !== false;
         $sItemCount = preg_match_all('/<li[^>]+class="[^"]*s-item[^"]*"[^>]*>(.*?)<\/li>/is', $body, $m);
+        // Probe what listing wrappers eBay is using NOW.
+        $structureHints = [
+            'li_s_item'       => preg_match_all('/<li[^>]+class="[^"]*s-item/i', $body, $x1),
+            'div_s_item'      => preg_match_all('/<div[^>]+class="[^"]*s-item/i', $body, $x2),
+            'div_su_card'     => preg_match_all('/<div[^>]+class="[^"]*su-card/i', $body, $x3),
+            'a_su_link'       => preg_match_all('/<a[^>]+class="[^"]*su-link/i', $body, $x4),
+            'data_view_attr'  => preg_match_all('/data-view="[^"]*"/i', $body, $x5),
+            'itm_links'       => preg_match_all('/href="https:\/\/www\.ebay\.co\.uk\/itm\/[^"]+/i', $body, $x6),
+            'ebayimg_imgs'    => preg_match_all('/https:\/\/i\.ebayimg\.com\/[^"\'\s>]+/i', $body, $x7),
+        ];
         $titleSnips = [];
         $imgSnips   = [];
         foreach ($m[1] ?? [] as $i => $chunk) {
@@ -816,6 +826,13 @@ function doSearchEbayCandidates() {
                 $imgSnips[] = '(no ebay img match)';
             }
         }
+        // Pull a sample around the first eBay product link so we can see the
+        // wrapper structure the new layout uses.
+        $sampleStruct = '';
+        if (preg_match('/href="https:\/\/www\.ebay\.co\.uk\/itm\/[^"]+/i', $body, $sm, PREG_OFFSET_CAPTURE)) {
+            $start = max(0, $sm[0][1] - 800);
+            $sampleStruct = substr($body, $start, 1600);
+        }
         $candidates = scrapeEbayListings($query, $limit);
         json([
             'ok' => true, 'query' => $query, 'debug' => true,
@@ -823,9 +840,11 @@ function doSearchEbayCandidates() {
             'body_length' => $bodyLen,
             'bot_detected' => $hasBot,
             's_item_li_count' => $sItemCount ?: 0,
+            'structure_hints' => $structureHints,
             'title_samples' => $titleSnips,
             'image_samples' => $imgSnips,
             'first_chars' => substr($body, 0, 300),
+            'sample_around_first_itm_link' => $sampleStruct,
             'candidates_returned' => count($candidates),
             'candidates' => $candidates,
         ]);
