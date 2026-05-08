@@ -72,6 +72,12 @@ switch ($action) {
     case 'getImage':      doGetImage();     break;
     case 'imgProxy':      doImgProxy();     break;
     case 'searchEbayCandidates': doSearchEbayCandidates(); break;
+    case 'probeRead':
+        requireAuth();
+        $f = __DIR__ . '/probeEbay.txt';
+        header('Content-Type: text/plain; charset=utf-8');
+        echo file_exists($f) ? file_get_contents($f) : '(no probe file)';
+        exit;
     case 'imgProxy':      doImgProxy();     break;
     case 'csvDebug':
         requireAuth();
@@ -831,6 +837,28 @@ function doSearchEbayCandidates() {
             $titleSnips[] = '(no s-item li)';
             $imgSnips[] = '(no s-item li)';
         }
+        // Write the structural samples to a probe file so we can read them
+        // back as plain text via /probeEbay.txt — Chrome MCP redacts URLs
+        // with query strings when they're returned in JSON.
+        $probeFile = __DIR__ . '/probeEbay.txt';
+        $probeOut = "=== Hints ===\n" . print_r($structureHints, true) . "\n";
+        $probeOut .= "=== Body length: $bodyLen ===\n\n";
+        if (preg_match('/<div[^>]+class="[^"]*su-card[^"]*"/i', $body, $sm, PREG_OFFSET_CAPTURE)) {
+            $probeOut .= "=== Sample around first su-card (3500 chars) ===\n";
+            $probeOut .= substr($body, $sm[0][1], 3500) . "\n\n";
+        }
+        if (preg_match('/href="[^"]*\/itm\/[^"]+/i', $body, $lm, PREG_OFFSET_CAPTURE)) {
+            $probeOut .= "=== Sample around first /itm/ link (1500 chars) ===\n";
+            $probeOut .= substr($body, max(0, $lm[0][1] - 400), 1500) . "\n\n";
+        }
+        // Look for common SPA / React data scripts that might hold listing data
+        if (preg_match('/<script[^>]*>([^<]{200,})<\/script>/i', $body, $jm, PREG_OFFSET_CAPTURE)) {
+            // Just first one to get a feel
+            $probeOut .= "=== First sizable inline <script> (1500 chars) ===\n";
+            $probeOut .= substr($jm[1], 0, 1500) . "\n\n";
+        }
+        @file_put_contents($probeFile, $probeOut);
+
         $candidates = scrapeEbayListings($query, $limit);
         json([
             'ok' => true, 'query' => $query, 'debug' => true,
