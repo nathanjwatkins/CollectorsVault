@@ -880,7 +880,12 @@ function scrapeEbayListings($query, $limit, array &$diag = null) {
     // We split the body on the su-card-container marker, then parse each
     // resulting chunk independently. The first chunk (before any container)
     // is page chrome and is discarded.
-    $parts = preg_split('/<div[^>]+class=(?:"[^"]*su-card-container[^"]*"|\S*su-card-container\S*)/i', $body);
+    // Split on the OUTER wrapper class only — `su-card-container--horizontal`
+    // is the per-listing wrapper (138 on a typical results page). The bare
+    // `su-card-container` class appears on inner sub-wrappers too, so a
+    // looser pattern produces 3-4× as many chunks and scatters each
+    // listing's content across them.
+    $parts = preg_split('/<div[^>]+class=(?:"[^"]*su-card-container--horizontal[^"]*"|\S*su-card-container--horizontal\S*)/i', $body);
     if (!$parts || count($parts) < 2) {
         $diag = ['stage' => 'no_cards', 'parts_count' => count($parts ?: [])];
         return [];
