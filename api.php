@@ -72,6 +72,12 @@ switch ($action) {
     case 'getImage':      doGetImage();     break;
     case 'imgProxy':      doImgProxy();     break;
     case 'searchEbayCandidates': doSearchEbayCandidates(); break;
+    case 'probeRead':
+        requireAuth();
+        $f = __DIR__ . '/probeEbay.txt';
+        header('Content-Type: text/plain; charset=utf-8');
+        echo file_exists($f) ? file_get_contents($f) : '(no probe file)';
+        exit;
     case 'csvDebug':
         requireAuth();
         $userId = $_SESSION['user_id'];
@@ -780,11 +786,33 @@ function doSearchEbayCandidates() {
     requireAuth();
     $query = trim((string)($_GET['query'] ?? $_POST['query'] ?? ''));
     $limit = max(1, min(12, intval($_GET['limit'] ?? $_POST['limit'] ?? 6)));
-    // mode: 'sold' (default — completed listings only, real sale prices) or
-    // 'live' (current active listings — better/fresher images, asking prices).
     $mode = ($_GET['mode'] ?? $_POST['mode'] ?? 'sold') === 'live' ? 'live' : 'sold';
     if ($query === '') json(['error' => 'Missing query'], 400);
     $candidates = scrapeEbayListings($query, $limit, $mode);
+    // Temporary diag: when results are empty, write a minimal probe to disk
+    // so we can see whether eBay bot-blocked us, served a different layout,
+    // or our split is still wrong.
+    if (empty($candidates)) {
+        $params = ['_nkw' => $query, '_ipg' => '60', '_sop' => '12'];
+        if ($mode === 'sold') { $params['LH_Sold']='1'; $params['LH_Complete']='1'; }
+        $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query($params);
+        $resp = curlGet($url, [
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language: en-GB,en;q=0.9',
+        ]);
+        $body = $resp['body'] ?? '';
+        $diagOut = "Q=$query  mode=$mode  HTTP=" . ($resp['code'] ?? 0) . "  body=" . strlen($body) . "\n";
+        $diagOut .= "su-card-container:    " . preg_match_all('/<div[^>]+class="[^"]*su-card-container/i', $body) . "\n";
+        $diagOut .= "su-card-container--horizontal: " . preg_match_all('/<div[^>]+class="[^"]*su-card-container--horizontal/i', $body) . "\n";
+        $diagOut .= "su-card-container__horizontal: " . preg_match_all('/<div[^>]+class="[^"]*su-card-container__horizontal/i', $body) . "\n";
+        $diagOut .= "Pardon-our-interruption: " . (stripos($body, 'Pardon our interruption') !== false ? 'YES' : 'no') . "\n";
+        $diagOut .= "captcha: " . (stripos($body, 'captcha') !== false ? 'YES' : 'no') . "\n";
+        if (preg_match('/<div[^>]+class="[^"]*su-card-container[^"]*"/i', $body, $sm, PREG_OFFSET_CAPTURE)) {
+            $diagOut .= "first su-card-container at " . $sm[0][1] . " — class: " . $sm[0][0] . "\n";
+        }
+        @file_put_contents(__DIR__ . '/probeEbay.txt', $diagOut);
+    }
     json(['ok' => true, 'query' => $query, 'mode' => $mode, 'candidates' => $candidates]);
 }
 
