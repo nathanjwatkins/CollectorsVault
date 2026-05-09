@@ -793,6 +793,35 @@ body::before {
 
 /* Theme toggle hidden — these pages are dark-only */
 #themeToggle, #themeToggleMobile { display: none !important; }
+
+/* ── eBay match picker ──────────────────────────────────────────────────── */
+/*
+  The picker has three responsive concerns:
+  1) The header row (label + Sold/Live toggle + Find button) overflows on
+     narrow phones — stack the buttons below the label there.
+  2) The candidate grid fits 3 columns on tablet/desktop but the cards get
+     too cramped for title text at 360px wide — drop to 2 columns on phones.
+  3) Find button text wraps awkwardly at very narrow widths — keep it
+     single-line and let the magnifier icon stay aligned.
+*/
+.ebay-picker-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:12px; }
+.ebay-picker-actions { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.ebay-cand-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+@media (max-width: 520px) {
+  .ebay-picker-row { flex-direction:column; align-items:stretch; gap:10px; }
+  .ebay-picker-actions { justify-content:space-between; }
+  .ebay-cand-grid { grid-template-columns:repeat(2,1fr); }
+}
+.ebay-picker-btn { white-space:nowrap; }
+
+/* Edit modal: full-bleed sheet on phones, centred panel on tablet+ */
+@media (max-width: 639px) {
+  #editBg { padding: 0 !important; align-items: flex-end !important; }
+  #editBg > div {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    max-height: 92dvh !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -946,12 +975,12 @@ body::before {
 
     <!-- ── eBay match picker ────────────────────────────────────────────── -->
     <div id="ebayPicker" style="padding:16px 20px;border-bottom:1px solid var(--border)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px">
-        <div>
+      <div class="ebay-picker-row">
+        <div style="min-width:0">
           <div style="font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:3px">eBay match</div>
-          <div id="ebayPickerStatus" style="font-family:var(--font);font-size:11px;color:var(--ink2)">No match selected — using auto.</div>
+          <div id="ebayPickerStatus" style="font-family:var(--font);font-size:11px;color:var(--ink2);overflow-wrap:anywhere">No match selected — using auto.</div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <div class="ebay-picker-actions">
           <!--
             Sold/Live toggle. Default 'sold' (real completed-sale prices,
             matches the price-refresh logic so picked items reflect actual
@@ -964,7 +993,7 @@ body::before {
             <button type="button" data-mode="live" onclick="setEbayMode('live')"
               style="padding:0 10px;background:transparent;color:var(--ink2);border:none;font-family:var(--mono);font-size:9px;letter-spacing:.10em;text-transform:uppercase;cursor:pointer;transition:background .15s">Live</button>
           </div>
-          <button id="ebayPickerBtn" onclick="loadEbayCandidates()" style="height:32px;padding:0 12px;background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--mono);font-size:9px;letter-spacing:.10em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <button id="ebayPickerBtn" class="ebay-picker-btn" onclick="loadEbayCandidates()" style="height:32px;padding:0 12px;background:var(--surface2);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--mono);font-size:9px;letter-spacing:.10em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0">
             <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.8" style="display:block"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
             Find on eBay
           </button>
@@ -1252,7 +1281,7 @@ async function loadEbayCandidates() {
 function renderEbayCandidates(list) {
   const cands = document.getElementById('ebayCandidates');
   if (!cands) return;
-  cands.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">` +
+  cands.innerHTML = `<div class="ebay-cand-grid">` +
     list.map((c, i) => {
       const proxied = 'api.php?action=imgProxy&url=' + encodeURIComponent(c.image);
       const titleSafe = esc(c.title);
