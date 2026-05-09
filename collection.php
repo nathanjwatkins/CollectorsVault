@@ -806,10 +806,11 @@ body::before {
 */
 .ebay-picker-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:12px; }
 .ebay-picker-actions { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.ebay-picker-actions > * { flex-shrink:0; }
 .ebay-cand-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
 @media (max-width: 520px) {
   .ebay-picker-row { flex-direction:column; align-items:stretch; gap:10px; }
-  .ebay-picker-actions { justify-content:space-between; }
+  .ebay-picker-actions { justify-content:flex-start; flex-wrap:wrap; }
   .ebay-cand-grid { grid-template-columns:repeat(2,1fr); }
 }
 .ebay-picker-btn { white-space:nowrap; }
