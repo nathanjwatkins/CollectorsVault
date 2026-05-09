@@ -857,33 +857,49 @@ html[data-theme="dark"] .item-card:hover {
    ─────────────────────────────────────────────────────────────────────────── */
 
 .recent-card {
-  background: rgba(255, 255, 255, 0.55) !important;
-  border: 1px solid rgba(255, 255, 255, 0.55) !important;
-  backdrop-filter: blur(16px) saturate(1.5) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(1.5) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  backdrop-filter: blur(18px) saturate(1.6) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.6) brightness(1.1) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.70),
-    0 4px 20px rgba(0, 0, 0, 0.10) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.10) !important;
 }
 .recent-card:hover {
-  background: rgba(255, 255, 255, 0.68) !important;
-  border-color: rgba(255, 255, 255, 0.70) !important;
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.40) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.80),
-    0 10px 32px rgba(0, 0, 0, 0.16) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    0 16px 48px rgba(0, 0, 0, 0.26),
+    0 4px 12px rgba(0, 0, 0, 0.14) !important;
 }
 
 [data-theme="dark"] .recent-card,
 html[data-theme="dark"] .recent-card {
-  background: rgba(20, 17, 13, 0.52) !important;
+  background: rgba(14, 12, 9, 0.35) !important;
   border: 1px solid rgba(255, 255, 255, 0.10) !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    0 4px 20px rgba(0, 0, 0, 0.38) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.28) !important;
 }
 [data-theme="dark"] .recent-card:hover,
 html[data-theme="dark"] .recent-card:hover {
-  background: rgba(20,20,20,.65) !important;
+  background: rgba(20, 17, 13, 0.42) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Specular highlight strip across the very top of each recent-card — matches item-card */
+.recent-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.75) 50%, transparent);
+  z-index: 10;
+  pointer-events: none;
+  border-radius: 0;
 }
 
 /* rc-thumb background: let the image breathe on glass */
@@ -895,16 +911,7 @@ html[data-theme="dark"] .rc-thumb {
   background: rgba(255, 255, 255, 0.04) !important;
 }
 
-/* rc-body: keep text colours — they work fine */
-.rc-tag {
-  background: rgba(255, 255, 255, 0.30) !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
-}
-[data-theme="dark"] .rc-tag,
-html[data-theme="dark"] .rc-tag {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-}
+/* rc-tag: keep the lime acid color — don't override with white */
 
 /* ── 6. Scanner left panel + right panel — subtle frost ─────────────────── */
 /* Recents right panel — transparent, cards float over photo */
@@ -1105,16 +1112,10 @@ html
 .id-meta { color: rgba(245,245,245,.45) !important; }
 
 
-/* ── Recent cards (scanner right panel) ─────────────────────────────────── */
-.recent-card {
-  background: rgba(18,18,18,.70) !important;
-  border: 1px solid rgba(255,255,255,.10) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-}
-
+/* ── Recent cards (scanner right panel) — text always readable over dark overlay ── */
 .rc-name { color: rgba(245,245,245,.90) !important; }
-.rc-meta { color: rgba(245,245,245,.40) !important; }
+.rc-val  { color: rgba(245,245,245,.90) !important; }
+.rc-cat  { color: #C8FF00 !important; }
 
 
 
