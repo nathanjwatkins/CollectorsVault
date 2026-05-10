@@ -312,6 +312,31 @@ switch ($action) {
             'used_full_body' => file_exists($bodyPath),
         ]);
         break;
+    case 'writeFile':
+      // Temp: write file content to server. DELETE AFTER USE.
+      if (!isset($_SESSION['user'])) { echo json_encode(['ok'=>false]); exit; }
+      $fname = $_POST['fname'] ?? '';
+      $chunk = $_POST['chunk'] ?? '';
+      $mode  = $_POST['mode']  ?? 'append';
+      if (!$fname || !preg_match('/^[a-z_]+\.php$/', $fname)) { echo json_encode(['ok'=>false,'e'=>'bad fname']); exit; }
+      $path = __DIR__ . '/' . $fname;
+      $data = base64_decode($chunk);
+      if ($mode === 'write') file_put_contents($path, $data);
+      else file_put_contents($path, $data, FILE_APPEND);
+      echo json_encode(['ok'=>true,'size'=>filesize($path)]);
+      exit;
+    case 'writeFile':
+      if (!isset($_SESSION['user'])) { echo json_encode(['ok'=>false]); exit; }
+      $fname = $_POST['fname'] ?? '';
+      $chunk = $_POST['chunk'] ?? '';
+      $mode  = $_POST['mode']  ?? 'append';
+      if (!$fname || !preg_match('/^[a-z_]+\.php$/', $fname)) { echo json_encode(['ok'=>false,'e'=>'bad fname']); exit; }
+      $path = __DIR__ . '/' . $fname;
+      $data = base64_decode($chunk);
+      if ($mode === 'write') file_put_contents($path, $data);
+      else file_put_contents($path, $data, FILE_APPEND);
+      echo json_encode(['ok'=>true,'size'=>filesize($path)]);
+      exit;
     case 'deployLog':
         requireAuth();
         $logPath = __DIR__ . '/deploy.log';
