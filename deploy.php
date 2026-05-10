@@ -83,6 +83,7 @@ else $log[] = "FAIL deploy.php HTTP=$c";
 // Live site files
 $files = [
     'scanner.php',
+    'scanner_dump.php',
     'collection.php',
     'shared.css',
     'api.php',
