@@ -930,7 +930,7 @@ function renderRecent(items){
     const safeId=String(item.id||'').replace(/[^a-zA-Z0-9_.-]/g,'');
     const val=item.value?'£'+parseFloat(item.value).toFixed(2):'—';
     const badge=item.item_type?`<span class="ic-badge">${esc(item.item_type)}</span>`:
-                item.series?`<span class="ic-badge">${esc(item.series)}</span>`:’’;
+                item.series?`<span class="ic-badge">${esc(item.series)}</span>`:'';
     const idxLabel=String(i+1).padStart(2,'0');
     return `<div class="item-card" onclick="openRecentModal(${JSON.stringify(item).replace(/"/g,'&quot;')})">
       <div class="ic-index">${idxLabel}</div>
