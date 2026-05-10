@@ -13,13 +13,13 @@ $username = htmlspecialchars($_SESSION['user']);
 <meta charset="UTF-8"/>
 <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F4F3F1" media="(prefers-color-scheme: light)">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-hfit=cover"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <title>CollectorVault — Scanner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=1778323180">
+<link rel="stylesheet" href="shared.css?v=1778414367">
 <style>
 /* ── LAYOUT ──────────────────────────────────────────────────────────────── */
 .app { display:flex; flex-direction:column; min-height:calc(100dvh - var(--nav-h, 52px) - 42px); }
@@ -143,55 +143,43 @@ $username = htmlspecialchars($_SESSION['user']);
 .btn-reset:hover { border-color:var(--ink); color:var(--ink); }
 
 /* ── RIGHT: RECENTS ──────────────────────────────────────────────────────── */
-.right { flex:1; padding:16px; padding-bottom:80px; background:var(--bg,#0C0C10); }
+.right { flex:1; padding:16px; padding-bottom:80px; background:var(--bg); }
 .right-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border); }
-.right-title { font-family:var(--font-sans); font-size:13px; font-weight:500; letter-spacing:.06em; text-transform:uppercase; color:var(--ink3); }
+.right-title { font-family:var(--font-mono); font-size:10px; font-weight:500; letter-spacing:.10em; text-transform:uppercase; color:var(--ink3); }
 
-/* Recent grid — matches collection.php card style */
-.recent-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
-.recent-card { min-height:0; position:relative; }
-.recent-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:var(--radius-md); overflow:hidden; cursor:pointer;
-  transition:border-color .2s, transform .2s;
-  -webkit-tap-highlight-color:transparent;
-}
-.recent-card:hover { transform:translateY(-2px); border-color:rgba(200,255,0,.25); }
-.recent-card:active { transform:scale(.98); }
+/* Recent grid — exact match of collection.php items-grid */
+.recent-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+@media(min-width:480px){ .recent-grid { grid-template-columns:repeat(3,1fr); } }
+@media(min-width:700px){ .recent-grid { grid-template-columns:repeat(4,1fr); } }
 
-/* Index number top-left */
-.rc-index { position:absolute; top:8px; left:9px; font-family:var(--font-mono); font-size:8px; letter-spacing:.10em; color:var(--acid); opacity:.55; z-index:5; pointer-events:none; text-shadow:0 1px 4px rgba(0,0,0,.60); }
-
-/* Image area with overlay */
-.rc-thumb {
-  width:100%; aspect-ratio:3/4; background:var(--surface2);
-  display:flex; align-items:center; justify-content:center; overflow:hidden;
-  position:relative;
-}
-.rc-thumb img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s ease; }
-.recent-card:hover .rc-thumb img { transform:scale(1.04); }
-.rc-thumb .rc-icon { width:28px; height:28px; }
-.rc-thumb .rc-icon svg { width:100%; height:100%; stroke:var(--ink4); fill:none; stroke-width:1.2; }
-.rc-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(5,5,7,.90) 0%,rgba(5,5,7,.20) 45%,transparent 70%); pointer-events:none; }
-
-/* Card footer overlaid on image */
-.rc-foot { position:absolute; bottom:0; left:0; right:0; padding:10px 10px 8px; z-index:2; }
-.rc-cat { font-family:var(--font-mono); font-size:7px; letter-spacing:.10em; text-transform:uppercase; color:var(--acid); opacity:.70; margin-bottom:3px; }
-.rc-name { font-weight:600; font-size:12px; color:var(--ink); letter-spacing:-.01em; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.rc-price-row { display:flex; align-items:center; justify-content:space-between; margin-top:5px; }
-.rc-val { font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--ink); }
-.rc-tag { font-family:var(--font-mono); font-size:7px; letter-spacing:.06em; padding:1px 5px; border-radius:var(--radius); border:1px solid rgba(200,255,0,.20); background:rgba(200,255,0,.08); color:var(--acid); text-transform:uppercase; }
+/* Cards — use same classes as collection.php ic-* */
+.recent-grid .item-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; cursor:pointer; transition:border-color .2s,transform .2s; position:relative; -webkit-tap-highlight-color:transparent; }
+.recent-grid .item-card:hover { border-color:rgba(200,255,0,.25); transform:translateY(-2px); }
+.recent-grid .item-card:active { transform:scale(.98); }
+.recent-grid .ic-index { position:absolute; top:8px; left:9px; font-family:var(--font-mono); font-size:8px; letter-spacing:.10em; color:#C8FF00; opacity:.55; z-index:5; pointer-events:none; text-shadow:0 1px 4px rgba(0,0,0,.60); }
+.recent-grid .ic-image-wrap { position:relative; width:100%; aspect-ratio:3/4; background:var(--surface2); overflow:hidden; }
+.recent-grid .ic-image { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s ease; }
+.recent-grid .item-card:hover .ic-image { transform:scale(1.04); }
+.recent-grid .ic-image-placeholder { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+.recent-grid .ic-image-placeholder svg { width:28px; height:28px; stroke:var(--ink3); fill:none; stroke-width:1.2; }
+.recent-grid .ic-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(5,5,7,.90) 0%,rgba(5,5,7,.20) 45%,transparent 70%); pointer-events:none; }
+.recent-grid .ic-foot { position:absolute; bottom:0; left:0; right:0; padding:10px 10px 8px; z-index:2; }
+.recent-grid .ic-cat { font-family:var(--font-mono); font-size:7px; letter-spacing:.10em; text-transform:uppercase; color:#C8FF00; opacity:.70; margin-bottom:3px; }
+.recent-grid .ic-name { font-family:var(--font-sans); font-size:12px; font-weight:600; color:var(--ink); letter-spacing:-.01em; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.recent-grid .ic-price-row { display:flex; align-items:center; justify-content:space-between; margin-top:5px; }
+.recent-grid .ic-price { font-family:var(--font-mono); font-size:12px; font-weight:700; color:var(--ink); }
+.recent-grid .ic-badge { font-family:var(--font-mono); font-size:7px; letter-spacing:.06em; padding:1px 5px; border-radius:var(--radius); border:1px solid rgba(200,255,0,.20); background:rgba(200,255,0,.08); color:#C8FF00; text-transform:uppercase; }
 
 .empty-scan { padding:40px 20px; text-align:center; }
-.empty-scan svg { width:36px; height:36px; stroke:rgba(255,255,255,.15); fill:none; stroke-width:1; margin-bottom:10px; }
-.empty-scan p { font-size:12px; color:rgba(255,255,255,.3); font-family:var(--font-mono); }
+.empty-scan svg { width:36px; height:36px; stroke:var(--ink3); fill:none; stroke-width:1; margin-bottom:10px; }
+.empty-scan p { font-size:12px; color:var(--ink3); font-family:var(--font-mono); }
 
 /* ── DESKTOP ──────────────────────────────────────────────────────────────── */
 @media (min-width:768px) {
   .app { flex-direction:row; min-height:calc(100dvh - var(--nav-h) - var(--cat-h, 40px)); }
   .left { width:360px; flex-shrink:0; border-bottom:none; border-right:1px solid var(--border); position:sticky; top:0; height:calc(100dvh - var(--nav-h) - var(--cat-h, 40px)); overflow-y:auto; padding:20px; }
-  .right { padding:20px 28px; background:var(--bg,#0C0C10); }
-  .recent-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; }
+  .right { padding:20px 28px; background:var(--bg); }
+  .recent-grid { grid-template-columns:repeat(4,1fr); gap:10px; }
 }
 @media (min-width:960px) {
   .left { width:380px; padding:24px; }
@@ -573,9 +561,9 @@ $username = htmlspecialchars($_SESSION['user']);
     <div id="errorBox"></div>
   </div>
 
-  <div class="right" style="background:#0C0C10">
+  <div class="right">
     <div class="right-hdr">
-      <div class="right-title">Recent Scans</div>
+      <div class="right-title" id="recentTitle">Recent — Trading Cards</div>
       <a href="collection.php" class="btn-sm btn-outline">View All →</a>
     </div>
     <div id="recentGrid" class="recent-grid">
@@ -700,7 +688,9 @@ function setCat(cat) {
   document.getElementById('panelLabel').textContent='Scan — '+def.label;
   document.getElementById('dzIcon').innerHTML=CAT_ICONS_SVG[cat]||CAT_ICONS_SVG.other;
   document.getElementById('dzTitle').textContent='Drop '+def.label.toLowerCase()+' here';
+  const rt=document.getElementById('recentTitle');if(rt)rt.textContent='Recent — '+def.label;
   resetScan();
+  loadRecent();
 }
 
 function selectCatFromPicker(cat) {
@@ -923,50 +913,42 @@ async function loadRecent(){
   try{
     const r=await fetch('api.php?action=collection&category=all',{credentials:'same-origin'});
     const d=await r.json();if(!d.ok)return;
-    renderRecent(d.items.slice(0,12));
+    const filtered=d.items.filter(item=>item.category===currentCat).slice(0,24);
+    renderRecent(filtered);
   }catch(e){}
 }
 
 function renderRecent(items){
   const grid=document.getElementById('recentGrid');
   if(!items.length){
-    grid.innerHTML='<div class="empty-scan"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg><p>Scan your first item</p></div>';
+    grid.innerHTML='<div class="empty-scan"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg><p>No '+CAT_LABELS[currentCat]+' scanned yet</p></div>';
     return;
   }
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
   grid.innerHTML=items.map((item,i)=>{
     const icon=CAT_ICONS_SVG[item.category]||CAT_ICONS_SVG.other;
-    // Always render an <img> placeholder + a fallback icon. The img is
-    // initially transparent (opacity:0) — browsers WILL download these,
-    // unlike display:none which suppresses the request entirely. Once
-    // fetchRecentImage() resolves a URL and the image loads, opacity flips
-    // to 1 and the icon hides. If the lookup fails the icon stays.
-    const safeId=String(item.id||'').replace(/[^a-zA-Z0-9_.\-]/g,'');
-    const thumb=`
-      <img id="rc-img-${safeId}" alt="${item.name}" loading="lazy"
-           style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity .2s"
-           onload="this.style.opacity='1';const ic=this.parentElement.querySelector('.rc-icon');if(ic)ic.style.display='none'"
-           onerror="this.style.opacity='0'">
-      <div class="rc-icon">${icon}</div>`;
+    const safeId=String(item.id||'').replace(/[^a-zA-Z0-9_.-]/g,'');
     const val=item.value?'£'+parseFloat(item.value).toFixed(2):'—';
-    const badge=item.item_type||item.series?`<span class="rc-tag">${item.item_type||item.series}</span>`:'';
-    const idx=String(i+1).padStart(2,'0');
-    return `<div class="recent-card" onclick="openRecentModal(${JSON.stringify(item).replace(/"/g,'&quot;')})">
-      <div class="rc-index">${idx}</div>
-      <div class="rc-thumb">
-        ${thumb}
-        <div class="rc-overlay"></div>
-      </div>
-      <div class="rc-foot">
-        <div class="rc-cat">${CAT_LABELS[item.category]||item.category||''}</div>
-        <div class="rc-name">${item.name}</div>
-        <div class="rc-price-row">
-          <span class="rc-val">${val}</span>
-          ${badge}
+    const badge=item.item_type?`<span class="ic-badge">${esc(item.item_type)}</span>`:
+                item.series?`<span class="ic-badge">${esc(item.series)}</span>`:’’;
+    const idxLabel=String(i+1).padStart(2,'0');
+    return `<div class="item-card" onclick="openRecentModal(${JSON.stringify(item).replace(/"/g,'&quot;')})">
+      <div class="ic-index">${idxLabel}</div>
+      <div class="ic-image-wrap">
+        <img id="rc-img-${safeId}" class="ic-image" alt="${esc(item.name)}" loading="lazy"
+             style="opacity:0;transition:opacity .2s"
+             onload="this.style.opacity='1';const ph=document.getElementById('ph-${safeId}');if(ph)ph.style.display='none'"
+             onerror="this.style.opacity='0'">
+        <div class="ic-image-placeholder" id="ph-${safeId}">${icon}</div>
+        <div class="ic-overlay"></div>
+        <div class="ic-foot">
+          <div class="ic-cat">${esc(CAT_LABELS[item.category]||item.category||'')}</div>
+          <div class="ic-name">${esc(item.name)}</div>
+          <div class="ic-price-row"><div class="ic-price">${val}</div>${badge}</div>
         </div>
       </div>
     </div>`;
   }).join('');
-  // Kick off image lookups in parallel — non-blocking, results trickle in.
   items.forEach(item => fetchRecentImage(item));
 }
 
