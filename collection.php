@@ -193,7 +193,7 @@ img { display: block; }
   /* Type */
   --ink:       #FAFAFA;
   --ink2:      #888896;
-  --ink3:      #616063;
+  --ink3:      #9fb5ac;
   --ink4:      #2A2A35;
 
   /* Accent */
