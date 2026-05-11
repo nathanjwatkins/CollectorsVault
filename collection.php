@@ -15,7 +15,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
-<meta name="theme-color" content="#050507">
+<meta name="theme-color" content="#0d0d0b">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>CollectorVault — Collection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,7 +32,7 @@ $username = htmlspecialchars($_SESSION['user']);
 .stat-block::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--acid) 0%,transparent 60%);opacity:.25}
 .stat-label{font-family:var(--mono);font-size:7px;letter-spacing:.20em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px}
 .stat-value{font-family:var(--font);font-size:clamp(26px,4vw,48px);font-weight:200;letter-spacing:-.04em;color:var(--ink);line-height:1}
-.stat-value.is-gain{color:var(--acid);text-shadow:0 0 40px rgba(200,255,0,.18)}
+.stat-value.is-gain{color:var(--acid);text-shadow:0 0 40px rgba(237,255,33,.18)}
 .stat-value.is-loss{color:var(--red)}
 
 .coll-toolbar{display:flex;align-items:center;gap:8px;padding:10px 20px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;background:var(--surface);position:sticky;top:56px;z-index:100;flex-shrink:0}
@@ -42,7 +42,7 @@ $username = htmlspecialchars($_SESSION['user']);
 .cat-tab{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);background:var(--surface2);border:1px solid var(--border);cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
 .cat-tab svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.5}
 .cat-tab:hover{color:var(--ink);border-color:var(--border2)}
-.cat-tab.active{background:var(--acid-dim);border-color:rgba(200,255,0,.25);color:var(--acid)}
+.cat-tab.active{background:var(--acid-dim);border-color:rgba(237,255,33,.25);color:var(--acid)}
 .cat-count{font-size:7px;opacity:.60}
 
 .toolbar-gap{flex:1;min-width:8px}
@@ -51,7 +51,7 @@ $username = htmlspecialchars($_SESSION['user']);
 .search-field svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:12px;height:12px;stroke:var(--ink3);fill:none;stroke-width:1.5;pointer-events:none}
 .search-field input{width:100%;height:30px;padding:0 10px 0 30px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-family:var(--mono);font-size:10px;color:var(--ink);outline:none;transition:border-color .15s;-webkit-appearance:none}
 .search-field input::placeholder{color:var(--ink3)}
-.search-field input:focus{border-color:rgba(200,255,0,.30)}
+.search-field input:focus{border-color:rgba(237,255,33,.30)}
 .sort-btn{height:30px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--ink2);cursor:pointer;outline:none;-webkit-appearance:none;flex-shrink:0}
 .view-toggle{display:flex;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;flex-shrink:0}
 .view-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--surface2);border:none;color:var(--ink3);cursor:pointer;transition:all .15s;border-right:1px solid var(--border)}
@@ -70,7 +70,7 @@ $username = htmlspecialchars($_SESSION['user']);
 .items-list{display:flex;flex-direction:column;gap:1px}
 
 .item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s;position:relative;-webkit-tap-highlight-color:transparent}
-.item-card:hover{border-color:rgba(200,255,0,.25);transform:translateY(-2px)}
+.item-card:hover{border-color:rgba(237,255,33,.25);transform:translateY(-2px)}
 .ic-index{position:absolute;top:8px;left:9px;font-family:var(--mono);font-size:8px;letter-spacing:.10em;color:var(--acid);opacity:.55;z-index:5;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,.60)}
 .ic-image-wrap{position:relative;width:100%;aspect-ratio:3/4;background:var(--surface2);overflow:hidden}
 .ic-image{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease}
@@ -83,12 +83,12 @@ $username = htmlspecialchars($_SESSION['user']);
 .ic-name{font-family:var(--font);font-size:12px;font-weight:600;color:var(--ink);letter-spacing:-.01em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ic-price-row{display:flex;align-items:center;justify-content:space-between;margin-top:5px}
 .ic-price{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink)}
-.ic-badge{font-family:var(--mono);font-size:7px;letter-spacing:.06em;padding:1px 5px;border-radius:var(--radius);border:1px solid rgba(200,255,0,.20);background:rgba(200,255,0,.08);color:var(--acid);text-transform:uppercase}
+.ic-badge{font-family:var(--mono);font-size:7px;letter-spacing:.06em;padding:1px 5px;border-radius:var(--radius);border:1px solid rgba(237,255,33,.20);background:rgba(237,255,33,.08);color:var(--acid);text-transform:uppercase}
 .ic-change{font-family:var(--mono);font-size:8px;letter-spacing:.04em}
 .ic-change.up{color:var(--acid)}.ic-change.down{color:var(--red)}.ic-change.flat{color:var(--ink3)}
 
 .item-row{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:transparent}
-.item-row:hover{border-color:rgba(200,255,0,.20)}
+.item-row:hover{border-color:rgba(237,255,33,.20)}
 .ir-thumb{width:44px;height:44px;border-radius:var(--radius-md);overflow:hidden;background:var(--surface2);flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .ir-thumb img{width:100%;height:100%;object-fit:cover}
 .ir-info{flex:1;min-width:0}
@@ -141,7 +141,7 @@ $username = htmlspecialchars($_SESSION['user']);
 
 /* FAB */
 .fab{position:fixed;right:20px;bottom:76px;width:48px;height:48px;background:var(--acid);color:var(--void);border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:200;box-shadow:var(--acid-glow);text-decoration:none;transition:box-shadow .2s,transform .15s;-webkit-tap-highlight-color:transparent}
-.fab:hover{box-shadow:0 0 40px rgba(200,255,0,.50),0 0 80px rgba(200,255,0,.20);transform:scale(1.06)}
+.fab:hover{box-shadow:0 0 40px rgba(237,255,33,.50),0 0 80px rgba(237,255,33,.20);transform:scale(1.06)}
 .fab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
 @media(min-width:900px){.fab{display:none}}
 
@@ -169,7 +169,7 @@ body{padding-bottom:60px}
    COLLECTORVAULT — COMPLETE REDESIGN
    Aesthetic: Precision dark instrument. Brutalist data meets luxury finish.
    Fonts: Outfit (display/UI) · JetBrains Mono (data/labels/prices)
-   Palette: #050507 void · #C8FF00 acid · #FAFAFA white · #111116 surface
+   Palette: #0d0d0b void · #edff21 acid · #FAFAFA white · #111116 surface
    Language: Zero-radius edges, 1px borders, zone-based layout, data density
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -183,7 +183,7 @@ img { display: block; }
 /* ── Design tokens ───────────────────────────────────────────────────────── */
 :root {
   /* Base */
-  --void:      #050507;
+  --void:      #0d0d0b;
   --surface:   #0C0C10;
   --surface2:  #111116;
   --surface3:  #18181F;
@@ -193,16 +193,16 @@ img { display: block; }
   /* Type */
   --ink:       #FAFAFA;
   --ink2:      #888896;
-  --ink3:      #444452;
+  --ink3:      #616063;
   --ink4:      #2A2A35;
 
   /* Accent */
-  --acid:      #C8FF00;
-  --acid-dim:  rgba(200,255,0,.12);
-  --acid-glow: 0 0 24px rgba(200,255,0,.30), 0 0 80px rgba(200,255,0,.10);
-  --acid-glow-sm: 0 0 12px rgba(200,255,0,.25);
+  --acid:      #edff21;
+  --acid-dim:  rgba(237,255,33,.12);
+  --acid-glow: 0 0 24px rgba(237,255,33,.30), 0 0 80px rgba(237,255,33,.10);
+  --acid-glow-sm: 0 0 12px rgba(237,255,33,.25);
   --red:       #FF4444;
-  --green:     #C8FF00;
+  --green:     #edff21;
 
   /* Type system */
   --font:      'Outfit', system-ui, sans-serif;
@@ -386,7 +386,7 @@ body::before {
 .cv-nav-item.active {
   color: var(--acid);
   background: var(--acid-dim);
-  border-color: rgba(200,255,0,.18);
+  border-color: rgba(237,255,33,.18);
 }
 
 .cv-nav-item.active svg { stroke: var(--acid); }
@@ -502,7 +502,7 @@ body::before {
   height: 24px;
   border-radius: 50%;
   background: var(--acid-dim);
-  border: 1px solid rgba(200,255,0,.25);
+  border: 1px solid rgba(237,255,33,.25);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -658,7 +658,7 @@ body::before {
 
 .tag-acid {
   background: var(--acid-dim);
-  border-color: rgba(200,255,0,.20);
+  border-color: rgba(237,255,33,.20);
   color: var(--acid);
 }
 
@@ -681,8 +681,8 @@ body::before {
 .cv-input::placeholder { color: var(--ink3); }
 
 .cv-input:focus {
-  border-color: rgba(200,255,0,.35);
-  box-shadow: 0 0 0 3px rgba(200,255,0,.07);
+  border-color: rgba(237,255,33,.35);
+  box-shadow: 0 0 0 3px rgba(237,255,33,.07);
 }
 
 /* ── Select ──────────────────────────────────────────────────────────────── */
@@ -701,7 +701,7 @@ body::before {
   -webkit-appearance: none;
 }
 
-.cv-select:focus { border-color: rgba(200,255,0,.35); }
+.cv-select:focus { border-color: rgba(237,255,33,.35); }
 
 /* ── Form group ──────────────────────────────────────────────────────────── */
 .form-group {
@@ -725,7 +725,7 @@ body::before {
   left: 50%;
   transform: translateX(-50%) translateY(8px);
   background: var(--surface);
-  border: 1px solid rgba(200,255,0,.30);
+  border: 1px solid rgba(237,255,33,.30);
   color: var(--acid);
   font-family: var(--mono);
   font-size: 10px;
@@ -799,7 +799,7 @@ body::before {
 ::-webkit-scrollbar-thumb:hover { background: var(--ink3); }
 
 /* ── Selection ───────────────────────────────────────────────────────────── */
-::selection { background: rgba(200,255,0,.20); color: var(--void); }
+::selection { background: rgba(237,255,33,.20); color: var(--void); }
 
 
 /* Theme toggle hidden — these pages are dark-only */
@@ -1330,7 +1330,7 @@ function renderEbayCandidates(list) {
       return `
         <div onclick="pickEbayCandidate(${i})" data-cand-idx="${i}"
              style="cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s,transform .1s"
-             onmouseover="this.style.borderColor='rgba(200,255,0,.45)'"
+             onmouseover="this.style.borderColor='rgba(237,255,33,.45)'"
              onmouseout="this.style.borderColor=''"
              onmousedown="this.style.transform='scale(.98)'"
              onmouseup="this.style.transform=''">
@@ -1446,11 +1446,11 @@ function openEdit(id) {
       ${isTextarea
         ? `<textarea id="ef_${k}" rows="${k==='notes'?3:2}"
             style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--font);font-size:13px;color:var(--ink);outline:none;transition:border-color .15s;resize:vertical"
-            onfocus="this.style.borderColor='rgba(200,255,0,.35)'"
+            onfocus="this.style.borderColor='rgba(237,255,33,.35)'"
             onblur="this.style.borderColor=''">${esc(val)}</textarea>`
         : `<input id="ef_${k}" type="${k==='price_paid'?'number':'text'}" value="${esc(val)}"
             style="width:100%;height:36px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--font);font-size:13px;color:var(--ink);outline:none;transition:border-color .15s"
-            onfocus="this.style.borderColor='rgba(200,255,0,.35)'"
+            onfocus="this.style.borderColor='rgba(237,255,33,.35)'"
             onblur="this.style.borderColor=''"
           >`}
       ${hint}
