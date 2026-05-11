@@ -87,6 +87,7 @@ $files = [
     'collection.php',
     'shared.css',
     'api.php',
+    'ebay_auth.php',
     'categories.js.php',
     'index.php',
     'theme.php',
