@@ -26,12 +26,12 @@ $username = htmlspecialchars($_SESSION['user']);
 
 /* ── LEFT: SCANNER ───────────────────────────────────────────────────────── */
 .left {
-  background: #0E0D0B;
+  background: #010b13;
   border-bottom: 1px solid rgba(255,255,255,.08);
   padding:16px; display:flex; flex-direction:column; gap:14px;
 }
 .left {
-  background: #0E0D0B;
+  background: #010b13;
   border-bottom: 1px solid rgba(255,255,255,.08);
 }
 
