@@ -10,7 +10,7 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown, no explanat
   "cardType": "Base|Refractor|Prizm|Parallel|Auto|Relic|Patch|Rookie|Gold|Silver|1/1|Short Print",
   "year": "the season this card was PRODUCED e.g. 2024/25 — look for the set year printed on the card, NOT the player photo year. Topps Chrome UEFA Club Competitions 2024/25 sets were released in 2024.",
   "cardNumber": "catalogue card number if printed e.g. #125, else empty string",
-  "numbered": "print run limit ONLY — just the total e.g. /199, /25, /10. Do NOT include the individual serial number. If you see 159/199 the answer is /199. If nothing is visible, empty string.",
+  "numbered": "the full serial stamp as printed e.g. 159/199, 23/25. Include both the individual number and the total. If nothing is visible, empty string.",
   "autograph": "Yes|No",
   "parallel": "variant name if applicable else empty string",
   "condition": "Mint|Near Mint|Excellent|Very Good|Good|Poor",
