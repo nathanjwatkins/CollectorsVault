@@ -1233,39 +1233,6 @@ function fetchEbayPriceFromUrl($query, $soldOnly) {
         'source' => $soldOnly ? 'sold' : 'active',
     ];
 }
-    if (stripos($body, 's-item') === false && stripos($body, 'srp-') === false) return null;
-
-    $prices = [];
-    // Pattern 1: £ symbol or HTML entity
-    preg_match_all('/(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m1);
-    foreach ($m1[1] as $p) { $v = floatval(str_replace(',','',$p)); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
-    // Pattern 2: data-price attributes
-    preg_match_all('/data-price="([\d.]+)"/', $body, $m2);
-    foreach ($m2[1] as $p) { $v = floatval($p); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
-    // Pattern 3: JSON-LD
-    preg_match_all('/"price"\s*:\s*"?([\d.]+)"?/', $body, $m3);
-    foreach ($m3[1] as $p) { $v = floatval($p); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
-    // Pattern 4: s-item__price class
-    preg_match_all('/class="s-item__price"[^>]*>[^£<]*(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m4);
-    foreach ($m4[1] as $p) { $v = floatval(str_replace(',','',$p)); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
-
-    $prices = array_values(array_unique($prices));
-    sort($prices);
-    if (empty($prices)) return null;
-
-    $prices = array_slice($prices, 0, 30);
-    $count  = count($prices);
-    $last10 = array_slice($prices, 0, min(10, $count));
-    return [
-        'avg_30' => round(array_sum($prices) / $count, 2),
-        'avg_10' => round(array_sum($last10) / count($last10), 2),
-        'min'    => round(min($prices), 2),
-        'max'    => round(max($prices), 2),
-        'count'  => $count,
-        'source' => $soldOnly ? 'sold' : 'active',
-    ];
-}
-
 /**
  * Scrape PriceCharting's public HTML search-results page for a query.
  *
