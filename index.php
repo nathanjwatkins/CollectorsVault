@@ -10,7 +10,7 @@ if (isset($_SESSION['user'])) { header('Location: scanner.php'); exit; }
 <head>
 <meta charset="UTF-8"/>
 <script>(function(){var t=localStorage.getItem('cv_theme')||'dark';document.documentElement.setAttribute('data-theme',t);}());</script>
-<meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0c0c10" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#F4F3F1" media="(prefers-color-scheme: light)">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>CollectorVault</title>
@@ -32,8 +32,8 @@ if (isset($_SESSION['user'])) { header('Location: scanner.php'); exit; }
   --font-mono: 'Geist Mono', 'IBM Plex Mono', monospace;
 }
 [data-theme="dark"] {
-  --bg:        #0E0E0E;
-  --surface:   #1A1A1A;
+  --bg:        #0c0c10;
+  --surface:   #0c0c10;
   --ink:       #F0EDE8;
   --ink2:      #BEBEBE;
   --ink3:      #707070;
@@ -47,7 +47,7 @@ html, body {
   font-family: var(--font-sans);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
-  background: #111111;
+  background: #0c0c10;
 }
 
 a, a:visited { color: inherit; text-decoration: none; }

@@ -28,7 +28,7 @@ html { color-scheme: dark; }
 }
 
 :root, [data-theme="dark"] {
-  --bg:        #0E0E0E;
+  --bg:        #0c0c10;
   --surface:   #1A1A1A;
   --surface2:  #222222;
   --ink:       #F5F5F5;
@@ -459,7 +459,7 @@ nav:not(.bottom-nav) {
 /* Both light + dark use the same deep dark so glassmorphism always works */
 body.picker-open,
 body.cat-carousel-open {
-  background: #111111;
+  background: #0c0c10;
   /* Prevent any light bg showing below the glass scene */
   min-height: 100dvh;
 }
@@ -938,7 +938,7 @@ html[data-theme="dark"] .rc-thumb {
 /* Solid dark bg on html when glass scene active — fills nav/bottom gaps */
 html:has(body.picker-open),
 html:has(body.cat-carousel-open) {
-  background: #111111 !important;
+  background: #0c0c10 !important;
 }
 body.picker-open,
 body.cat-carousel-open {
