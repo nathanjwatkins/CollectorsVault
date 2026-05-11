@@ -43,6 +43,9 @@ define('GEMINI_MODELS', [
     'gemini-2.0-flash',      // fallback — retiring June 2026, keep until then
 ]);
 define('GOOGLE_CSE_ID', 'YOUR_CSE_ID_HERE');
+// ── eBay API auth module ──────────────────────────────────────────────────────
+require_once __DIR__ . '/ebay_auth.php';
+
 define('DATA_DIR',        __DIR__ . '/data/');
 define('UPLOADS_DIR',     __DIR__ . '/uploads/');
 define('USERS_FILE',      DATA_DIR . 'users.csv');
@@ -777,6 +780,37 @@ function doGetImage() {
 }
 
 function fetchEbayListingImage($query) {
+    // ── Try eBay Browse API first ─────────────────────────────────────────
+    try {
+        $token = getEbayToken();
+        $apiUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?'
+            . http_build_query(['q' => $query, 'limit' => 5, 'fieldgroups' => 'EXTENDED']);
+        $ch = curl_init($apiUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $token,
+                'X-EBAY-C-MARKETPLACE-ID: EBAY_GB',
+                'Content-Type: application/json',
+            ],
+            CURLOPT_TIMEOUT => 10,
+        ]);
+        $body     = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode === 200) {
+            $data = json_decode($body, true);
+            foreach ($data['itemSummaries'] ?? [] as $item) {
+                $img = $item['thumbnailImages'][0]['imageUrl'] ?? $item['image']['imageUrl'] ?? '';
+                if ($img) return preg_replace('/s-l\d+/', 's-l500', $img);
+            }
+        }
+    } catch (RuntimeException $e) {
+        error_log('eBay API image fetch failed: ' . $e->getMessage());
+    }
+
+    // ── Fallback: HTML scrape ─────────────────────────────────────────────
     $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query(['_nkw' => $query, '_ipg' => '10', '_sop' => '12']);
     $resp = curlGet($url, [
         'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -805,13 +839,62 @@ function doSearchEbayCandidates() {
     requireAuth();
     $query = trim((string)($_GET['query'] ?? $_POST['query'] ?? ''));
     $limit = max(1, min(12, intval($_GET['limit'] ?? $_POST['limit'] ?? 6)));
-    $mode = ($_GET['mode'] ?? $_POST['mode'] ?? 'sold') === 'live' ? 'live' : 'sold';
+    $mode  = ($_GET['mode'] ?? $_POST['mode'] ?? 'sold') === 'live' ? 'live' : 'sold';
     if ($query === '') json(['error' => 'Missing query'], 400);
-    $candidates = scrapeEbayListings($query, $limit, $mode);
-    // Check if scrape was bot-blocked (sentinel file written by scraper).
+
+    // ── Try eBay Browse API first ─────────────────────────────────────────
+    try {
+        $token = getEbayToken();
+        $params = ['q' => $query, 'limit' => $limit, 'fieldgroups' => 'EXTENDED'];
+        // Browse API doesn't support sold-only without Marketplace Insights approval.
+        // We use it for both modes — better than a 403 from scraping.
+        $apiUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?' . http_build_query($params);
+        $ch = curl_init($apiUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $token,
+                'X-EBAY-C-MARKETPLACE-ID: EBAY_GB',
+                'Content-Type: application/json',
+            ],
+            CURLOPT_TIMEOUT => 10,
+        ]);
+        $body     = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode === 200) {
+            $data = json_decode($body, true);
+            $candidates = [];
+            foreach ($data['itemSummaries'] ?? [] as $item) {
+                $price = '';
+                if (isset($item['price']['value'], $item['price']['currency'])) {
+                    $sym   = $item['price']['currency'] === 'GBP' ? '£' : $item['price']['currency'] . ' ';
+                    $price = $sym . number_format((float)$item['price']['value'], 2);
+                }
+                $img = $item['thumbnailImages'][0]['imageUrl'] ?? $item['image']['imageUrl'] ?? '';
+                if ($img) $img = preg_replace('/s-l\d+/', 's-l500', $img);
+                $candidates[] = [
+                    'title' => $item['title'] ?? '',
+                    'price' => $price,
+                    'url'   => $item['itemWebUrl'] ?? '',
+                    'image' => $img,
+                ];
+            }
+            if (!empty($candidates)) {
+                json(['ok' => true, 'query' => $query, 'mode' => 'live', 'blocked' => false, 'candidates' => $candidates, 'source' => 'api']);
+                return;
+            }
+        }
+    } catch (RuntimeException $e) {
+        error_log('eBay API candidates failed: ' . $e->getMessage());
+    }
+
+    // ── Fallback: HTML scrape ─────────────────────────────────────────────
+    $candidates  = scrapeEbayListings($query, $limit, $mode);
     $blockedFile = __DIR__ . '/data/ebay_cands_' . md5($mode . '|' . strtolower(trim($query))) . '.blocked';
-    $blocked = file_exists($blockedFile) && (time() - filemtime($blockedFile)) < 60;
-    json(['ok' => true, 'query' => $query, 'mode' => $mode, 'blocked' => $blocked, 'candidates' => $candidates]);
+    $blocked     = file_exists($blockedFile) && (time() - filemtime($blockedFile)) < 60;
+    json(['ok' => true, 'query' => $query, 'mode' => $mode, 'blocked' => $blocked, 'candidates' => $candidates, 'source' => 'scrape']);
 }
 
 function scrapeEbayListings($query, $limit, $mode = 'sold') {
@@ -1047,27 +1130,101 @@ function fetchEbayPrice($query, $category = '') {
 }
 
 function fetchEbayPriceFromUrl($query, $soldOnly) {
+    // ── Try eBay Browse API first (active listings) ───────────────────────
+    // Note: sold/completed listings require Marketplace Insights API approval.
+    // Until that is granted, we use Browse API (active) as the primary source
+    // and fall back to the HTML scraper for sold mode.
+    if (!$soldOnly) {
+        try {
+            $token  = getEbayToken();
+            $apiUrl = 'https://api.ebay.com/buy/browse/v1/item_summary/search?'
+                . http_build_query(['q' => $query, 'limit' => 50, 'fieldgroups' => 'EXTENDED']);
+            $ch = curl_init($apiUrl);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER     => [
+                    'Authorization: Bearer ' . $token,
+                    'X-EBAY-C-MARKETPLACE-ID: EBAY_GB',
+                    'Content-Type: application/json',
+                ],
+                CURLOPT_TIMEOUT => 12,
+            ]);
+            $body     = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($httpCode === 200) {
+                $data   = json_decode($body, true);
+                $prices = [];
+                foreach ($data['itemSummaries'] ?? [] as $item) {
+                    if (!isset($item['price']['value'])) continue;
+                    $v = (float)$item['price']['value'];
+                    // Convert non-GBP prices using a rough rate
+                    if (isset($item['price']['currency']) && $item['price']['currency'] !== 'GBP') continue;
+                    if ($v >= 0.50 && $v <= 50000) $prices[] = $v;
+                }
+                if (count($prices) >= 2) {
+                    sort($prices);
+                    $prices = array_slice($prices, 0, 30);
+                    $count  = count($prices);
+                    $last10 = array_slice($prices, 0, min(10, $count));
+                    return [
+                        'avg_30' => round(array_sum($prices) / $count, 2),
+                        'avg_10' => round(array_sum($last10) / count($last10), 2),
+                        'min'    => round(min($prices), 2),
+                        'max'    => round(max($prices), 2),
+                        'count'  => $count,
+                        'source' => 'ebay_api_active',
+                    ];
+                }
+            }
+        } catch (RuntimeException $e) {
+            error_log('eBay API price fetch failed: ' . $e->getMessage());
+        }
+    }
+
+    // ── Fallback: HTML scrape ─────────────────────────────────────────────
     $params = ['_nkw' => $query, '_sacat' => '0', '_sop' => '13', '_ipg' => '60'];
     if ($soldOnly) {
         $params['LH_Sold'] = '1';
         $params['LH_Complete'] = '1';
     }
-    $url = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query($params);
+    $url  = 'https://www.ebay.co.uk/sch/i.html?' . http_build_query($params);
     $resp = curlGet($url);
     if (!$resp['ok'] || $resp['code'] !== 200 || strlen($resp['body']) < 1000) return null;
     $body = $resp['body'];
-    // Bot-detection: eBay's PerimeterX challenge page is titled "Pardon
-    // our interruption..." and contains neither the word "robot" nor
-    // "captcha". Without this check we'd happily run the price regex
-    // against the challenge page, find 0 hits, and silently "succeed"
-    // with no_data — exactly the symptom we hit on Hostinger's IP.
     if (stripos($body, 'Pardon our interruption') !== false ||
         stripos($body, 'Please verify you are a human') !== false ||
         stripos($body, 'robot') !== false ||
         stripos($body, 'captcha') !== false) return null;
-    // Sanity: real eBay search-results pages contain 's-item' / 'srp-'
-    // markers. If neither is present, the scrape landed on something
-    // else (challenge, error page, redirect).
+    if (stripos($body, 's-item') === false && stripos($body, 'srp-') === false) return null;
+
+    $prices = [];
+    preg_match_all('/(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m1);
+    foreach ($m1[1] as $p) { $v = floatval(str_replace(',','',$p)); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
+    preg_match_all('/data-price="([\d.]+)"/', $body, $m2);
+    foreach ($m2[1] as $p) { $v = floatval($p); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
+    preg_match_all('/"price"\s*:\s*"?([\d.]+)"?/', $body, $m3);
+    foreach ($m3[1] as $p) { $v = floatval($p); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
+    preg_match_all('/class="s-item__price"[^>]*>[^£<]*(?:£|&#163;)\s*([\d,]+\.?\d{0,2})/', $body, $m4);
+    foreach ($m4[1] as $p) { $v = floatval(str_replace(',','',$p)); if ($v>=0.50&&$v<=50000) $prices[]=$v; }
+
+    $prices = array_values(array_unique($prices));
+    sort($prices);
+    if (empty($prices)) return null;
+
+    $prices = array_slice($prices, 0, 30);
+    $count  = count($prices);
+    $last10 = array_slice($prices, 0, min(10, $count));
+    return [
+        'avg_30' => round(array_sum($prices) / $count, 2),
+        'avg_10' => round(array_sum($last10) / count($last10), 2),
+        'min'    => round(min($prices), 2),
+        'max'    => round(max($prices), 2),
+        'count'  => $count,
+        'source' => $soldOnly ? 'sold' : 'active',
+    ];
+}
     if (stripos($body, 's-item') === false && stripos($body, 'srp-') === false) return null;
 
     $prices = [];
