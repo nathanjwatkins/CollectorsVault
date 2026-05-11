@@ -98,6 +98,17 @@ $username = htmlspecialchars($_SESSION['user']);
 
 /* Modal */
 #modalBg{display:none;position:fixed;inset:0;background:rgba(5,5,7,.85);z-index:500;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:flex-end;justify-content:center;padding:0}
+#confirmBg{display:none;position:fixed;inset:0;background:rgba(5,5,7,.7);z-index:600;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center}
+#confirmBg.open{display:flex}
+.confirm-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:28px 24px 20px;max-width:340px;width:calc(100% - 32px)}
+.confirm-title{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;letter-spacing:.02em}
+.confirm-body{font-size:13px;color:var(--ink3);margin-bottom:24px;line-height:1.5}
+.confirm-actions{display:flex;gap:10px}
+.confirm-actions button{flex:1;height:40px;border:none;border-radius:var(--radius-md);font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:opacity .15s}
+.confirm-cancel{background:var(--surface2);color:var(--ink2)}
+.confirm-cancel:hover{opacity:.75}
+.confirm-delete{background:#c13528;color:#fff}
+.confirm-delete:hover{opacity:.85}
 @media(min-width:640px){#modalBg{align-items:center;padding:16px}}
 #modalBg.open{display:flex}
 .modal-sheet{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg) var(--radius-lg) 0 0;width:100%;max-height:92dvh;overflow-y:auto;position:relative;padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -925,6 +936,16 @@ body::before {
   </a>
 </nav>
 
+<div id="confirmBg">
+  <div class="confirm-box">
+    <div class="confirm-title">DELETE ITEM</div>
+    <div class="confirm-body" id="confirmBody">Are you sure you want to remove this item from your vault? This cannot be undone.</div>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeConfirm()">CANCEL</button>
+      <button class="confirm-delete" id="confirmDeleteBtn">DELETE</button>
+    </div>
+  </div>
+</div>
 <div id="modalBg" onclick="if(event.target===this)closeModal()">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -1190,12 +1211,30 @@ function openModal(id){
 }
 
 function closeModal(){document.getElementById('modalBg').classList.remove('open');currentModalId=null;}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeConfirm();}});
 
-async function deleteItem(id){
-  if(!id||!confirm('Delete this item from your vault?'))return;
-  try{const fd=new FormData();fd.append('action','delete');fd.append('item_id',id);const resp=await fetch('/api.php',{method:'POST',body:fd,credentials:'same-origin'});const d=await resp.json();
-  if(d.ok){allItems=allItems.filter(i=>i.id!==id);delete priceData[id];delete imageCache[id];closeModal();updateCounts();filterItems();loadStats();showToast('Item deleted');}}catch(e){showToast('Delete failed');}
+function deleteItem(id){
+  if(!id)return;
+  const item=allItems.find(i=>i.id===id);
+  const name=item?item.name:'this item';
+  document.getElementById('confirmBody').textContent='Remove "'+name+'" from your vault? This cannot be undone.';
+  document.getElementById('confirmDeleteBtn').onclick=()=>confirmDelete(id);
+  document.getElementById('confirmBg').classList.add('open');
+}
+function closeConfirm(){document.getElementById('confirmBg').classList.remove('open');}
+async function confirmDelete(id){
+  closeConfirm();
+  try{
+    const item=allItems.find(i=>i.id===id);
+    const fd=new FormData();
+    fd.append('action','delete');
+    fd.append('id',id);
+    if(item&&item.category)fd.append('category',item.category);
+    const resp=await fetch('/api.php',{method:'POST',body:fd,credentials:'same-origin'});
+    const d=await resp.json();
+    if(d.ok){allItems=allItems.filter(i=>i.id!==id);delete priceData[id];delete imageCache[id];closeModal();updateCounts();filterItems();loadStats();showToast('Item deleted');}
+    else{showToast('Delete failed: '+(d.error||'unknown error'));}
+  }catch(e){showToast('Delete failed');}
 }
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
