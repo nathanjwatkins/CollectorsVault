@@ -1166,7 +1166,7 @@ function openModal(id){
   document.getElementById('mAvg10').textContent=p?.avg_10?'£'+parseFloat(p.avg_10).toFixed(2):'—';
   document.getElementById('mAvg30').textContent=p?.avg_30?'£'+parseFloat(p.avg_30).toFixed(2):'—';
   document.getElementById('mPaid').textContent=item.price_paid?'£'+parseFloat(item.price_paid).toFixed(2):'—';
-  const fields=['item_type','condition','manufacturer','year','series','card_number','platform','genre','region','artist','label','format','pressing','kit_type','size','signed'].filter(k=>item[k]);
+  const fields=['item_type','condition','manufacturer','year','series','card_number','parallel','numbered','autograph','platform','genre','region','artist','label','format','pressing','kit_type','size','signed','notes'].filter(k=>item[k]);
   document.getElementById('modalFields').innerHTML=fields.map(k=>`<div><div class="modal-field-label">${k.replace(/_/g,' ')}</div><div class="modal-field-val">${esc(item[k])}</div></div>`).join('');
   document.getElementById('modalBg').classList.add('open');
   // Prefer imageCache (set on first successful fetch) over DOM lookup —
@@ -1380,15 +1380,15 @@ function openEdit(id) {
 
   const fields = document.getElementById('editFields');
   const editableKeys = ['name','subtitle','series','year','item_type','condition','manufacturer',
-    'card_number','platform','genre','region','artist','label','format','pressing',
-    'kit_type','size','signed','price_paid','ebay_query'];
+    'card_number','parallel','numbered','autograph','platform','genre','region','artist','label','format','pressing',
+    'kit_type','size','signed','price_paid','ebay_query','notes'];
 
   const labelMap = {name:'Name',subtitle:'Subtitle / Set',series:'Series',year:'Year',
     item_type:'Type',condition:'Condition',manufacturer:'Manufacturer',
     card_number:'Card Number',platform:'Platform',genre:'Genre',region:'Region',
     artist:'Artist',label:'Label',format:'Format',pressing:'Pressing',
     kit_type:'Kit Type',size:'Size',signed:'Signed',price_paid:'Paid (£)',
-    ebay_query:'eBay Search Query'};
+    ebay_query:'eBay Search Query',notes:'Notes',numbered:'Numbered',autograph:'Autograph',parallel:'Parallel'};
 
   fields.innerHTML = editableKeys.map(k => {
     // For ebay_query, pre-fill the input with the auto-built query when no
@@ -1401,13 +1401,19 @@ function openEdit(id) {
     const hint = k === 'ebay_query'
       ? '<div style="font-family:var(--mono);font-size:8px;color:var(--ink3);margin-top:3px;letter-spacing:.04em">Edit to override the auto-generated query, or pick a candidate above to set automatically.</div>'
       : '';
+    const isTextarea = k === 'notes' || k === 'ebay_query';
     return `<div>
       <label style="font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:4px">${labelMap[k]||k}</label>
-      <input id="ef_${k}" type="${k==='price_paid'?'number':'text'}" value="${esc(val)}"
-        style="width:100%;height:36px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--font);font-size:13px;color:var(--ink);outline:none;transition:border-color .15s"
-        onfocus="this.style.borderColor='rgba(200,255,0,.35)'"
-        onblur="this.style.borderColor=''"
-      >
+      ${isTextarea
+        ? `<textarea id="ef_${k}" rows="${k==='notes'?3:2}"
+            style="width:100%;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--font);font-size:13px;color:var(--ink);outline:none;transition:border-color .15s;resize:vertical"
+            onfocus="this.style.borderColor='rgba(200,255,0,.35)'"
+            onblur="this.style.borderColor=''">${esc(val)}</textarea>`
+        : `<input id="ef_${k}" type="${k==='price_paid'?'number':'text'}" value="${esc(val)}"
+            style="width:100%;height:36px;padding:0 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-md);font-family:var(--font);font-size:13px;color:var(--ink);outline:none;transition:border-color .15s"
+            onfocus="this.style.borderColor='rgba(200,255,0,.35)'"
+            onblur="this.style.borderColor=''"
+          >`}
       ${hint}
     </div>`;
   }).join('');
@@ -1428,8 +1434,8 @@ async function saveEdit() {
   const savedId = editItemId;
 
   const editableKeys = ['name','subtitle','series','year','item_type','condition','manufacturer',
-    'card_number','platform','genre','region','artist','label','format','pressing',
-    'kit_type','size','signed','price_paid','ebay_query'];
+    'card_number','parallel','numbered','autograph','platform','genre','region','artist','label','format','pressing',
+    'kit_type','size','signed','price_paid','ebay_query','notes'];
 
   // Only send fields the user actually changed or non-empty fields,
   // and only assign back values that are present so we never clobber

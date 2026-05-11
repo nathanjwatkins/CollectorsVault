@@ -36,6 +36,9 @@ estimatedValue must be a GBP number.`,
         { id: 'numbered',   label: 'Numbered',      type: 'text',   placeholder: 'e.g. /199, /25' },
         { id: 'autograph',  label: 'Autograph',     type: 'select', options: ['No','Yes'] },
       ]},
+      { row: [
+        { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Any additional details...', full: true },
+      ]},
     ],
   },
 
@@ -68,6 +71,9 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown.
       { row: [
         { id: 'signed',       label: 'Signed?',      type: 'select', options: ['No','Yes','Unknown'] },
         { id: 'condition',    label: 'Condition',    type: 'select', options: ['New with tags','Excellent','Good','Fair','Poor'] },
+      ]},
+      { row: [
+        { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Any additional details...', full: true },
       ]},
     ],
   },
@@ -102,6 +108,9 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown.
         { id: 'completeness', label: 'Completeness',  type: 'select', options: ['Complete in Box','With Case','Game Only','Sealed'] },
         { id: 'condition',    label: 'Condition',     type: 'select', options: ['Mint','Very Good','Good','Fair','Poor'] },
       ]},
+      { row: [
+        { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Any additional details...', full: true },
+      ]},
     ],
   },
 
@@ -134,6 +143,9 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown.
         { id: 'pressing',  label: 'Pressing',  type: 'text',   placeholder: 'e.g. Original UK 1st Press' },
         { id: 'condition', label: 'Condition', type: 'select', options: ['Mint','Near Mint','Very Good Plus','Very Good','Good','Poor'] },
       ]},
+      { row: [
+        { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Any additional details...', full: true },
+      ]},
     ],
   },
 
@@ -164,6 +176,9 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown.
       { row: [
         { id: 'condition', label: 'Condition',     type: 'select', options: ['Mint','Excellent','Good','Fair','Poor'] },
       ], full: true },
+      { row: [
+        { id: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Any additional details...', full: true },
+      ]},
     ],
   },
 };
