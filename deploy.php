@@ -51,7 +51,7 @@ function cv_fetch(string $path): array {
     // cache-busts. The Contents API is uncached and always returns the
     // current main-branch SHA. Costs us a base64 decode step but is the
     // only reliable way to auto-deploy seconds after a push.
-    $url = GITHUB_API . $path . '?ref=main';
+    $url = GITHUB_API . $path . '?ref=main&t=' . time(); // cache-bust GitHub CDN
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
