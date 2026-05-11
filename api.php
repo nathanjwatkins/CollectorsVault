@@ -44,7 +44,15 @@ define('GEMINI_MODELS', [
 ]);
 define('GOOGLE_CSE_ID', 'YOUR_CSE_ID_HERE');
 // ── eBay API auth module ──────────────────────────────────────────────────────
-require_once __DIR__ . '/ebay_auth.php';
+// Loaded conditionally so a missing/broken file doesn't take down the whole site
+if (file_exists(__DIR__ . '/ebay_auth.php')) {
+    require_once __DIR__ . '/ebay_auth.php';
+}
+if (!function_exists('getEbayToken')) {
+    function getEbayToken(): string {
+        throw new RuntimeException('ebay_auth.php not available — eBay API disabled');
+    }
+}
 
 define('DATA_DIR',        __DIR__ . '/data/');
 define('UPLOADS_DIR',     __DIR__ . '/uploads/');
