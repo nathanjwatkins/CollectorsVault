@@ -10,15 +10,15 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown, no explanat
   "cardType": "Base|Refractor|Prizm|Parallel|Auto|Relic|Patch|Rookie|Gold|Silver|1/1|Short Print",
   "year": "the season this card was PRODUCED e.g. 2024/25 — look for the set year printed on the card, NOT the player photo year. Topps Chrome UEFA Club Competitions 2024/25 sets were released in 2024.",
   "cardNumber": "catalogue card number if printed e.g. #125, else empty string",
-  "numbered": "the full serial stamp as printed e.g. 159/199, 23/25. Include both the individual number and the total. If nothing is visible, empty string.",
+  "numbered": "IMPORTANT: look carefully for a stamped serial number on the card e.g. 159/199. Return the FULL stamp exactly as printed including the individual number and total e.g. 159/199. If no serial stamp is visible, return empty string.",
   "autograph": "Yes|No",
   "parallel": "variant name if applicable else empty string",
   "condition": "Mint|Near Mint|Excellent|Very Good|Good|Poor",
   "estimatedValue": 0,
   "confidence": "High|Medium|Low",
-  "notes": "notable features"
+  "notes": ""
 }
-estimatedValue must be a GBP number.`,
+estimatedValue must be a GBP number. notes must always be empty string — it is filled in by the user, not by you.`,
     fields: [
       { row: [
         { id: 'series',     label: 'Card Series',   type: 'text',   placeholder: 'e.g. Topps Chrome' },
@@ -57,7 +57,7 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown.
   "condition": "New with tags|Excellent|Good|Fair|Poor",
   "estimatedValue": 0,
   "confidence": "High|Medium|Low",
-  "notes": "notable features"
+  "notes": ""
 }`,
     fields: [
       { row: [
@@ -93,7 +93,7 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown.
   "condition": "Mint|Very Good|Good|Fair|Poor",
   "estimatedValue": 0,
   "confidence": "High|Medium|Low",
-  "notes": "notable details"
+  "notes": ""
 }`,
     fields: [
       { row: [
@@ -128,7 +128,7 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown.
   "condition": "Mint|Near Mint|Very Good Plus|Very Good|Good|Poor",
   "estimatedValue": 0,
   "confidence": "High|Medium|Low",
-  "notes": "notable features"
+  "notes": ""
 }`,
     fields: [
       { row: [
@@ -162,7 +162,7 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown.
   "condition": "Mint|Excellent|Good|Fair|Poor",
   "estimatedValue": 0,
   "confidence": "High|Medium|Low",
-  "notes": "notable features"
+  "notes": ""
 }`,
     fields: [
       { row: [

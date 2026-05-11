@@ -852,7 +852,7 @@ function buildForm(ai) {
         field.options.forEach(opt=>{const o=document.createElement('option');o.value=o.textContent=opt;input.appendChild(o);});
         const v=(ai[field.id]||'').toLowerCase();
         for(const o of input.options){if(o.value.toLowerCase()===v){input.value=o.value;break;}}
-      }else if(field.type==='textarea'){input=document.createElement('textarea');input.placeholder=field.placeholder||'';input.value=ai[field.id]||'';input.rows=3;input.style.cssText='resize:vertical;width:100%';}else{input=document.createElement('input');input.type='text';input.placeholder=field.placeholder||'';input.value=ai[field.id]||'';}
+      }else if(field.type==='textarea'){input=document.createElement('textarea');input.placeholder=field.placeholder||'';input.value='';input.rows=3;input.style.cssText='resize:vertical;width:100%';}else{input=document.createElement('input');input.type='text';input.placeholder=field.placeholder||'';input.value=ai[field.id]||'';}
       input.id='f_'+field.id;fg.appendChild(input);row.appendChild(fg);
     });
     container.appendChild(row);
