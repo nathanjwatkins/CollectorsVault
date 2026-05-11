@@ -659,6 +659,7 @@ html::before {
   position: fixed;
   inset: 0;
   z-index: -2;
+  background-color: #0c0c10; /* fallback when no bg image is set */
   background-image: var(--bg-img-light);
   background-size: cover;
   background-position: center;
