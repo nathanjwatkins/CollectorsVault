@@ -8,7 +8,7 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown, no explanat
   "subtitle": "team or franchise",
   "series": "card set name e.g. Topps Chrome",
   "cardType": "Base|Refractor|Prizm|Parallel|Auto|Relic|Patch|Rookie|Gold|Silver|1/1|Short Print",
-  "year": "the card SET release year/season. Look ONLY for text printed on the card that explicitly states the set year — e.g. a year in the card border, set name, or back of card. Do NOT infer the year from the player photo, kit colour, or badge. If you cannot see explicit set year text on the card, return empty string.",
+  "year": "the season this card was PRODUCED e.g. 2024/25 — look for the set year printed on the card, NOT the player photo year. Topps Chrome UEFA Club Competitions 2024/25 sets were released in 2024.",
   "cardNumber": "catalogue card number if printed e.g. #125, else empty string",
   "numbered": "IMPORTANT: look carefully for a stamped serial number on the card e.g. 159/199. Return the FULL stamp exactly as printed including the individual number and total e.g. 159/199. If no serial stamp is visible, return empty string.",
   "autograph": "Yes|No",
