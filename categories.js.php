@@ -10,6 +10,8 @@ Return ONLY a raw JSON object. Start with { end with }. No markdown, no explanat
   "cardType": "Base|Refractor|Prizm|Parallel|Auto|Relic|Patch|Rookie|Gold|Silver|1/1|Short Print",
   "year": "season e.g. 2024/25",
   "cardNumber": "if visible else empty string",
+  "numbered": "print run if visible e.g. /199 else empty string",
+  "autograph": "Yes|No",
   "parallel": "variant name if applicable else empty string",
   "condition": "Mint|Near Mint|Excellent|Very Good|Good|Poor",
   "estimatedValue": 0,
@@ -20,15 +22,19 @@ estimatedValue must be a GBP number.`,
     fields: [
       { row: [
         { id: 'series',     label: 'Card Series',   type: 'text',   placeholder: 'e.g. Topps Chrome' },
-        { id: 'cardType',   label: 'Card Type',     type: 'select', options: ['Base','Refractor','Prizm','Parallel','Auto','Relic','Patch','Rookie','Gold','Silver','1/1','Short Print','Case Hit'] },
+        { id: 'item_type',  label: 'Card Type',     type: 'select', options: ['Base','Refractor','Prizm','Parallel','Auto','Relic','Patch','Rookie','Gold','Silver','1/1','Short Print','Case Hit'] },
       ]},
       { row: [
         { id: 'year',       label: 'Year / Season', type: 'text',   placeholder: '2024/25' },
         { id: 'condition',  label: 'Condition',     type: 'select', options: ['Mint','Near Mint','Excellent','Very Good','Good','Poor'] },
       ]},
       { row: [
-        { id: 'cardNumber', label: 'Card #',        type: 'text',   placeholder: 'e.g. TC-100' },
-        { id: 'parallel',   label: 'Parallel',      type: 'text',   placeholder: 'e.g. Blue Refractor' },
+        { id: 'card_number', label: 'Card #',       type: 'text',   placeholder: 'e.g. TC-100' },
+        { id: 'parallel',    label: 'Parallel',     type: 'text',   placeholder: 'e.g. Blue Refractor' },
+      ]},
+      { row: [
+        { id: 'numbered',   label: 'Numbered',      type: 'text',   placeholder: 'e.g. /199, /25' },
+        { id: 'autograph',  label: 'Autograph',     type: 'select', options: ['No','Yes'] },
       ]},
     ],
   },

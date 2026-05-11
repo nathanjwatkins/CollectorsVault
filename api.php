@@ -57,9 +57,34 @@ if (!function_exists('getEbayToken')) {
 define('DATA_DIR',        __DIR__ . '/data/');
 define('UPLOADS_DIR',     __DIR__ . '/uploads/');
 define('USERS_FILE',      DATA_DIR . 'users.csv');
-define('COLLECTION_FILE', DATA_DIR . 'collection.csv');
+define('COLLECTION_FILE', DATA_DIR . 'collection.csv'); // legacy — kept for migration
 define('PRICES_FILE',     DATA_DIR . 'prices.csv');
 define('IMAGES_FILE',     DATA_DIR . 'images.csv');
+
+// Per-category CSV files and their columns
+define('CAT_FILES', [
+    'cards'  => DATA_DIR . 'cards.csv',
+    'shirts' => DATA_DIR . 'shirts.csv',
+    'games'  => DATA_DIR . 'games.csv',
+    'vinyl'  => DATA_DIR . 'vinyl.csv',
+    'other'  => DATA_DIR . 'other.csv',
+]);
+define('CAT_HEADERS', [
+    'cards'  => ['id','user_id','username','category','name','subtitle','series','item_type','year','condition','bought','value','notes','thumbnail','saved_at','card_number','parallel','numbered','autograph','ebay_query'],
+    'shirts' => ['id','user_id','username','category','name','subtitle','year','condition','bought','value','notes','thumbnail','saved_at','manufacturer','kit_type','size','signed','ebay_query'],
+    'games'  => ['id','user_id','username','category','name','subtitle','year','condition','bought','value','notes','thumbnail','saved_at','publisher','genre','region','completeness','ebay_query'],
+    'vinyl'  => ['id','user_id','username','category','name','subtitle','year','condition','bought','value','notes','thumbnail','saved_at','label','format','pressing','ebay_query'],
+    'other'  => ['id','user_id','username','category','name','subtitle','year','condition','bought','value','notes','thumbnail','saved_at','manufacturer','extra1','extra2','ebay_query'],
+]);
+
+function catFile(string $cat): string {
+    $files = CAT_FILES;
+    return $files[$cat] ?? $files['other'];
+}
+function catHeaders(string $cat): array {
+    $headers = CAT_HEADERS;
+    return $headers[$cat] ?? $headers['other'];
+}
 
 foreach ([DATA_DIR, UPLOADS_DIR] as $dir) {
     if (!is_dir($dir)) mkdir($dir, 0755, true);
@@ -1371,31 +1396,22 @@ function doSave() {
     requireAuth();
     $item = json_decode($_POST['item'] ?? '{}', true);
     if (!$item || empty($item['name'])) json(['error' => 'Invalid item'], 400);
-    $item['id']       = uniqid('cv_', true);
-    $item['user_id']  = $_SESSION['user_id'];
-    $item['username'] = $_SESSION['user'];
-    $item['saved_at'] = date('Y-m-d H:i:s');
+    $item['id']        = uniqid('cv_', true);
+    $item['user_id']   = $_SESSION['user_id'];
+    $item['username']  = $_SESSION['user'];
+    $item['saved_at']  = date('Y-m-d H:i:s');
     $item['thumbnail'] = '';
 
-    // Align the row to the file's actual header — `csvHeaders()` is a fallback
-    // for first-write only; once columns have been added (manufacturer,
-    // card_number, platform, kit_type, etc.) the file's real header is the
-    // single source of truth. Writing 19 values into a 33-column file produces
-    // a row that readCSV() silently skips on the next read.
-    $headers = null;
-    if (file_exists(COLLECTION_FILE) && filesize(COLLECTION_FILE) > 0) {
-        $h = fopen(COLLECTION_FILE, 'r');
-        $headers = fgetcsv($h);
-        fclose($h);
-    }
-    if (!$headers) $headers = array_keys(csvHeaders());
+    $cat     = $item['category'] ?? 'other';
+    $file    = catFile($cat);
+    $headers = catHeaders($cat);
 
     $row = [];
     foreach ($headers as $col) {
         $v = $item[$col] ?? '';
         $row[$col] = is_string($v) ? str_replace(["\n","\r"], ' ', $v) : $v;
     }
-    appendCSV(COLLECTION_FILE, $row, $headers);
+    appendCSV($file, $row, $headers);
     json(['ok' => true, 'id' => $item['id']]);
 }
 
@@ -1403,12 +1419,24 @@ function doCollection() {
     requireAuth();
     $category = $_GET['category'] ?? 'all';
     $userId   = $_SESSION['user_id'];
-    $rows = readCSV(COLLECTION_FILE);
     $items = [];
-    foreach ($rows as $row) {
-        if ($row['user_id'] !== $userId) continue;
-        if ($category !== 'all' && $row['category'] !== $category) continue;
-        $items[] = $row;
+
+    $cats = $category === 'all' ? array_keys(CAT_FILES) : [$category];
+    foreach ($cats as $cat) {
+        $file = catFile($cat);
+        if (!file_exists($file)) continue;
+        foreach (readCSV($file) as $row) {
+            if ($row['user_id'] !== $userId) continue;
+            $items[] = $row;
+        }
+    }
+    // Also pull legacy collection.csv rows (migration path)
+    if (file_exists(COLLECTION_FILE)) {
+        foreach (readCSV(COLLECTION_FILE) as $row) {
+            if ($row['user_id'] !== $userId) continue;
+            if ($category !== 'all' && ($row['category'] ?? '') !== $category) continue;
+            $items[] = $row;
+        }
     }
     usort($items, fn($a,$b) => strcmp($b['saved_at'], $a['saved_at']));
     json(['ok' => true, 'items' => $items, 'count' => count($items)]);
@@ -1418,31 +1446,36 @@ function doUpdate() {
     requireAuth();
     $userId  = $_SESSION['user_id'];
     $itemId  = $_POST['item_id'] ?? '';
+    $cat     = $_POST['category'] ?? '';
     $updates = json_decode($_POST['updates'] ?? '{}', true);
     if (!$itemId || !$updates) json(['error' => 'Missing item_id or updates'], 400);
 
-    // Read the actual headers from the CSV file first
-    $headers = null;
-    if (file_exists(COLLECTION_FILE)) {
-        $h = fopen(COLLECTION_FILE, 'r');
-        $headers = fgetcsv($h);
-        fclose($h);
+    // Find which file this item lives in
+    $file = null; $headers = null;
+    if ($cat && isset(CAT_FILES[$cat])) {
+        $file    = catFile($cat);
+        $headers = catHeaders($cat);
+    } else {
+        // Search all cat files + legacy
+        foreach (array_merge(array_values(CAT_FILES), [COLLECTION_FILE]) as $f) {
+            if (!file_exists($f)) continue;
+            foreach (readCSV($f) as $r) {
+                if ($r['id'] === $itemId && $r['user_id'] === $userId) {
+                    $file = $f;
+                    $fh = fopen($f, 'r'); $headers = fgetcsv($fh); fclose($fh);
+                    break 2;
+                }
+            }
+        }
     }
-    if (!$headers) json(['error' => 'Collection file not found'], 500);
+    if (!$file || !$headers) json(['error' => 'Item not found'], 404);
 
-    $rows  = readCSV(COLLECTION_FILE);
+    $rows  = readCSV($file);
     $found = false;
-
-    // Allowed fields that can be updated
-    $allowed = ['name','subtitle','series','year','item_type','condition','manufacturer',
-                'card_number','platform','genre','region','artist','label','format',
-                'pressing','kit_type','size','signed','price_paid','ebay_query','notes',
-                'value','bought','extra1','extra2','extra3','extra4','thumbnail'];
-
     foreach ($rows as &$row) {
         if ($row['id'] === $itemId && $row['user_id'] === $userId) {
             foreach ($updates as $k => $v) {
-                if (in_array($k, $allowed) && array_key_exists($k, $row)) {
+                if (array_key_exists($k, $row)) {
                     $row[$k] = trim((string)$v);
                 }
             }
@@ -1450,21 +1483,10 @@ function doUpdate() {
         }
     }
     unset($row);
-
     if (!$found) json(['error' => 'Item not found'], 404);
+    writeCSV($file, $rows, $headers);
 
-    // Write back using the original file headers — never change the structure
-    writeCSV(COLLECTION_FILE, $rows, $headers);
-
-    // If ebay_query was updated, save it to prices CSV too. We have to be
-    // careful: if the existing prices.csv was last written by an old code
-    // path that didn't include the ebay_query column, the file's header
-    // line will have N columns but the in-memory rows we're about to write
-    // will have N+1 keys (because we just added $pr['ebay_query']). That
-    // mismatch makes readCSV() skip every row on the next read — which
-    // shows up to the user as all prices going to "—" after an edit.
-    // Fix: always normalise the header list to include ebay_query and
-    // ensure every row has exactly that set of keys.
+    // Sync ebay_query to prices CSV if updated
     if (isset($updates['ebay_query']) && trim($updates['ebay_query'])) {
         $priceRows = readCSV(PRICES_FILE);
         $priceFound = false;
@@ -1476,64 +1498,64 @@ function doUpdate() {
         }
         unset($pr);
         if ($priceFound) {
-            // Read existing header, then ensure ebay_query is present.
             $ph = null;
             if (file_exists(PRICES_FILE)) { $ph2 = fopen(PRICES_FILE,'r'); $ph = fgetcsv($ph2); fclose($ph2); }
             if (!$ph) $ph = ['item_id','user_id','avg_30','avg_10','min','max','count','prev_avg','change_pct','direction','updated_at','ebay_query'];
             if (!in_array('ebay_query', $ph, true)) $ph[] = 'ebay_query';
-            // Reorder every row to match the header exactly so writeCSV's
-            // array_values() produces aligned columns. Missing keys → ''.
             $aligned = [];
             foreach ($priceRows as $pr) {
-                $row = [];
-                foreach ($ph as $col) { $row[$col] = $pr[$col] ?? ''; }
-                $aligned[] = $row;
+                $r = [];
+                foreach ($ph as $col) { $r[$col] = $pr[$col] ?? ''; }
+                $aligned[] = $r;
             }
             writeCSV(PRICES_FILE, $aligned, $ph);
         }
     }
-
     json(['ok' => true]);
 }
 
 function doDelete() {
     requireAuth();
-    $id = $_POST['id'] ?? '';
+    $id     = $_POST['id'] ?? '';
+    $cat    = $_POST['category'] ?? '';
     $userId = $_SESSION['user_id'];
     if (!$id) json(['error' => 'Missing id'], 400);
 
-    // Read the actual headers from collection.csv — never use csvHeaders()
-    // here because the live CSV has many more columns (price_paid,
-    // ebay_query, card_number, etc.) than csvHeaders() declares. Writing
-    // with the truncated header list silently drops every extra column.
-    $collHeaders = null;
-    if (file_exists(COLLECTION_FILE)) {
-        $h = fopen(COLLECTION_FILE, 'r');
-        $collHeaders = fgetcsv($h);
-        fclose($h);
+    // Find which file this item lives in
+    $file = null; $headers = null;
+    if ($cat && isset(CAT_FILES[$cat])) {
+        $file    = catFile($cat);
+        $headers = catHeaders($cat);
+    } else {
+        foreach (array_merge(array_values(CAT_FILES), [COLLECTION_FILE]) as $f) {
+            if (!file_exists($f)) continue;
+            foreach (readCSV($f) as $r) {
+                if ($r['id'] === $id && $r['user_id'] === $userId) {
+                    $file = $f;
+                    $fh = fopen($f, 'r'); $headers = fgetcsv($fh); fclose($fh);
+                    break 2;
+                }
+            }
+        }
     }
-    if (!$collHeaders) json(['error' => 'Collection file not found'], 500);
+    if (!$file || !$headers) json(['error' => 'Item not found'], 404);
 
-    $rows = readCSV(COLLECTION_FILE);
+    $rows = readCSV($file);
     $updated = []; $deleted = false;
     foreach ($rows as $row) {
         if ($row['id'] === $id && $row['user_id'] === $userId) { $deleted = true; }
         else $updated[] = $row;
     }
     if (!$deleted) json(['error' => 'Not found'], 404);
-    writeCSV(COLLECTION_FILE, $updated, $collHeaders);
+    writeCSV($file, $updated, $headers);
 
-    // Clean up caches — read each file's actual headers rather than using
-    // hard-coded ones that may drift (e.g. prices.csv now has ebay_query
-    // appended; the old hard-coded header list dropped that column).
-    foreach ([IMAGES_FILE, PRICES_FILE] as $file) {
-        if (!file_exists($file)) continue;
-        $fh = fopen($file, 'r');
-        $hdrs = fgetcsv($fh);
-        fclose($fh);
+    // Clean up price and image caches
+    foreach ([IMAGES_FILE, PRICES_FILE] as $cfile) {
+        if (!file_exists($cfile)) continue;
+        $fh = fopen($cfile, 'r'); $hdrs = fgetcsv($fh); fclose($fh);
         if (!$hdrs) continue;
-        $rows = array_values(array_filter(readCSV($file), fn($r) => ($r['item_id'] ?? '') !== $id));
-        writeCSV($file, $rows, $hdrs);
+        $crows = array_values(array_filter(readCSV($cfile), fn($r) => ($r['item_id'] ?? '') !== $id));
+        writeCSV($cfile, $crows, $hdrs);
     }
     json(['ok' => true]);
 }
@@ -1542,13 +1564,27 @@ function doStats() {
     requireAuth();
     $userId = $_SESSION['user_id'];
     $stats  = ['total' => 0, 'invested' => 0, 'value' => 0, 'by_cat' => []];
-    foreach (readCSV(COLLECTION_FILE) as $row) {
-        if ($row['user_id'] !== $userId) continue;
-        $stats['total']++;
-        $stats['invested'] += floatval($row['bought'] ?? 0);
-        $stats['value']    += floatval($row['value']  ?? 0);
-        $cat = $row['category'] ?? 'other';
-        $stats['by_cat'][$cat] = ($stats['by_cat'][$cat] ?? 0) + 1;
+    // Read all per-category files
+    foreach (CAT_FILES as $cat => $file) {
+        if (!file_exists($file)) continue;
+        foreach (readCSV($file) as $row) {
+            if ($row['user_id'] !== $userId) continue;
+            $stats['total']++;
+            $stats['invested'] += floatval($row['bought'] ?? 0);
+            $stats['value']    += floatval($row['value']  ?? 0);
+            $stats['by_cat'][$cat] = ($stats['by_cat'][$cat] ?? 0) + 1;
+        }
+    }
+    // Also count legacy collection.csv rows
+    if (file_exists(COLLECTION_FILE)) {
+        foreach (readCSV(COLLECTION_FILE) as $row) {
+            if ($row['user_id'] !== $userId) continue;
+            $stats['total']++;
+            $stats['invested'] += floatval($row['bought'] ?? 0);
+            $stats['value']    += floatval($row['value']  ?? 0);
+            $cat = $row['category'] ?? 'other';
+            $stats['by_cat'][$cat] = ($stats['by_cat'][$cat] ?? 0) + 1;
+        }
     }
     json(['ok' => true, 'stats' => $stats]);
 }
