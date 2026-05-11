@@ -15,7 +15,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
-<meta name="theme-color" content="#010b13">
+<meta name="theme-color" content="#0c0c10">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>CollectorVault — Collection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -169,7 +169,7 @@ body{padding-bottom:60px}
    COLLECTORVAULT — COMPLETE REDESIGN
    Aesthetic: Precision dark instrument. Brutalist data meets luxury finish.
    Fonts: Outfit (display/UI) · JetBrains Mono (data/labels/prices)
-   Palette: #010b13 void · #ceff2e acid · #FAFAFA white · #111116 surface
+   Palette: #0c0c10 void · #ceff2e acid · #FAFAFA white · #111116 surface
    Language: Zero-radius edges, 1px borders, zone-based layout, data density
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -183,7 +183,7 @@ img { display: block; }
 /* ── Design tokens ───────────────────────────────────────────────────────── */
 :root {
   /* Base */
-  --void:      #010b13;
+  --void:      #0c0c10;
   --surface:   #0C0C10;
   --surface2:  #111116;
   --surface3:  #18181F;

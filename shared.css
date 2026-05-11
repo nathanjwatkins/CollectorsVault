@@ -52,7 +52,7 @@ html {
 html:root, [data-theme="dark"] { color-scheme: dark; }
 
 body {
-  background: #010b13;
+  background: #0c0c10;
   color: var(--ink);
   font-family: var(--font-sans);
   min-height: 100dvh;
@@ -268,7 +268,7 @@ nav:not(.bottom-nav) {
 
 /* ── CATEGORY BAR ──────────────────────────────────────────────────────────── */
 .cat-bar {
-  background: #010b13;
+  background: #0c0c10;
   border-bottom: 1px solid var(--border);
   padding: 0 12px;
   display: flex;
