@@ -721,8 +721,7 @@ body.cat-carousel-open .fab { display: none; }
 }
 .modal-close { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border-radius: 50%; background: rgba(5,5,7,.70); border: 1px solid rgba(255,255,255,.14); color: var(--ink2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; font-family: var(--font-sans); transition: background .15s; z-index: 10; }
 .modal-close:hover { background: rgba(5,5,7,.90); color: var(--ink); }
-/* On desktop the sheet is position:relative (overflow:hidden) so absolute close sits at sheet top-right */
-@media(min-width:640px){ .modal-close { position: absolute; top: 14px; right: 14px; } }
+@media(min-width:640px){ .modal-close { top: 14px; left: 14px; right: auto; } }
 
 .modal-body { padding: 20px 20px 28px; }
 @media(min-width:640px){ .modal-body { flex: 1; overflow-y: auto; padding: 28px 24px 28px; display: flex; flex-direction: column; justify-content: center; } }
