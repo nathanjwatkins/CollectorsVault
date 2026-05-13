@@ -26,7 +26,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=20260513">
+<link rel="stylesheet" href="shared.css?v=20260513b">
 <style>
 /* ── COLLECTION PAGE LAYOUT ──────────────────────────────────────────────── */
 
@@ -164,59 +164,7 @@ $username = htmlspecialchars($_SESSION['user']);
 .empty-state h3  { font-family: var(--font-sans); font-size: 18px; font-weight: 600; color: var(--ink2); letter-spacing: -.02em; }
 .empty-state p   { font-family: var(--font-mono); font-size: 10px; color: var(--ink3); letter-spacing: .04em; }
 
-/* ── Item modal ──────────────────────────────────────────────────────────── */
-#modalBg {
-  display: none; position: fixed; inset: 0;
-  background: rgba(5,5,7,.85); z-index: 500;
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  align-items: flex-end; justify-content: center; padding: 0;
-}
-#modalBg.open { display: flex; }
-@media(min-width:640px){ #modalBg { align-items: center; padding: 16px; } }
-
-.modal-sheet {
-  background: var(--surface); border: 1px solid rgba(255,255,255,.12);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  width: 100%; max-height: 92dvh; overflow-y: auto; position: relative;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-@media(min-width:640px){ .modal-sheet { border-radius: var(--radius-lg); max-width: 520px; max-height: 88dvh; } }
-
-.modal-handle { width: 36px; height: 3px; background: rgba(255,255,255,.16); border-radius: 2px; margin: 12px auto 0; }
-@media(min-width:640px){ .modal-handle { display: none; } }
-
-.modal-hero { position: relative; width: 100%; height: 240px; overflow: hidden; background: rgba(255,255,255,.06); }
-.modal-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.modal-hero-grad { position: absolute; inset: 0; background: linear-gradient(to top, rgba(12,12,16,.95) 0%, transparent 60%); }
-.modal-close { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border-radius: 50%; background: rgba(5,5,7,.70); border: 1px solid rgba(255,255,255,.14); color: var(--ink2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; font-family: var(--font-sans); transition: background .15s; z-index: 1; }
-.modal-close:hover { background: rgba(5,5,7,.90); color: var(--ink); }
-
-.modal-body { padding: 20px 20px 28px; }
-.modal-overline { font-family: var(--font-mono); font-size: 8px; letter-spacing: .16em; text-transform: uppercase; color: var(--acid); margin-bottom: 6px; }
-.modal-title    { font-family: var(--font-sans); font-size: 22px; font-weight: 600; letter-spacing: -.03em; color: var(--ink); line-height: 1.1; margin-bottom: 4px; }
-.modal-sub      { font-family: var(--font-mono); font-size: 10px; color: var(--ink3); letter-spacing: .04em; margin-bottom: 16px; }
-
-.modal-prices { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 16px; }
-.modal-price-cell  { background: rgba(255,255,255,.05); padding: 12px 14px; }
-.modal-price-label { font-family: var(--font-mono); font-size: 7px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); margin-bottom: 4px; }
-.modal-price-val   { font-family: var(--font-mono); font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
-.modal-price-val.highlight { color: var(--acid); }
-
-.modal-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.modal-field-label { font-family: var(--font-mono); font-size: 7px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); margin-bottom: 3px; }
-.modal-field-val   { font-family: var(--font-sans); font-size: 13px; font-weight: 500; color: var(--ink); }
-
-.modal-actions { display: flex; gap: 8px; }
-.modal-btn {
-  flex: 1; height: 38px; display: flex; align-items: center; justify-content: center; gap: 6px;
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: .10em; text-transform: uppercase;
-  border-radius: var(--radius-md); cursor: pointer; transition: all .15s;
-  border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color: var(--ink2);
-}
-.modal-btn:hover { color: var(--ink); border-color: rgba(255,255,255,.22); }
-.modal-btn svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.5; }
-.modal-btn.danger { color: var(--red); border-color: rgba(255,68,68,.20); background: rgba(255,68,68,.05); }
-.modal-btn.danger:hover { background: rgba(255,68,68,.12); }
+/* ── Item modal — styles in shared.css §13 ───────────────────────────────── */
 
 /* ── Confirm delete ──────────────────────────────────────────────────────── */
 #confirmBg { display: none; position: fixed; inset: 0; background: rgba(5,5,7,.80); z-index: 600; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); align-items: center; justify-content: center; }
@@ -312,7 +260,7 @@ $username = htmlspecialchars($_SESSION['user']);
 </div>
 
 <!-- Item view modal -->
-<div id="modalBg" onclick="if(event.target===this)closeModal()">
+<div id="modalBg" class="cv-modal-bg" onclick="if(event.target===this)closeModal()">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-hero">

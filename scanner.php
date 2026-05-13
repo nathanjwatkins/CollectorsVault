@@ -25,7 +25,7 @@ $username = htmlspecialchars($_SESSION['user']);
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=20260513">
+<link rel="stylesheet" href="shared.css?v=20260513b">
 <style>
 /* ── SCANNER PAGE LAYOUT ─────────────────────────────────────────────────── */
 .app {
@@ -596,6 +596,36 @@ $username = htmlspecialchars($_SESSION['user']);
 
 <div id="toast"></div>
 
+<!-- Recent item modal -->
+<div id="recentModalBg" class="cv-modal-bg" onclick="if(event.target===this)closeRecentModal()">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-hero">
+      <img id="recentModalImg" src="" alt="" style="opacity:0">
+      <div id="recentModalHeroIcon" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.18"></div>
+      <div class="modal-hero-grad"></div>
+      <button class="modal-close" onclick="closeRecentModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-overline" id="recentModalCat"></div>
+      <div class="modal-title" id="recentModalTitle"></div>
+      <div class="modal-sub" id="recentModalSub"></div>
+      <div class="modal-prices">
+        <div class="modal-price-cell"><div class="modal-price-label">Avg 10</div><div class="modal-price-val highlight" id="recentModalAvg10">—</div></div>
+        <div class="modal-price-cell"><div class="modal-price-label">Avg 30</div><div class="modal-price-val" id="recentModalAvg30">—</div></div>
+        <div class="modal-price-cell"><div class="modal-price-label">Paid</div><div class="modal-price-val" id="recentModalPaid">—</div></div>
+      </div>
+      <div class="modal-fields" id="recentModalFields"></div>
+      <div class="modal-actions">
+        <a href="collection.php" class="modal-btn" style="text-decoration:none">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Collection
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <a href="collection.php" class="fab" aria-label="View collection"
    style="background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18)">
   <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -640,6 +670,8 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     const v = document.getElementById('verifyOverlay');
     if (v && v.classList.contains('show')) cancelVerify();
+    const rm = document.getElementById('recentModalBg');
+    if (rm && rm.classList.contains('open')) closeRecentModal();
   }
 });
 
@@ -896,55 +928,63 @@ function renderRecent(items){
       </div>
     </div>`;
   }).join('');
-  items.forEach(item => fetchRecentImageInto(item, 'rc-img-'));
+  items.forEach(item => fetchRecentImageInto(item, false));
 }
 
-function openRecentModal(item){
-  const existing = document.getElementById('recentModal'); if(existing) existing.remove();
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function closeRecentModal(){
+  document.getElementById('recentModalBg').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function openRecentModal(item){
   const icon = CAT_ICONS_SVG[item.category] || CAT_ICONS_SVG.other;
-  const safeId = String(item.id||'').replace(/[^a-zA-Z0-9_.\-]/g,'');
-  const thumb = `
-    <div style="position:relative;width:100%;height:200px;background:rgba(0,0,0,.15);overflow:hidden">
-      <img id="rcm-img-${safeId}" alt="${item.name}"
-           style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:0;transition:opacity .2s"
-           onload="this.style.opacity='1';const ic=this.parentElement.querySelector('.rcm-icon');if(ic)ic.style.display='none'"
-           onerror="this.style.opacity='0'">
-      <div class="rcm-icon" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.25">${icon}</div>
-    </div>`;
-  const fields = [
-    ['Category',CAT_LABELS[item.category]||item.category],
-    ['Series',item.series||'—'],['Type',item.item_type||'—'],
-    ['Year',item.year||'—'],['Condition',item.condition||'—'],
-    ['Purchased',item.bought?'£'+parseFloat(item.bought).toFixed(2):'—'],
-    ['Value',item.value?'£'+parseFloat(item.value).toFixed(2):'—'],
-    ['Added',item.saved_at?item.saved_at.split(' ')[0]:'—'],
-  ].filter(([,v]) => v && v !== '—');
-  const overlay = document.createElement('div');
-  overlay.id = 'recentModal';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(14,13,11,.72);z-index:400;display:flex;align-items:flex-end;justify-content:center';
-  overlay.onclick = e => { if (e.target === overlay){ overlay.remove(); document.body.style.overflow=''; }};
-  const sheet = document.createElement('div');
-  sheet.style.cssText = 'background:var(--surface);width:100%;max-width:500px;border-radius:16px 16px 0 0;border:1px solid rgba(255,255,255,.10);border-bottom:none;max-height:85dvh;overflow-y:auto;';
-  sheet.innerHTML = `
-    <div style="width:32px;height:3px;background:rgba(255,255,255,.16);border-radius:2px;margin:10px auto 0"></div>
-    ${thumb}
-    <div style="padding:16px 18px 36px">
-      <div style="font-family:var(--font-sans);font-size:19px;font-weight:500;color:var(--ink);margin-bottom:3px">${item.name}</div>
-      <div style="font-family:var(--font-mono);font-size:10px;color:var(--ink3);margin-bottom:14px;letter-spacing:.03em">${item.subtitle||CAT_LABELS[item.category]||''}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        ${fields.map(([l,v])=>`<div><div style="font-family:var(--font-mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:2px">${l}</div><div style="font-size:13px;color:var(--ink);font-family:var(--font-sans)">${v}</div></div>`).join('')}
-      </div>
-      <a href="collection.php" style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;background:var(--ink);color:var(--void);border-radius:6px;padding:12px;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-decoration:none;text-transform:uppercase">View Full Collection →</a>
-    </div>`;
-  overlay.appendChild(sheet);
-  document.body.appendChild(overlay);
+  document.getElementById('recentModalCat').textContent   = CAT_LABELS[item.category] || item.category || '';
+  document.getElementById('recentModalTitle').textContent = item.name || '—';
+  document.getElementById('recentModalSub').textContent   = [item.subtitle, item.series, item.year].filter(Boolean).join(' · ');
+  document.getElementById('recentModalPaid').textContent  = item.bought ? '£' + parseFloat(item.bought).toFixed(2) : '—';
+  document.getElementById('recentModalAvg10').textContent = '—';
+  document.getElementById('recentModalAvg30').textContent = '—';
+  document.getElementById('recentModalHeroIcon').innerHTML = icon;
+  document.getElementById('recentModalHeroIcon').style.opacity = '0.18';
+  const img = document.getElementById('recentModalImg');
+  img.style.opacity = '0';
+  img.onload  = () => { img.style.opacity = '1'; document.getElementById('recentModalHeroIcon').style.opacity = '0'; };
+  img.onerror = () => {};
+  img.src = '';
+  const fieldMap = {series:'Series',item_type:'Type',year:'Year',condition:'Condition',
+    season:'Season',kit_type:'Kit',manufacturer:'Manufacturer',size:'Size',signed:'Signed',
+    platform:'Platform',publisher:'Publisher',genre:'Genre',region:'Region',completeness:'Complete',
+    artist:'Artist',label:'Label',format:'Format',pressing:'Pressing',
+    brand:'Brand',material:'Material',extra1:'Detail',extra2:'Detail',extra3:'Detail',extra4:'Detail'};
+  const skipKeys = new Set(['id','user_id','username','saved_at','name','subtitle','category','bought','value','notes','thumbnail','ebay_query']);
+  let fieldHtml = Object.entries(fieldMap)
+    .filter(([k]) => !skipKeys.has(k) && item[k] && item[k].toString().trim() !== '')
+    .map(([k,l]) => `<div><div class="modal-field-label">${esc(l)}</div><div class="modal-field-val">${esc(item[k])}</div></div>`)
+    .join('');
+  if (item.value)    fieldHtml += `<div><div class="modal-field-label">Value</div><div class="modal-field-val">£${parseFloat(item.value).toFixed(2)}</div></div>`;
+  if (item.saved_at) fieldHtml += `<div><div class="modal-field-label">Added</div><div class="modal-field-val">${esc(item.saved_at.split(' ')[0])}</div></div>`;
+  document.getElementById('recentModalFields').innerHTML = fieldHtml;
+  document.getElementById('recentModalBg').classList.add('open');
   document.body.style.overflow = 'hidden';
-  fetchRecentImageInto(item, 'rcm-img-');
+  fetchRecentImageInto(item, true);
+  try {
+    const r = await fetch('api.php?action=getPrices', {credentials:'same-origin'});
+    const d = await r.json();
+    if (d.ok && d.prices && d.prices[item.id]) {
+      const p = d.prices[item.id];
+      document.getElementById('recentModalAvg10').textContent = p.avg_10 ? '£' + parseFloat(p.avg_10).toFixed(2) : '—';
+      document.getElementById('recentModalAvg30').textContent = p.avg_30 ? '£' + parseFloat(p.avg_30).toFixed(2) : '—';
+    }
+  } catch(_){}
 }
 
-async function fetchRecentImageInto(item, prefix){
+async function fetchRecentImageInto(item, forModal = false){
   const safeId = String(item.id||'').replace(/[^a-zA-Z0-9_.\-]/g,'');
-  const img = document.getElementById(prefix+safeId);
+  const img = forModal
+    ? document.getElementById('recentModalImg')
+    : document.getElementById('rc-img-'+safeId);
   if (!img) return;
   if (item.thumbnail){
     img.src = 'api.php?action=imgProxy&url='+encodeURIComponent(item.thumbnail);
