@@ -2,6 +2,8 @@
 ob_start();
 header('Cache-Control: no-cache, must-revalidate, max-age=0');
 header('Pragma: no-cache');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: same-origin');
 ini_set('session.cookie_httponly',1); ini_set('session.cookie_secure',1); ini_set('session.cookie_samesite','Lax');
 session_start();
 if (!isset($_SESSION['user'])) { header('Location: index.php'); exit; }
@@ -14,11 +16,16 @@ $username = htmlspecialchars($_SESSION['user']);
 <meta name="theme-color" content="#0c0c10">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CollectorVault">
+<link rel="manifest" href="/manifest.json">
 <title>CollectorVault — Scanner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=<?= time() ?>">
+<link rel="stylesheet" href="shared.css?v=20260513">
 <style>
 /* ── SCANNER PAGE LAYOUT ─────────────────────────────────────────────────── */
 .app {
@@ -523,7 +530,7 @@ $username = htmlspecialchars($_SESSION['user']);
     <div class="dropzone" id="dropzone"
          onclick="document.getElementById('fileInput').click()"
          ondragover="onDragOver(event)" ondragleave="onDragLeave()" ondrop="onDrop(event)">
-      <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="handleFile(event)"/>
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)"/>
       <div class="dz-icon" id="dzIcon">
         <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
       </div>
@@ -563,7 +570,7 @@ $username = htmlspecialchars($_SESSION['user']);
         <div class="verify-title" id="verifyTitle">Verify item details</div>
         <div class="verify-sub">Check before saving</div>
       </div>
-      <button class="verify-close" onclick="cancelVerify()" aria-label="Cancel">
+      <button class="verify-close" onclick="cancelVerify()" aria-label="Close">
         <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
@@ -853,10 +860,9 @@ function showError(msg){ const el = document.getElementById('errorBox'); el.text
 
 async function loadRecent(){
   try {
-    const r = await fetch('api.php?action=collection&category=all',{credentials:'same-origin'});
+    const r = await fetch(`api.php?action=collection&category=${encodeURIComponent(currentCat)}&limit=24`,{credentials:'same-origin'});
     const d = await r.json(); if (!d.ok) return;
-    const filtered = d.items.filter(item => item.category === currentCat).slice(0,24);
-    renderRecent(filtered);
+    renderRecent(d.items.slice(0,24));
   } catch(e){}
 }
 

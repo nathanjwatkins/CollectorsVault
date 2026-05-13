@@ -3,6 +3,8 @@ ob_start();
 header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
 header('Pragma: no-cache');
 header('Expires: 0');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: same-origin');
 ini_set('session.cookie_samesite','Lax'); ini_set('session.cookie_secure','1'); ini_set('session.cookie_httponly','1');
 session_start();
 if (!isset($_SESSION['user'])) { header('Location: /index.php'); exit; }
@@ -14,11 +16,17 @@ $username = htmlspecialchars($_SESSION['user']);
 <meta charset="UTF-8"/>
 <meta name="theme-color" content="#0c0c10">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CollectorVault">
+<link rel="manifest" href="/manifest.json">
 <title>CollectorVault — Collection</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
 <?php include 'theme.php'; ?>
-<link rel="stylesheet" href="shared.css?v=<?= time() ?>">
+<link rel="stylesheet" href="shared.css?v=20260513">
 <style>
 /* ── COLLECTION PAGE LAYOUT ──────────────────────────────────────────────── */
 
@@ -310,7 +318,7 @@ $username = htmlspecialchars($_SESSION['user']);
     <div class="modal-hero">
       <img id="modalImg" src="" alt="">
       <div class="modal-hero-grad"></div>
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
     </div>
     <div class="modal-body">
       <div class="modal-overline" id="modalCat"></div>
@@ -345,7 +353,7 @@ $username = htmlspecialchars($_SESSION['user']);
   <div style="background:var(--surface);border:1px solid rgba(255,255,255,.12);border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:88dvh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08)">
       <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--acid)">Edit Item</div>
-      <button onclick="closeEdit()" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:var(--ink2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px">×</button>
+      <button onclick="closeEdit()" aria-label="Close" style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:var(--ink2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px">×</button>
     </div>
 
     <!-- eBay match picker -->

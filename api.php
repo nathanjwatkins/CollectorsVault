@@ -574,14 +574,18 @@ function doLogin() {
     foreach ($users as $user) {
         if (strtolower($user['username']) === strtolower($username)) {
             if (password_verify($password, $user['password_hash'])) {
+                session_regenerate_id(true);
                 $_SESSION['user']    = $user['username'];
                 $_SESSION['user_id'] = $user['id'];
                 json(['ok' => true, 'username' => $user['username']]);
             }
         }
     }
+    usleep(300000); // 300ms delay — makes brute-force attacks ~3x/sec max
     json(['error' => 'Invalid username or password'], 401);
 }
+
+// Note: the loop exits naturally here — usleep is before json() so it always runs on failure
 
 function doLogout() { session_destroy(); json(['ok' => true]); }
 
@@ -1439,6 +1443,9 @@ function doCollection() {
         }
     }
     usort($items, fn($a,$b) => strcmp($b['saved_at'], $a['saved_at']));
+    if (!empty($_GET['limit'])) {
+        $items = array_slice($items, 0, (int)$_GET['limit']);
+    }
     json(['ok' => true, 'items' => $items, 'count' => count($items)]);
 }
 
@@ -1702,8 +1709,10 @@ function appendCSV($file, $row, $headers) {
     $new = !file_exists($file) || filesize($file) === 0;
     if ($new) {
         $h = fopen($file, 'a');
+        flock($h, LOCK_EX);
         fputcsv($h, $headers);
         fputcsv($h, array_values($row));
+        flock($h, LOCK_UN);
         fclose($h);
         return;
     }
@@ -1711,7 +1720,9 @@ function appendCSV($file, $row, $headers) {
     // we never write a row whose column count drifts from the file's header.
     // Without this, readCSV() silently drops the appended row on every read.
     $fh = fopen($file, 'r');
+    flock($fh, LOCK_SH);
     $diskHeaders = fgetcsv($fh);
+    flock($fh, LOCK_UN);
     fclose($fh);
     if (!$diskHeaders) $diskHeaders = $headers;
     $aligned = [];
@@ -1719,13 +1730,17 @@ function appendCSV($file, $row, $headers) {
         $aligned[] = array_key_exists($col, $row) ? $row[$col] : '';
     }
     $h = fopen($file, 'a');
+    flock($h, LOCK_EX);
     fputcsv($h, $aligned);
+    flock($h, LOCK_UN);
     fclose($h);
 }
 function writeCSV($file, $rows, $headers) {
     $h = fopen($file, 'w');
+    flock($h, LOCK_EX);
     fputcsv($h, $headers);
     foreach ($rows as $row) fputcsv($h, array_values($row));
+    flock($h, LOCK_UN);
     fclose($h);
 }
 function curlGet($url, $headers = []) {
